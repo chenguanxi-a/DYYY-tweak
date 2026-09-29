@@ -68,7 +68,6 @@ $(TWEAK_NAME)_FILES +=             DYYYBottomAlertView.m \
             DYYYSDKPatch.m \
             DYYYScreenshot.m \
             DYYYSettingViewController.m \
-            DYYYSettingViewController_m.m \
             DYYYSwitchManager.m \
             DYYYToast.m \
             DYYYUtils.m \
