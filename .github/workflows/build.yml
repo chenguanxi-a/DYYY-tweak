@@ -18,8 +18,17 @@ jobs:
 
       - name: Install Theos
         run: |
-          curl -s https://raw.githubusercontent.com/theos/theos/master/install-theos.sh | bash
+          rm -rf $HOME/theos
+          git clone --recursive https://github.com/theos/theos.git $HOME/theos
+          curl -sL https://github.com/procursus/ldid/releases/download/v2.1.5-procursus7/ldid_linux_x86_64 -o $HOME/theos/bin/ldid
+          chmod +x $HOME/theos/bin/ldid
           echo "THEOS=$HOME/theos" >> $GITHUB_ENV
+
+      - name: Install SDKs
+        run: |
+          rm -rf $HOME/theos/sdks/*
+          curl -sL https://github.com/itsnebulalol/sdks/archive/main.tar.gz | tar -xzf - --strip-components=1 -C $HOME/theos/sdks
+          ls $HOME/theos/sdks/
 
       - name: Build
         run: |
