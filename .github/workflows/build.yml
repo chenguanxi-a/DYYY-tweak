@@ -33,7 +33,11 @@ jobs:
       - name: Build
         run: |
           export THEOS=$HOME/theos
-          make package
+          set -e
+          make package 2>&1 | tee build.log
+          echo "Build exit code: ${PIPESTATUS[0]}"
+          echo "=== LAST 150 LINES OF BUILD LOG ==="
+          tail -150 build.log
           ls -la packages/
 
       - name: Upload dylib
