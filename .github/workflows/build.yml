@@ -15,39 +15,29 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
 
       - name: Install Theos
         run: |
           git clone https://github.com/theos/theos.git $HOME/theos --depth=1
           git clone https://github.com/theos/sdks.git $HOME/theos/sdks --depth=1
-          export THEOS=$HOME/theos
           echo "THEOS=$HOME/theos" >> $GITHUB_ENV
 
-      - name: Build dylib
+      - name: Build
         run: |
           export THEOS=$HOME/theos
           make package
-          echo "THEOS_PACKAGE_DIR=$(pwd)" >> $GITHUB_ENV
+          ls -la packages/
 
-      - name: Upload artifact
+      - name: Upload dylib
         uses: actions/upload-artifact@v4
         with:
-          name: DYYY++-dylib
-          path: packages/*.ipa
-          if-no-files-found: ignore
-
-      - name: Upload dylib artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: DYYY++-dylib
+          name: DYYY--dylib
           path: packages/*.dylib
-          if-no-files-found: ignore
+          if-no-files-found: error
 
-      - name: Upload deb artifact
+      - name: Upload deb
         uses: actions/upload-artifact@v4
         with:
-          name: DYYY++-deb
+          name: DYYY--deb
           path: packages/*.deb
-          if-no-files-found: ignore
+          if-no-files-found: error
