@@ -18,9 +18,7 @@ jobs:
 
       - name: Install Theos
         run: |
-          rm -rf $HOME/theos
-          git clone https://github.com/theos/theos.git $HOME/theos --depth=1
-          git clone https://github.com/theos/sdks.git $HOME/theos/sdks --depth=1
+          curl -s https://raw.githubusercontent.com/theos/theos/master/install-theos.sh | bash
           echo "THEOS=$HOME/theos" >> $GITHUB_ENV
 
       - name: Build
