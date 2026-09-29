@@ -1,0 +1,20 @@
+# Compiled output
+*.dylib
+*.o
+*.d
+*.a
+build/
+theos/
+
+# Xcode
+*.pbxproj
+*.xcodeproj/
+*.xcworkspace/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Theos package
+*.deb

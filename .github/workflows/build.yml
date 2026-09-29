@@ -1,0 +1,53 @@
+name: Build DYYY++ dylib
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build iOS tweak
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Theos
+        run: |
+          git clone https://github.com/theos/theos.git $HOME/theos --depth=1
+          git clone https://github.com/theos/sdks.git $HOME/theos/sdks --depth=1
+          export THEOS=$HOME/theos
+          echo "THEOS=$HOME/theos" >> $GITHUB_ENV
+
+      - name: Build dylib
+        run: |
+          export THEOS=$HOME/theos
+          make package
+          echo "THEOS_PACKAGE_DIR=$(pwd)" >> $GITHUB_ENV
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DYYY++-dylib
+          path: packages/*.ipa
+          if-no-files-found: ignore
+
+      - name: Upload dylib artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DYYY++-dylib
+          path: packages/*.dylib
+          if-no-files-found: ignore
+
+      - name: Upload deb artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DYYY++-deb
+          path: packages/*.deb
+          if-no-files-found: ignore
