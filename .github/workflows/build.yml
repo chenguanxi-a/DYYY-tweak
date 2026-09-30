@@ -1,24 +1,28 @@
 name: Build Tweak
 on:
   push:
-    branches: [main, master]
+    branches: [ main, master ]
   workflow_dispatch:
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Install Theos
         run: |
           git clone --recursive --depth=1 https://github.com/theos/theos.git ~/theos
           echo 'THEOS=$HOME/theos' >> $GITHUB_ENV
           sudo apt update
           sudo apt install -y git make clang ldid
+
       - name: Build Tweak
         run: |
           export THEOS=$HOME/theos
           export PATH=$THEOS/bin:$PATH
           make NO_PACKAGE=1
+
       - name: Debug: List build output
         run: |
           ls -la
@@ -29,6 +33,7 @@ jobs:
             echo '.theos folder not found'
           fi
           find . -name '*.dylib'
+
       - name: Upload dylib and plist
         uses: actions/upload-artifact@v4
         with:
