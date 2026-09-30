@@ -6,24 +6,26 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
 
       - name: Install Theos
         run: |
           git clone --recursive --depth=1 https://github.com/theos/theos.git ~/theos
-          echo 'THEOS=$HOME/theos' >> $GITHUB_ENV
-          sudo apt update
-          sudo apt install -y git make clang curl
-          # 下载 iPhoneOS15.0 SDK
+
+      - name: Setup iOS SDK
+        run: |
+          SDK="$(xcrun --sdk iphoneos --show-sdk-path)"
+          VER="$(xcrun --sdk iphoneos --show-sdk-version)"
           mkdir -p ~/theos/sdks
-          curl -L https://github.com/theos/sdks/raw/master/iPhoneOS15.0.sdk.tar.xz -o ~/theos/sdks/iPhoneOS15.0.sdk.tar.xz
-          tar -xf ~/theos/sdks/iPhoneOS15.0.sdk.tar.xz -C ~/theos/sdks
+          ln -sfn "$SDK" ~/theos/sdks/iPhoneOS${VER}.sdk
+          echo "iOS SDK: $VER"
 
       - name: Build Tweak
+        env:
+          THEOS: ~/theos
         run: |
-          export THEOS=$HOME/theos
           export PATH=$THEOS/bin:$PATH
           export NO_CODESIGN=1
           make NO_PACKAGE=1
