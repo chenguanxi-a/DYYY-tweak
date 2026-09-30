@@ -1,77 +1,44 @@
-name: Build DYYYPP dylib
+name: Build Tweak
 
 on:
   push:
-    branches: [main, master]
-  pull_request:
     branches: [main, master]
   workflow_dispatch:
 
 jobs:
   build:
-    name: Build iOS tweak
-    runs-on: macos-14
-    timeout-minutes: 30
-
-    env:
-      THEOS: ${{ github.workspace }}/theos
-
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install ldid
-        run: |
-          brew install ldid || true
+      - uses: actions/checkout@v4
 
       - name: Install Theos
         run: |
-          rm -rf $THEOS
-          git clone --recursive --depth=1 https://github.com/theos/theos.git $THEOS
-          git -C $THEOS log -1 --oneline
-
-      - name: Setup iOS SDK
-        run: |
-          SDK="$(xcrun --sdk iphoneos --show-sdk-path)"
-          VER="$(xcrun --sdk iphoneos --show-sdk-version)"
-          echo "iOS SDK version: $VER"
-          mkdir -p $THEOS/sdks
-          ln -sfn "$SDK" "$THEOS/sdks/iPhoneOS${VER}.sdk"
-          ls -la $THEOS/sdks/
+          git clone --recursive --depth=1 https://github.com/theos/theos.git ~/theos
+          echo "THEOS=$HOME/theos" >> $GITHUB_ENV
+          sudo apt update
+          sudo apt install -y git make clang ldid
 
       - name: Build Tweak
         run: |
-          export THEOS=$THEOS
+          export THEOS=$HOME/theos
           export PATH=$THEOS/bin:$PATH
-          make clean || true
-          rm -rf .theos packages
-          # NO_PACKAGE=1：只编译链接 dylib，不打包 deb
-          make package NO_PACKAGE=1 DEBUG=1 2>&1 || true
-          echo "===== Make exit: $? ====="
-          echo "--- repo root ---"
-          ls -la
-          echo "--- .theos/lib/ ---"
-          ls -la .theos/lib/ 2>/dev/null || echo ".theos/lib/ not found"
-          echo "--- .theos/obj/ ---"
-          ls -la .theos/obj/ 2>/dev/null || echo ".theos/obj/ not found"
-          echo "--- packages/ ---"
-          ls -la packages/ 2>/dev/null || echo "packages/ not found"
-          echo "--- all dylib files ---"
-          find .theos -name "*.dylib" 2>/dev/null || echo "none found"
+          make NO_PACKAGE=1
 
-      - name: Debug: List .theos
+      - name: Debug: List build output
         run: |
-          echo "--- .theos/ tree ---"
-          find .theos -type f 2>/dev/null || echo ".theos/ not found"
-          echo "--- .theos/lib/ ---"
-          ls -la .theos/lib/ 2>/dev/null || true
-          echo "--- project root ---"
-          ls -la *.dylib *.plist 2>/dev/null || true
+          ls -la
+          if [ -d ".theos" ]; then
+            ls -la .theos/
+            ls -la .theos/obj/ || echo ".theos/obj not exist"
+          else
+            echo ".theos folder not found"
+          fi
+          find . -name "*.dylib"
 
       - name: Upload dylib and plist
         uses: actions/upload-artifact@v4
         with:
           name: DYYYPP-tweak
           path: |
-            .theos/lib/DYYYPP.dylib
+            .theos/obj/DYYYPP.dylib
             DYYYPP.plist
