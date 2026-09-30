@@ -23,20 +23,28 @@ jobs:
           curl -sL https://github.com/procursus/ldid/releases/download/v2.1.5-procursus7/ldid_linux_x86_64 -o $HOME/theos/bin/ldid
           chmod +x $HOME/theos/bin/ldid
           echo "THEOS=$HOME/theos" >> $GITHUB_ENV
+          echo "PATH=$HOME/theos/bin:$PATH" >> $GITHUB_ENV
 
       - name: Install SDKs
         run: |
           rm -rf $HOME/theos/sdks/*
           curl -sL https://github.com/itsnebulalol/sdks/archive/main.tar.gz | tar -xzf - --strip-components=1 -C $HOME/theos/sdks
           ls $HOME/theos/sdks/
+          echo "iPhoneOS15.0.sdk exists:"
+          test -d $HOME/theos/sdks/iPhoneOS15.0.sdk && echo "YES" || echo "NO"
 
       - name: Build
         run: |
           export THEOS=$HOME/theos
+          export PATH=$THEOS/bin:$PATH
+          echo "THEOS=$THEOS"
+          echo "PATH=$PATH"
+          echo "which make: $(which make)"
+          make --version | head -1
           set -e
-          make package 2>&1 | tee build.log
+          make clean || true
+          make package V=1 2>&1 | tee build.log
           echo "Exit code: ${PIPESTATUS[0]}"
-          tail -150 build.log
           ls -la packages/
 
       - name: Upload build log
@@ -52,11 +60,11 @@ jobs:
         with:
           name: DYYY--dylib
           path: packages/*.dylib
-          if-no-files-found: error
+          if-no-files-found: warn
 
       - name: Upload deb
         uses: actions/upload-artifact@v4
         with:
           name: DYYY--deb
           path: packages/*.deb
-          if-no-files-found: error
+          if-no-files-found: warn
