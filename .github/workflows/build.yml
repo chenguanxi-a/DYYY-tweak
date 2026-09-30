@@ -13,9 +13,9 @@ jobs:
       - name: Install Theos
         run: |
           git clone --recursive --depth=1 https://github.com/theos/theos.git ~/theos
+          brew install ldid
 
       - name: Detect iOS SDK version
-        id: sdk
         run: |
           VER=$(xcrun --sdk iphoneos --show-sdk-version)
           echo "SDK_VERSION=$VER" >> $GITHUB_ENV
