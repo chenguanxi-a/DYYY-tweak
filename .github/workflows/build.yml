@@ -15,14 +15,17 @@ jobs:
           git clone --recursive --depth=1 https://github.com/theos/theos.git ~/theos
           echo 'THEOS=$HOME/theos' >> $GITHUB_ENV
           sudo apt update
-          sudo apt install -y git make clang
-          curl -L https://github.com/theos/ldid/releases/latest/download/ldid-linux -o ~/theos/bin/ldid
-          chmod +x ~/theos/bin/ldid
+          sudo apt install -y git make clang curl
+          # 下载 iPhoneOS15.0 SDK
+          mkdir -p ~/theos/sdks
+          curl -L https://github.com/theos/sdks/raw/master/iPhoneOS15.0.sdk.tar.xz -o ~/theos/sdks/iPhoneOS15.0.sdk.tar.xz
+          tar -xf ~/theos/sdks/iPhoneOS15.0.sdk.tar.xz -C ~/theos/sdks
 
       - name: Build Tweak
         run: |
           export THEOS=$HOME/theos
           export PATH=$THEOS/bin:$PATH
+          export NO_CODESIGN=1
           make NO_PACKAGE=1
 
       - name: Upload dylib and plist
