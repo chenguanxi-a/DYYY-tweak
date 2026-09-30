@@ -19,9 +19,6 @@ define Package/$(PACKAGE_IDENTIFIER)
   Depends: firmware (>= 14.0), mobilesubstrate
 endef
 
-# 只编译 dylib，不打包 deb（用于 TrollFools 巨魔注入）
-export NO_PACKAGE = 1
-
 # TARGET
 ARCHS = arm64e
 TARGET = iphone:clang:latest:15.0
@@ -32,6 +29,10 @@ export DEBUG = 1
 export THEOS_STRICT_LOGOS = 0
 export ERROR_ON_WARNINGS = 0
 export LOGOS_DEFAULT_GENERATOR = internal
+
+# Rootless 插件配置
+export THEOS_PACKAGE_SCHEME = rootless
+THEOS_PACKAGE_INSTALL_PREFIX = /var/jb
 
 # 目标进程
 INSTALL_TARGET_PROCESSES = Aweme

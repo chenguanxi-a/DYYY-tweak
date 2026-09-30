@@ -43,22 +43,28 @@ jobs:
         run: |
           export THEOS=$THEOS
           export PATH=$THEOS/bin:$PATH
-          # NO_PACKAGE=1：只编译 dylib，不打包 deb
-          make DEBUG=1 2>&1 || true
+          make clean || true
+          rm -rf .theos packages
+          # NO_PACKAGE=1：只编译链接 dylib，不打包 deb
+          make package NO_PACKAGE=1 DEBUG=1 2>&1 || true
           echo "===== Make exit: $? ====="
           echo "--- repo root ---"
           ls -la
-          echo "--- .theos/ ---"
-          find .theos -type f 2>/dev/null || echo ".theos/ not found or empty"
+          echo "--- .theos/lib/ ---"
+          ls -la .theos/lib/ 2>/dev/null || echo ".theos/lib/ not found"
+          echo "--- .theos/obj/ ---"
+          ls -la .theos/obj/ 2>/dev/null || echo ".theos/obj/ not found"
+          echo "--- packages/ ---"
+          ls -la packages/ 2>/dev/null || echo "packages/ not found"
           echo "--- all dylib files ---"
-          find . -name "*.dylib" -not -path "./.git/*" 2>/dev/null || echo "none found"
+          find .theos -name "*.dylib" 2>/dev/null || echo "none found"
 
       - name: Debug: List .theos
         run: |
           echo "--- .theos/ tree ---"
           find .theos -type f 2>/dev/null || echo ".theos/ not found"
-          echo "--- .theos/obj/ ---"
-          ls -la .theos/obj/ 2>/dev/null || echo ".theos/obj/ not found"
+          echo "--- .theos/lib/ ---"
+          ls -la .theos/lib/ 2>/dev/null || true
           echo "--- project root ---"
           ls -la *.dylib *.plist 2>/dev/null || true
 
@@ -67,5 +73,5 @@ jobs:
         with:
           name: DYYYPP-tweak
           path: |
-            .theos/obj/DYYYPP.dylib
+            .theos/lib/DYYYPP.dylib
             DYYYPP.plist
