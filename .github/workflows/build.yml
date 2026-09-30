@@ -14,7 +14,7 @@ jobs:
       - name: Install Theos
         run: |
           git clone --recursive --depth=1 https://github.com/theos/theos.git ~/theos
-          echo "THEOS=$HOME/theos" >> $GITHUB_ENV
+          echo 'THEOS=$HOME/theos' >> $GITHUB_ENV
           sudo apt update
           sudo apt install -y git make clang ldid
 
@@ -27,13 +27,13 @@ jobs:
       - name: Debug: List build output
         run: |
           ls -la
-          if [ -d ".theos" ]; then
+          if [ -d '.theos' ]; then
             ls -la .theos/
-            ls -la .theos/obj/ || echo ".theos/obj not exist"
+            ls -la .theos/obj/ || echo '.theos/obj not exist'
           else
-            echo ".theos folder not found"
+            echo '.theos folder not found'
           fi
-          find . -name "*.dylib"
+          find . -name '*.dylib'
 
       - name: Upload dylib and plist
         uses: actions/upload-artifact@v4
