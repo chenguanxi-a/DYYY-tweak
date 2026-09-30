@@ -1,4 +1,4 @@
-name: Build DYYY++ dylib
+﻿name: Build DYYY++ dylib
 
 on:
   push:
@@ -34,11 +34,20 @@ jobs:
         run: |
           export THEOS=$HOME/theos
           set -e
-          make package 2>&1 | tee build.log
+          make clean
+          make package V=1 2>&1 | tee build.log
           echo "Build exit code: ${PIPESTATUS[0]}"
-          echo "=== LAST 150 LINES OF BUILD LOG ==="
-          tail -150 build.log
+          echo "=== LAST 200 LINES ==="
+          tail -200 build.log
           ls -la packages/
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build.log
+          retention-days: 7
 
       - name: Upload dylib
         uses: actions/upload-artifact@v4
