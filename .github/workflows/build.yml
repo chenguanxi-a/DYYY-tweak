@@ -34,11 +34,9 @@ jobs:
         run: |
           export THEOS=$HOME/theos
           set -e
-          make clean
-          make package V=1 2>&1 | tee build.log
-          echo "Build exit code: ${PIPESTATUS[0]}"
-          echo "=== LAST 200 LINES ==="
-          tail -200 build.log
+          make package 2>&1 | tee build.log
+          echo "Exit code: ${PIPESTATUS[0]}"
+          tail -150 build.log
           ls -la packages/
 
       - name: Upload build log
