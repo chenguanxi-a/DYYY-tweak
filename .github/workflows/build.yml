@@ -31,15 +31,18 @@ jobs:
           sed -i '' 's|TARGET = iphone:clang:.*|TARGET = iphone:clang:${SDK_VERSION}:15.0|' Makefile
           cat Makefile | grep '^TARGET'
           make NO_PACKAGE=1
-          echo "=== .theos contents ==="
+          echo "=== .theos tree ==="
           find .theos -type f 2>/dev/null || echo ".theos/ not found"
-          echo "=== all dylib files ==="
-          find . -name "*.dylib" -not -path "./.git/*" 2>/dev/null || echo "none found"
+          echo "=== dylib locations ==="
+          find . -name "*.dylib" -not -path "./.git/*" 2>/dev/null || echo "none"
+          ls -la .theos/lib/ 2>/dev/null || true
+          ls -la .theos/obj/ 2>/dev/null || true
 
       - name: Upload dylib and plist
         uses: actions/upload-artifact@v4
         with:
           name: DYYYPP-tweak
           path: |
+            .theos/lib/DYYYPP.dylib
             .theos/obj/DYYYPP.dylib
             DYYYPP.plist
