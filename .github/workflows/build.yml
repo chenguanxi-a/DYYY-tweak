@@ -52,10 +52,16 @@ jobs:
           rm -rf packages .theos
           # 用 subshell 确保 build.log 始终被创建，不受 set -e 影响
           set -o pipefail
-          make package FINALPACKAGE=1 DEBUG=0 2>&1 | tee build.log
+          # 移除 FINALPACKAGE=1：让 Theos 正常输出 .theos/lib/*.dylib 和 packages/*.deb
+          make package DEBUG=0 2>&1 | tee build.log
           MAKE_EXIT=${PIPESTATUS[0]}
           echo "Make exit code: $MAKE_EXIT"
+          echo "--- .theos/lib/ ---"
+          ls -la .theos/lib/ 2>/dev/null || true
+          echo "--- packages/ ---"
           ls -la packages/ 2>/dev/null || true
+          echo "--- repo root deb ---"
+          ls -la *.deb 2>/dev/null || true
           echo "--- build.log content (last 200 lines) ---"
           tail -200 build.log 2>/dev/null || true
           exit $MAKE_EXIT
@@ -72,7 +78,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: DYYY--dylib
-          path: packages/*.dylib
+          path: .theos/lib/*.dylib
           if-no-files-found: warn
 
       - name: Upload deb
