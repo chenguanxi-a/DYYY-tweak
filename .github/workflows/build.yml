@@ -48,13 +48,17 @@ jobs:
           echo "which make: $(which make)"
           echo "which clang: $(which clang)"
           clang --version | head -1
-          set -e
           make clean || true
           rm -rf packages .theos
-          make package FINALPACKAGE=1 DEBUG=0
-          echo "Build exit code: $?"
-          ls -la packages/
-          cat build.log 2>/dev/null || true
+          # 用 subshell 确保 build.log 始终被创建，不受 set -e 影响
+          set -o pipefail
+          make package FINALPACKAGE=1 DEBUG=0 2>&1 | tee build.log
+          MAKE_EXIT=${PIPESTATUS[0]}
+          echo "Make exit code: $MAKE_EXIT"
+          ls -la packages/ 2>/dev/null || true
+          echo "--- build.log content (last 200 lines) ---"
+          tail -200 build.log 2>/dev/null || true
+          exit $MAKE_EXIT
 
       - name: Upload build log
         if: always()
