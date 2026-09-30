@@ -1,7 +1,7 @@
 # 插件：显示编译成功，显示的信息
 PACKAGE_IDENTIFIER = com.huami.dyyy
-PACKAGE_NAME = DYYY++
-PACKAGE_VERSION = 2.1-7++
+PACKAGE_NAME = DYYYPP
+PACKAGE_VERSION = 2.1-7PP
 PACKAGE_ARCHITECTURE = iphoneos-arm64e
 PACKAGE_REVISION = 1
 PACKAGE_SECTION = Tweaks
@@ -11,8 +11,8 @@ PACKAGE_DESCRIPTION = DYYY （原作者：huami1314；魔改：pxx917144686）
 # 插件：编译时，引用的信息
 define Package/$(PACKAGE_IDENTIFIER)
   Package: com.huami.dyyy
-  Name: DYYY++
-  Version: 2.1-7++
+  Name: DYYYPP
+  Version: 2.1-7PP
   Architecture: iphoneos-arm64e
   Author: pxx917144686
   Section: Tweaks
@@ -40,7 +40,7 @@ INSTALL_TARGET_PROCESSES = Aweme
 include $(THEOS)/makefiles/common.mk
 
 # 插件名称
-TWEAK_NAME = DYYY++
+TWEAK_NAME = DYYYPP
 
 # 源代码文件
 $(TWEAK_NAME)_FILES = DYYY.xm \

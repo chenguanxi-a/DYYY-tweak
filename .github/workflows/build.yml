@@ -1,4 +1,4 @@
-name: Build DYYY++ dylib
+name: Build DYYYPP dylib
 
 on:
   push:
@@ -75,12 +75,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: DYYY--dylib
-          path: .theos/obj/DYYY++.dylib
+          path: .theos/obj/DYYYPP.dylib
           if-no-files-found: warn
 
       - name: Upload plist
         uses: actions/upload-artifact@v4
         with:
           name: DYYY--plist
-          path: DYYY++.plist
+          path: DYYYPP.plist
           if-no-files-found: warn
