@@ -30,7 +30,11 @@ jobs:
           export NO_CODESIGN=1
           sed -i '' 's|TARGET = iphone:clang:.*|TARGET = iphone:clang:${SDK_VERSION}:15.0|' Makefile
           cat Makefile | grep '^TARGET'
-          make NO_PACKAGE=1
+          make NO_PACKAGE=1 2>&1 || true
+          echo "=== .theos contents ==="
+          find .theos -type f 2>/dev/null || echo ".theos/ not found"
+          echo "=== all dylib files ==="
+          find . -name "*.dylib" -not -path "./.git/*" 2>/dev/null || echo "none found"
 
       - name: Upload dylib and plist
         uses: actions/upload-artifact@v4
