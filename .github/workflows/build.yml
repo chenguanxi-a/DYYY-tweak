@@ -30,7 +30,7 @@ jobs:
           export NO_CODESIGN=1
           sed -i '' 's|TARGET = iphone:clang:.*|TARGET = iphone:clang:${SDK_VERSION}:15.0|' Makefile
           cat Makefile | grep '^TARGET'
-          make NO_PACKAGE=1 2>&1 || true
+          make NO_PACKAGE=1
           echo "=== .theos contents ==="
           find .theos -type f 2>/dev/null || echo ".theos/ not found"
           echo "=== all dylib files ==="
