@@ -23,17 +23,6 @@ jobs:
           export PATH=$THEOS/bin:$PATH
           make NO_PACKAGE=1
 
-      - name: Debug: List build output
-        run: |
-          ls -la
-          if [ -d '.theos' ]; then
-            ls -la .theos/
-            ls -la .theos/obj/ || echo '.theos/obj not exist'
-          else
-            echo '.theos folder not found'
-          fi
-          find . -name '*.dylib'
-
       - name: Upload dylib and plist
         uses: actions/upload-artifact@v4
         with:
