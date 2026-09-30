@@ -1,4 +1,4 @@
-PACKAGE_IDENTIFIER = com.huami.dyyy
+﻿PACKAGE_IDENTIFIER = com.huami.dyyy
 PACKAGE_NAME = DYYYPP
 PACKAGE_VERSION = 2.1-7PP
 PACKAGE_ARCHITECTURE = iphoneos-arm64e
@@ -18,7 +18,7 @@ define Package/$(PACKAGE_IDENTIFIER)
 endef
 
 ARCHS = arm64 arm64e
-TARGET = iphone:clang:15.0:15.0
+TARGET = iphone:clang:17.0:15.0
 USE_SWIFT = 1
 
 export DEBUG = 1
