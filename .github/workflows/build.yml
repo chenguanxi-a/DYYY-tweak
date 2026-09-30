@@ -55,8 +55,8 @@ jobs:
           make DEBUG=1 2>&1 | tee build.log
           MAKE_EXIT=${PIPESTATUS[0]}
           echo "Make exit code: $MAKE_EXIT"
-          echo "--- .theos/lib/ ---"
-          ls -la .theos/lib/ 2>/dev/null || true
+          echo "--- .theos/obj/ ---"
+          ls -la .theos/obj/ 2>/dev/null || true
           echo "--- project root plist ---"
           ls -la *.plist 2>/dev/null || true
           echo "--- build.log content (last 200 lines) ---"
@@ -75,7 +75,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: DYYY--dylib
-          path: .theos/lib/DYYY++.dylib
+          path: .theos/obj/DYYY++.dylib
           if-no-files-found: warn
 
       - name: Upload plist
