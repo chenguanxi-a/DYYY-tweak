@@ -1,0 +1,83 @@
+name: Build DYYY++ dylib
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build iOS tweak
+    runs-on: macos-14
+    timeout-minutes: 30
+
+    env:
+      THEOS: ${{ github.workspace }}/theos
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install ldid + dpkg
+        run: |
+          brew install ldid dpkg || true
+
+      - name: Install Theos
+        run: |
+          rm -rf $THEOS
+          git clone --recursive --depth=1 https://github.com/theos/theos.git $THEOS
+          git -C $THEOS log -1 --oneline
+
+      - name: Setup iOS SDK
+        run: |
+          SDK="$(xcrun --sdk iphoneos --show-sdk-path)"
+          VER="$(xcrun --sdk iphoneos --show-sdk-version)"
+          echo "iOS SDK version: $VER"
+          mkdir -p $THEOS/sdks
+          ln -sfn "$SDK" "$THEOS/sdks/iPhoneOS${VER}.sdk"
+          ls -la $THEOS/sdks/
+
+      - name: Build
+        run: |
+          export THEOS=$THEOS
+          export PATH=$THEOS/bin:$PATH
+          echo "THEOS=$THEOS"
+          echo "PATH=$PATH"
+          echo "which make: $(which make)"
+          echo "which clang: $(which clang)"
+          clang --version | head -1
+          make clean || true
+          rm -rf packages .theos
+          # 用 subshell 确保 build.log 始终被创建，不受 set -e 影响
+          set -o pipefail
+          make package FINALPACKAGE=1 DEBUG=0 2>&1 | tee build.log
+          MAKE_EXIT=${PIPESTATUS[0]}
+          echo "Make exit code: $MAKE_EXIT"
+          ls -la packages/ 2>/dev/null || true
+          echo "--- build.log content (last 200 lines) ---"
+          tail -200 build.log 2>/dev/null || true
+          exit $MAKE_EXIT
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build.log
+          retention-days: 7
+
+      - name: Upload dylib
+        uses: actions/upload-artifact@v4
+        with:
+          name: DYYY--dylib
+          path: packages/*.dylib
+          if-no-files-found: warn
+
+      - name: Upload deb
+        uses: actions/upload-artifact@v4
+        with:
+          name: DYYY--deb
+          path: packages/*.deb
+          if-no-files-found: warn
