@@ -20,9 +20,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install ldid + dpkg
+      - name: Install ldid
         run: |
-          brew install ldid dpkg || true
+          brew install ldid || true
 
       - name: Install Theos
         run: |
@@ -49,19 +49,16 @@ jobs:
           echo "which clang: $(which clang)"
           clang --version | head -1
           make clean || true
-          rm -rf packages .theos
-          # 用 subshell 确保 build.log 始终被创建，不受 set -e 影响
+          rm -rf .theos
+          # NO_PACKAGE=1：只编译 dylib，不打包 deb
           set -o pipefail
-          # 移除 FINALPACKAGE=1：让 Theos 正常输出 .theos/lib/*.dylib 和 repo root 的 deb
-          make package DEBUG=0 2>&1 | tee build.log
+          make DEBUG=1 2>&1 | tee build.log
           MAKE_EXIT=${PIPESTATUS[0]}
           echo "Make exit code: $MAKE_EXIT"
           echo "--- .theos/lib/ ---"
           ls -la .theos/lib/ 2>/dev/null || true
-          echo "--- packages/ ---"
-          ls -la packages/ 2>/dev/null || true
-          echo "--- repo root deb ---"
-          ls -la *.deb 2>/dev/null || true
+          echo "--- project root plist ---"
+          ls -la *.plist 2>/dev/null || true
           echo "--- build.log content (last 200 lines) ---"
           tail -200 build.log 2>/dev/null || true
           exit $MAKE_EXIT
@@ -78,12 +75,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: DYYY--dylib
-          path: .theos/lib/*.dylib
+          path: .theos/lib/DYYY++.dylib
           if-no-files-found: warn
 
-      - name: Upload deb
+      - name: Upload plist
         uses: actions/upload-artifact@v4
         with:
-          name: DYYY--deb
-          path: "*.deb"
+          name: DYYY--plist
+          path: DYYY++.plist
           if-no-files-found: warn

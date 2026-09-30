@@ -2,7 +2,7 @@
 PACKAGE_IDENTIFIER = com.huami.dyyy
 PACKAGE_NAME = DYYY++
 PACKAGE_VERSION = 2.1-7++
-PACKAGE_ARCHITECTURE = iphoneos-arm64
+PACKAGE_ARCHITECTURE = iphoneos-arm64e
 PACKAGE_REVISION = 1
 PACKAGE_SECTION = Tweaks
 PACKAGE_DEPENDS = firmware (>= 14.0), mobilesubstrate
@@ -13,29 +13,25 @@ define Package/$(PACKAGE_IDENTIFIER)
   Package: com.huami.dyyy
   Name: DYYY++
   Version: 2.1-7++
-  Architecture: iphoneos-arm64
+  Architecture: iphoneos-arm64e
   Author: pxx917144686
   Section: Tweaks
   Depends: firmware (>= 14.0), mobilesubstrate
 endef
 
-# 直接输出到根路径
-export THEOS_PACKAGE_DIR = $(CURDIR)
+# 只编译 dylib，不打包 deb（用于 TrollFools 巨魔注入）
+export NO_PACKAGE = 1
 
 # TARGET
-ARCHS = arm64
+ARCHS = arm64e
 TARGET = iphone:clang:latest:15.0
 USE_SWIFT = 1
 
 # 关闭严格错误检查和警告
-export DEBUG = 0
+export DEBUG = 1
 export THEOS_STRICT_LOGOS = 0
 export ERROR_ON_WARNINGS = 0
 export LOGOS_DEFAULT_GENERATOR = internal
-
-# Rootless 插件配置
-export THEOS_PACKAGE_SCHEME = rootless
-THEOS_PACKAGE_INSTALL_PREFIX = /var/jb
 
 # 目标进程
 INSTALL_TARGET_PROCESSES = Aweme
@@ -98,7 +94,7 @@ $(TWEAK_NAME)_LDFLAGS += -Xlinker -no_warn_duplicate_libraries
 $(TWEAK_NAME)_LDFLAGS += -Wl,-w
 
 # FLEX 库和头文件路径
-$(TWEAK_NAME)_LIBRARIES = 
+$(TWEAK_NAME)_LIBRARIES =
 $(TWEAK_NAME)_CFLAGS += -I$(THEOS_PROJECT_DIR)
 $(TWEAK_NAME)_CFLAGS += -I$(THEOS)/include
 $(TWEAK_NAME)_CFLAGS += -I$(THEOS_PROJECT_DIR)/FLEX
