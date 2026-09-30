@@ -1,10 +1,10 @@
-﻿PACKAGE_IDENTIFIER = com.huami.dyyy
+PACKAGE_IDENTIFIER = com.huami.dyyy
 PACKAGE_NAME = DYYYPP
 PACKAGE_VERSION = 2.1-7PP
 PACKAGE_ARCHITECTURE = iphoneos-arm64e
 PACKAGE_REVISION = 1
 PACKAGE_SECTION = Tweaks
-PACKAGE_DEPENDS = firmware (>= 14.0), mobilesubstrate
+PACKAGE_DEPENDS = firmware (>= 15.0), mobilesubstrate
 PACKAGE_DESCRIPTION = DYYY (Original: huami1314; Mod: pxx917144686)
 
 define Package/$(PACKAGE_IDENTIFIER)
@@ -14,9 +14,10 @@ define Package/$(PACKAGE_IDENTIFIER)
   Architecture: iphoneos-arm64e
   Author: pxx917144686
   Section: Tweaks
-  Depends: firmware (>= 14.0), mobilesubstrate
+  Depends: firmware (>= 15.0), mobilesubstrate
 endef
 
+# A改成17.0（机器自带SDK），B保留15.0（最低兼容iOS15，巨魔完全没问题）
 ARCHS = arm64 arm64e
 TARGET = iphone:clang:17.0:15.0
 USE_SWIFT = 1

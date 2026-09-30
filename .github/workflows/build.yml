@@ -13,19 +13,12 @@ jobs:
       - name: Install Theos
         run: |
           git clone --recursive --depth=1 https://github.com/theos/theos.git ~/theos
-
-      - name: Setup iOS SDK
-        run: |
-          SDK="$(xcrun --sdk iphoneos --show-sdk-path)"
-          VER="$(xcrun --sdk iphoneos --show-sdk-version)"
-          mkdir -p ~/theos/sdks
-          ln -sfn "$SDK" ~/theos/sdks/iPhoneOS${VER}.sdk
-          echo "iOS SDK: $VER"
+          echo 'THEOS=$HOME/theos' >> $GITHUB_ENV
+          export PATH=$HOME/theos/bin:$PATH
 
       - name: Build Tweak
-        env:
-          THEOS: ~/theos
         run: |
+          export THEOS=$HOME/theos
           export PATH=$THEOS/bin:$PATH
           export NO_CODESIGN=1
           make NO_PACKAGE=1
