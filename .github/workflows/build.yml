@@ -10,9 +10,8 @@ on:
 jobs:
   build:
     name: Build iOS tweak
-    # Theos requires macOS — ubuntu-latest cannot cross-compile iOS tweaks properly.
-    # See: https://github.com/ab6866/theos-tweak-pipeline
-    runs-on: macos-latest
+    runs-on: macos-14
+    timeout-minutes: 30
 
     env:
       THEOS: ${{ github.workspace }}/theos
@@ -21,31 +20,38 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install ldid + dpkg
+        run: |
+          brew install ldid dpkg || true
+          which ldid || echo "!! ldid not found"
+          which dpkg-deb || echo "!! dpkg-deb not found"
+
       - name: Install Theos
         run: |
           rm -rf $THEOS
-          git clone --recursive https://github.com/theos/theos.git $THEOS
+          git clone --recursive --depth=1 https://github.com/theos/theos.git $THEOS
           echo "THEOS=$THEOS" >> $GITHUB_ENV
           echo "PATH=$THEOS/bin:$PATH" >> $GITHUB_ENV
+          git -C $THEOS log -1 --oneline
 
       - name: Setup iOS SDK
         run: |
           SDK="$(xcrun --sdk iphoneos --show-sdk-path)"
           VER="$(xcrun --sdk iphoneos --show-sdk-version)"
-          echo "iOS SDK: $SDK (version $VER)"
+          echo "iOS SDK version: $VER"
           mkdir -p $THEOS/sdks
           ln -sfn "$SDK" "$THEOS/sdks/iPhoneOS${VER}.sdk"
           ls -la $THEOS/sdks/
 
       - name: Build
         run: |
+          set -exo pipefail
           export THEOS=$THEOS
           export PATH=$THEOS/bin:$PATH
           echo "THEOS=$THEOS"
           echo "PATH=$PATH"
           echo "which make: $(which make)"
           echo "which clang: $(which clang)"
-          set -e
           make clean || true
           rm -rf packages
           make package THEOS_PACKAGE_SCHEME=rootless FINALPACKAGE=1 DEBUG=0
