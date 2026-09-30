@@ -16,7 +16,6 @@ jobs:
           echo 'THEOS=$HOME/theos' >> $GITHUB_ENV
           sudo apt update
           sudo apt install -y git make clang
-          # 手动下载预编译ldid
           curl -L https://github.com/theos/ldid/releases/latest/download/ldid-linux -o ~/theos/bin/ldid
           chmod +x ~/theos/bin/ldid
 
