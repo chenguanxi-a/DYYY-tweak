@@ -661,7 +661,7 @@ NSDictionary *getCurrentABTestData(void) {
 }
 
 - (void)setupTableView {
-    self.tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStyleInsetGrouped];
+    self.tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStyleGrouped];
     self.tableView.delegate = self;
     self.tableView.dataSource = self;
     self.tableView.backgroundColor = [UIColor clearColor];
@@ -1546,7 +1546,7 @@ NSDictionary *getCurrentABTestData(void) {
     headerButton.frame = CGRectMake(buttonX, 2, buttonWidth, 41);
     
     // 使用系统背景色并添加圆角
-    headerButton.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.9]; // 半透明白色背景
+    headerButton.backgroundColor = [UIColor clearColor];
     headerButton.layer.cornerRadius = 10;
     headerButton.layer.masksToBounds = YES; // 确保内容不超出圆角范围
     
@@ -1554,7 +1554,7 @@ NSDictionary *getCurrentABTestData(void) {
     headerButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
     headerButton.titleLabel.font = [UIFont boldSystemFontOfSize:17];
     [headerButton setTitle:self.isSearching ? self.filteredSectionTitles[section] : self.sectionTitles[section] forState:UIControlStateNormal];
-    [headerButton setTitleColor:[UIColor darkTextColor] forState:UIControlStateNormal];
+    [headerButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     headerButton.tag = section;
     [headerButton addTarget:self action:@selector(headerTapped:) forControlEvents:UIControlEventTouchUpInside];
     
@@ -1680,7 +1680,11 @@ NSDictionary *getCurrentABTestData(void) {
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
-    return 35.0; // 保持一致的分组头部高度
+    return 35.0;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section {
+    return CGFLOAT_MIN;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
@@ -1724,6 +1728,7 @@ NSDictionary *getCurrentABTestData(void) {
     cell.textLabel.attributedText = attributedText;
     cell.backgroundColor = [UIColor clearColor];
     cell.contentView.backgroundColor = [UIColor clearColor];
+    cell.selectedBackgroundView = [[UIView alloc] init];
     cell.textLabel.textColor = [UIColor whiteColor];
     cell.detailTextLabel.textColor = [UIColor lightGrayColor];
     cell.detailTextLabel.text = nil;
