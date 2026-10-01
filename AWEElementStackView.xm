@@ -270,3 +270,40 @@ static CGFloat currentScale = 1.0;
 }
 
 %end
+
+// ============================================================
+//  液态玻璃效果（Liquid Glass / Glassmorphism）Hook
+//  开启 dyyy_enable_liquid_glass 后对右侧互动栏施加毛玻璃质感
+// ============================================================
+
+static void dyyyApplyLiquidGlassToElementStackView(UIView *v) {
+    if (!v || ![v isKindOfClass:[UIView class]]) return;
+    if (v.tag == 0xDEAD) return;
+
+    v.backgroundColor = [UIColor clearColor];
+
+    UIVisualEffectView *blurView = [[UIVisualEffectView alloc]
+        initWithEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleDark]];
+    blurView.frame = v.bounds;
+    blurView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    blurView.alpha = 0.85f;
+    blurView.tag = 0xDEAD;
+    [v insertSubview:blurView atIndex:0];
+
+    v.layer.cornerRadius = 12.0;
+    v.layer.masksToBounds = YES;
+    v.layer.borderColor = [[UIColor whiteColor] colorWithAlphaComponent:0.20].CGColor;
+    v.layer.borderWidth = 0.5;
+    v.layer.shadowColor = [[UIColor blackColor] colorWithAlphaComponent:0.18].CGColor;
+    v.layer.shadowOpacity = 0.18;
+    v.layer.shadowOffset = CGSizeMake(0, 2);
+    v.layer.shadowRadius = 6.0;
+}
+%hook AWEElementStackView
+- (void)layoutSubviews {
+    %orig;
+    if (DYYYGetBool("dyyy_enable_liquid_glass")) {
+        dyyyApplyLiquidGlassToElementStackView(self);
+    }
+}
+%end
