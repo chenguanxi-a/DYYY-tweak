@@ -25,20 +25,47 @@
 //  用于长按滑动手势过程中显示当前选中的倍速档位
 // ============================================================
 
-static UIView *dyyySpeedHUDView = nil;
+// ── 倍速 HUD（底部文字提示） ──────────────────────────────────
+// 手势滑动期间在屏幕底部中央显示 "下滑松手锁定 X.Xx 倍速"
+static UIView *dyyySpeedHUDView  = nil;
+static UILabel* dyyySpeedHUDLabel = nil;
+
+// 隐藏视频播放界面中所有非视频 UI，让界面只保留视频和 HUD
+static void dyyyHidePlayInterfaceUI(void) {
+    UIWindow *window = [DYYYManager getActiveWindow];
+    if (!window) return;
+    for (UIView *v in window.subviews) {
+        NSString *cls = NSStringFromClass([v class]);
+        // 跳过 HUD 本身和视频播放视图
+        if ([cls containsString:@"DYYY"] || [cls containsString:@"Player"] ||
+            [cls containsString:@"Metal"] || [cls containsString:@"TTMetal"]) continue;
+        v.hidden = YES;
+    }
+}
+
+// 恢复视频播放界面所有 UI
+static void dyyyShowPlayInterfaceUI(void) {
+    UIWindow *window = [DYYYManager getActiveWindow];
+    if (!window) return;
+    for (UIView *v in window.subviews) {
+        NSString *cls = NSStringFromClass([v class]);
+        if ([cls containsString:@"DYYY"]) continue;
+        v.hidden = NO;
+    }
+}
 
 static void dyyyUpdateSpeedHUD(CGFloat currentSpeed) {
     UIWindow *window = [DYYYManager getActiveWindow];
     if (!window) return;
 
-    CGFloat screenWidth = window.bounds.size.width;
-    CGFloat bottomMargin = 120.0;
-    CGFloat hudHeight = 52.0;
-    CGFloat hudWidth = 180.0;
-    CGFloat hudY = window.bounds.size.height - bottomMargin - hudHeight;
+    CGFloat screenWidth  = window.bounds.size.width;
+    CGFloat screenHeight = window.bounds.size.height;
+    CGFloat hudHeight    = 48.0;
+    CGFloat hudWidth     = 200.0;
+    CGFloat hudY         = screenHeight - hudHeight - 100.0;
 
     if (!dyyySpeedHUDView) {
-        dyyySpeedHUDView = [[UIView alloc] init];
+        dyyySpeedHUDView  = [[UIView alloc] init];
         dyyySpeedHUDView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.72];
         dyyySpeedHUDView.layer.cornerRadius = hudHeight / 2.0;
         dyyySpeedHUDView.clipsToBounds = YES;
@@ -47,42 +74,35 @@ static void dyyyUpdateSpeedHUD(CGFloat currentSpeed) {
         [window addSubview:dyyySpeedHUDView];
     }
 
-    UILabel *speedLabel = (UILabel *)[dyyySpeedHUDView viewWithTag:99001];
-    if (!speedLabel) {
-        speedLabel = [[UILabel alloc] init];
-        speedLabel.tag = 99001;
-        speedLabel.textColor = [UIColor whiteColor];
-        speedLabel.font = [UIFont systemFontOfSize:17 weight:UIFontWeightMedium];
-        speedLabel.textAlignment = NSTextAlignmentCenter;
-        speedLabel.adjustsFontSizeToFitWidth = YES;
-        speedLabel.minimumScaleFactor = 0.7;
-        [dyyySpeedHUDView addSubview:speedLabel];
+    if (!dyyySpeedHUDLabel) {
+        dyyySpeedHUDLabel = [[UILabel alloc] init];
+        dyyySpeedHUDLabel.textColor = [UIColor whiteColor];
+        dyyySpeedHUDLabel.font = [UIFont systemFontOfSize:16 weight:UIFontWeightMedium];
+        dyyySpeedHUDLabel.textAlignment = NSTextAlignmentCenter;
+        dyyySpeedHUDLabel.adjustsFontSizeToFitWidth = YES;
+        dyyySpeedHUDLabel.minimumScaleFactor = 0.6;
+        [dyyySpeedHUDView addSubview:dyyySpeedHUDLabel];
     }
 
-    // 格式："当前 X.Xx 倍速，下滑松手锁定"
-    NSString *speedText = [NSString stringWithFormat:@"当前 %.1fx 倍速，下滑松手锁定", currentSpeed];
-    speedLabel.text = speedText;
+    // 格式："下滑松手锁定 X.Xx 倍速"
+    NSString *speedText = [NSString stringWithFormat:@"下滑松手锁定 %.1fx 倍速", currentSpeed];
+    dyyySpeedHUDLabel.text = speedText;
 
-    // 自适应宽度
-    CGSize textSize = [speedText sizeWithAttributes:@{NSFontAttributeName: speedLabel.font}];
-    hudWidth = MAX(hudWidth, textSize.width + 32.0);
+    CGSize textSize = [speedText sizeWithAttributes:@{NSFontAttributeName: dyyySpeedHUDLabel.font}];
+    hudWidth = MAX(hudWidth, textSize.width + 40.0);
     CGFloat hudX = (screenWidth - hudWidth) / 2.0;
     dyyySpeedHUDView.frame = CGRectMake(hudX, hudY, hudWidth, hudHeight);
 
-    if (dyyySpeedHUDView.hidden) {
-        dyyySpeedHUDView.hidden = NO;
-        [UIView animateWithDuration:0.15 animations:^{
-            dyyySpeedHUDView.alpha = 1.0;
-        }];
-    } else {
-        dyyySpeedHUDView.alpha = 1.0;
-    }
+    dyyySpeedHUDView.hidden = NO;
+    dyyySpeedHUDView.alpha  = 1.0;
+    dyyySpeedHUDLabel.alpha = 1.0;
 }
 
 static void dyyyHideSpeedHUD(void) {
     if (!dyyySpeedHUDView) return;
     [UIView animateWithDuration:0.2 animations:^{
-        dyyySpeedHUDView.alpha = 0.0;
+        dyyySpeedHUDView.alpha  = 0.0;
+        dyyySpeedHUDLabel.alpha = 0.0;
     } completion:^(BOOL finished) {
         dyyySpeedHUDView.hidden = YES;
     }];
@@ -6331,6 +6351,7 @@ static BOOL isGestureActive = NO;
         cumulativeDownwardDistance = 0;
         currentHUDSpeedIndex = -1;
         initialTouchY = location.y;
+        dyyyHidePlayInterfaceUI();
         dyyyLongPressFastSpeedActive = YES;
         dyyyLongPressLockedSpeedActive = NO;
         isGestureActive = YES;
@@ -6346,6 +6367,7 @@ static BOOL isGestureActive = NO;
     // ── Ended / Cancelled / Failed：提交或恢复倍速 ────────────
     else if (isEnding) {
         isGestureActive = NO;
+        dyyyShowPlayInterfaceUI();
 
         if (!enableSpeedGesture) {
             dyyyLongPressFastSpeedActive = NO;
