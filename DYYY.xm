@@ -6245,6 +6245,9 @@ static BOOL isGestureActive = NO;
 - (void)handleLongPressFastSpeed:(UILongPressGestureRecognizer *)gesture {
     BOOL enableSpeedGesture = DYYYGetBool(@"DYYYEnableLongPressSpeedGesture");
     CGPoint location = [gesture locationInView:gesture.view];
+    // Bug B fix: resolve screen height from active window so delta is independent of gesture view bounds
+    UIWindow *keyWindow = [DYYYManager getActiveWindow];
+    CGFloat screenHeight = keyWindow ? keyWindow.bounds.size.height : [UIScreen mainScreen].bounds.size.height;
     static CGFloat initialTouchY = 0;
     BOOL isBeginning = gesture.state == UIGestureRecognizerStateBegan;
     BOOL isEnding = gesture.state == UIGestureRecognizerStateEnded ||
@@ -6261,7 +6264,9 @@ static BOOL isGestureActive = NO;
         dyyyLongPressFastSpeedActive = NO;
     }
 
-    %orig;
+    // Bug A fix: removed %orig to prevent recursive hook loop that freezes the main thread.
+    // The original app method may internally trigger changeSpeed: causing re-entrant hook calls.
+    // All speed logic is handled below without calling %orig.
 
     if (isEnding) {
         DYYYScheduleConfiguredPlaybackSpeedRestore();
@@ -6282,20 +6287,24 @@ static BOOL isGestureActive = NO;
         currentLongPressSpeed = longPressSpeed;
     }
     else if (gesture.state == UIGestureRecognizerStateChanged && isGestureActive) {
-        CGFloat deltaY = location.y - initialTouchY;
+        // Bug B fix: use window height as reference for correct swipe delta
+        // Original: location.y - initialTouchY (wrong when gesture.view is smaller than full screen)
+        // Fixed:    initialTouchY - location.y (up swipe = positive deltaY = speed up)
+        CGFloat deltaY = (screenHeight > 0) ? (initialTouchY - location.y) : 0;
         CGFloat threshold = 10.0;
 
         if (fabs(deltaY) > threshold) {
-            CGFloat speedChange;
-            speedChange = (deltaY > 0) ? 0.25 : -0.25;
-
+            CGFloat speedChange = (deltaY > 0) ? 0.25 : -0.25;
             CGFloat newSpeed = currentLongPressSpeed + speedChange;
             newSpeed = MAX(0.5, MIN(3.0, newSpeed));
 
             if (newSpeed != currentLongPressSpeed) {
                 currentLongPressSpeed = newSpeed;
                 initialTouchY = location.y;
-                [self changeSpeed:currentLongPressSpeed];
+                // Ensure playback rate change runs on main queue
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self changeSpeed:currentLongPressSpeed];
+                });
             }
         }
     }
@@ -6324,6 +6333,17 @@ static BOOL isGestureActive = NO;
     if (speed <= 1.0 && dyyyLongPressLockedSpeedActive) {
         DYYYEndLockedLongPressSpeedAndRestoreIfNeeded();
     }
+}
+
+// Bug B fix: allow the speed long-press gesture to recognize simultaneously with
+// scroll / swipe gestures on sibling views, preventing gesture starvation.
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer
+    shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
+    if ([gestureRecognizer isKindOfClass:[UILongPressGestureRecognizer class]] ||
+        [gestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]]) {
+        return YES;
+    }
+    return NO;
 }
 %end
 
