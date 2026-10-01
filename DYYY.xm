@@ -30,27 +30,50 @@
 static UIView *dyyySpeedHUDView  = nil;
 static UILabel* dyyySpeedHUDLabel = nil;
 
-// 隐藏视频播放界面中所有非视频 UI，让界面只保留视频和 HUD
+// 仅隐藏 AWEPlayInteractionViewController.view 下的 overlay UI，不触碰视频播放视图。
+// 通过 findViewControllersInHierarchy 定位当前播放界面控制器，再遍历其 view 的子视图。
+// 跳过的类：播放器相关（Video/Metal/Player）、DYYY 自建视图、AWEPlayInteractionViewController 自身。
+static BOOL dyyyIsProtectedClass(NSString *cls) {
+    if ([cls containsString:@"DYYY"]) return YES;
+    if ([cls containsString:@"Video"] || [cls containsString:@"video"]) return YES;
+    if ([cls containsString:@"Metal"] || [cls containsString:@"TTMetal"]) return YES;
+    if ([cls containsString:@"Player"] || [cls containsString:@"player"]) return YES;
+    if ([cls containsString:@"Media"] || [cls containsString:@"media"]) return YES;
+    if ([cls isEqualToString:@"AWEPlayInteractionViewController"]) return YES;
+    return NO;
+}
+
 static void dyyyHidePlayInterfaceUI(void) {
     UIWindow *window = [DYYYManager getActiveWindow];
     if (!window) return;
-    for (UIView *v in window.subviews) {
-        NSString *cls = NSStringFromClass([v class]);
-        // 跳过 HUD 本身和视频播放视图
-        if ([cls containsString:@"DYYY"] || [cls containsString:@"Player"] ||
-            [cls containsString:@"Metal"] || [cls containsString:@"TTMetal"]) continue;
-        v.hidden = YES;
+    UIViewController *rootVC = window.rootViewController;
+    while (rootVC.presentedViewController) rootVC = rootVC.presentedViewController;
+    NSArray *vcs = findViewControllersInHierarchy(rootVC);
+    for (UIViewController *vc in vcs) {
+        if (![vc isKindOfClass:NSClassFromString(@"AWEPlayInteractionViewController")]) continue;
+        UIView *view = vc.view;
+        if (!view) continue;
+        for (UIView *sub in view.subviews) {
+            NSString *cls = NSStringFromClass([sub class]);
+            if (dyyyIsProtectedClass(cls)) continue;
+            sub.hidden = YES;
+        }
     }
 }
 
-// 恢复视频播放界面所有 UI
 static void dyyyShowPlayInterfaceUI(void) {
     UIWindow *window = [DYYYManager getActiveWindow];
     if (!window) return;
-    for (UIView *v in window.subviews) {
-        NSString *cls = NSStringFromClass([v class]);
-        if ([cls containsString:@"DYYY"]) continue;
-        v.hidden = NO;
+    UIViewController *rootVC = window.rootViewController;
+    while (rootVC.presentedViewController) rootVC = rootVC.presentedViewController;
+    NSArray *vcs = findViewControllersInHierarchy(rootVC);
+    for (UIViewController *vc in vcs) {
+        if (![vc isKindOfClass:NSClassFromString(@"AWEPlayInteractionViewController")]) continue;
+        UIView *view = vc.view;
+        if (!view) continue;
+        for (UIView *sub in view.subviews) {
+            sub.hidden = NO;
+        }
     }
 }
 
