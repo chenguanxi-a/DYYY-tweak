@@ -270,7 +270,6 @@ static CGFloat currentScale = 1.0;
 }
 
 %end
-
 // ============================================================
 //  液态玻璃效果（Liquid Glass / Glassmorphism）Hook
 //  开启 dyyy_enable_liquid_glass 后对右侧互动栏施加毛玻璃质感
@@ -299,6 +298,7 @@ static void dyyyApplyLiquidGlassToElementStackView(UIView *v) {
     v.layer.shadowOffset = CGSizeMake(0, 2);
     v.layer.shadowRadius = 6.0;
 }
+
 %hook AWEElementStackView
 - (void)layoutSubviews {
     %orig;

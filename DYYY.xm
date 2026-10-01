@@ -6613,9 +6613,122 @@ static void findTargetViewInView(UIView *view) {
 		return;
 	}
 	for (UIView *subview in view.subviews) {
+		findTargetViewInView(subview);
+	}
 }
 
 
+// ============================================================
+//  液态玻璃效果（Liquid Glass / Glassmorphism）Hook
+//  开启 dyyy_enable_liquid_glass 后对顶栏、底栏、右侧互动栏施加毛玻璃质感
+// ============================================================
+
+// 判断是否为抖音原生 TabBar 层级视图（防止误匹配直播/商城内嵌 TabBar）
+static BOOL dyyyIsMainTabBar(UIView *view) {
+    NSString *cls = NSStringFromClass([view class]);
+    if ([cls containsString:@"AWENormalModeTabBar"]) return YES;
+    if ([cls containsString:@"TabBar"] && ![cls containsString:@"Live"] && ![cls containsString:@"Shop"]) return YES;
+    return NO;
+}
+
+// 判断是否为播放界面右侧互动栏
+static BOOL dyyyIsRightInteractionBar(UIView *view) {
+    NSString *cls = NSStringFromClass([view class]);
+    if ([cls containsString:@"AWEElementStackView"]) return YES;
+    if ([cls containsString:@"InteractionRightElement"]) return YES;
+    if ([cls containsString:@"AWEPlayInteractionElement"]) return YES;
+    return NO;
+}
+
+// 判断是否为顶部导航栏/状态栏区域
+static BOOL dyyyIsTopBar(UIView *view) {
+    NSString *cls = NSStringFromClass([view class]);
+    if ([cls containsString:@"AWEPlayInteractionTopBar"]) return YES;
+    if ([cls containsString:@"Tab"]) return NO; // 避免重复匹配 TabBar
+    if ([cls containsString:@"Navigation"] || [cls containsString:@"TopBar"] || [cls containsString:@"StatusBar"]) return YES;
+    return NO;
+}
+
+// 应用液态玻璃效果到单个视图
+static void dyyyApplyLiquidGlassToView(UIView *v) {
+    if (!v || ![v isKindOfClass:[UIView class]]) return;
+    if (v.tag == 0xDEAD) return; // 已处理过
+
+    // 清除原有硬边背景，改为透明
+    v.backgroundColor = [UIColor clearColor];
+
+    // 添加 UIVisualEffectView（毛玻璃层）
+    UIVisualEffectView *blurView = [[UIVisualEffectView alloc]
+        initWithEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleDark]];
+    blurView.frame = v.bounds;
+    blurView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    blurView.alpha = 0.85f;
+    blurView.tag = 0xDEAD; // 标记已处理
+    [v insertSubview:blurView atIndex:0];
+
+    // 顶层加一层极淡高光叠加，增强玻璃质感
+    UIVisualEffectView *overlayView = [[UIVisualEffectView alloc]
+        initWithEffect:[UIVibrancyEffect effectForBlurEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleLight]]];
+    overlayView.frame = v.bounds;
+    overlayView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    overlayView.alpha = 0.25f;
+    [v addSubview:overlayView];
+
+    // 胶囊形圆角（TabBar 用大圆角，其他用小圆角）
+    CGFloat radius = ([v isKindOfClass:%c(UITabBar)] || [dyyyIsMainTabBar(v)]) ? 18.0 : 12.0;
+    v.layer.cornerRadius = radius;
+    v.layer.masksToBounds = YES;
+
+    // 边缘高光描边
+    v.layer.borderColor = [[UIColor whiteColor] colorWithAlphaComponent:0.20].CGColor;
+    v.layer.borderWidth = 0.5;
+
+    // 微弱立体阴影
+    v.layer.shadowColor = [[UIColor blackColor] colorWithAlphaComponent:0.18].CGColor;
+    v.layer.shadowOpacity = 0.18;
+    v.layer.shadowOffset = CGSizeMake(0, 2);
+    v.layer.shadowRadius = 6.0;
+}
+
+// ── 顶栏 Hook ──────────────────────────────────────────────
+%hook AWEPlayInteractionTopBar
+- (void)layoutSubviews {
+    %orig;
+    if (!DYYYGetBool(@"dyyy_enable_liquid_glass")) return;
+    dyyyApplyLiquidGlassToView(self);
+}
+%end
+
+// ── 底栏 TabBar Hook ───────────────────────────────────────
+%hook AWENormalModeTabBar
+- (void)layoutSubviews {
+    %orig;
+    if (!DYYYGetBool(@"dyyy_enable_liquid_glass")) return;
+    dyyyApplyLiquidGlassToView(self);
+}
+%end
+
+// ── 右侧互动栏 Hook ────────────────────────────────────────
+%hook AWEElementStackView
+- (void)layoutSubviews {
+    %orig;
+    if (!DYYYGetBool(@"dyyy_enable_liquid_glass")) return;
+    // 对自身（右侧主容器）应用毛玻璃
+    dyyyApplyLiquidGlassToView(self);
+    // 对右侧互动按钮的子按钮单独添加阴影
+    for (UIView *sub in self.subviews) {
+        NSString *cls = NSStringFromClass([sub class]);
+        if ([cls containsString:@"Button"] || [cls containsString:@"Element"]) {
+            sub.layer.shadowColor = [[UIColor blackColor] colorWithAlphaComponent:0.15].CGColor;
+            sub.layer.shadowOpacity = 0.15;
+            sub.layer.shadowOffset = CGSizeMake(0, 1);
+            sub.layer.shadowRadius = 4.0;
+            sub.layer.cornerRadius = 10.0;
+            sub.layer.masksToBounds = YES;
+        }
+    }
+}
+%end
 // ============================================================
 //  液态玻璃效果（Liquid Glass / Glassmorphism）Hook
 //  开启 dyyy_enable_liquid_glass 后对顶栏、底栏施加毛玻璃质感
@@ -6648,7 +6761,7 @@ static void dyyyApplyLiquidGlassToView(UIView *v) {
 %hook AWEPlayInteractionTopBar
 - (void)layoutSubviews {
     %orig;
-    if (DYYYGetBool(\"dyyy_enable_liquid_glass\")) {
+    if (DYYYGetBool("dyyy_enable_liquid_glass")) {
         dyyyApplyLiquidGlassToView(self);
     }
 }
@@ -6657,7 +6770,7 @@ static void dyyyApplyLiquidGlassToView(UIView *v) {
 %hook AWENormalModeTabBar
 - (void)layoutSubviews {
     %orig;
-    if (DYYYGetBool(\"dyyy_enable_liquid_glass\")) {
+    if (DYYYGetBool("dyyy_enable_liquid_glass")) {
         dyyyApplyLiquidGlassToView(self);
     }
 }
