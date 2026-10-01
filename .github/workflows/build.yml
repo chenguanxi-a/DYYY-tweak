@@ -32,17 +32,16 @@ jobs:
           cat Makefile | grep '^TARGET'
           make NO_PACKAGE=1
 
-      - name: Debug - list compiled files
+      - name: Copy dylib to release folder
         run: |
-          ls -la .theos/
-          ls -la .theos/obj/ || true
-          ls -la .theos/lib/ || true
+          mkdir -p release
+          find .theos -name 'DYYYPP.dylib' -exec cp {} release/DYYYPP.dylib \;
+          ls -la release/
 
       - name: Upload dylib and plist
         uses: actions/upload-artifact@v4
         with:
           name: DYYYPP-tweak
           path: |
-            .theos/obj/
-            .theos/lib/
+            release/DYYYPP.dylib
             DYYYPP.plist

@@ -6379,7 +6379,7 @@ static BOOL isGestureActive = NO;
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self changeSpeed:lockedSpeed];
                 NSString *msg = [NSString stringWithFormat:@"已锁定 %.1fx 倍速", lockedSpeed];
-                [DYYYToast showSuccessToastWithMessage:msg completion:nil];
+                [DYYYToast showSuccessToastWithMessage:msg];
             });
         } else {
             // 未达锁定阈值：向下滑动不足 30px，恢复默认倍速
