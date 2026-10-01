@@ -27,6 +27,8 @@
 
 // ── 倍速 HUD（底部文字提示） ──────────────────────────────────
 // 手势滑动期间在屏幕底部中央显示 "下滑松手锁定 X.Xx 倍速"
+extern NSArray *findViewControllersInHierarchy(UIViewController *rootViewController);
+
 static UIView *dyyySpeedHUDView  = nil;
 static UILabel* dyyySpeedHUDLabel = nil;
 
@@ -133,7 +135,6 @@ static void dyyyHideSpeedHUD(void) {
 
 
 // 函数声明（DYYYFloatSpeedButton.h 未导出）
-extern NSArray *findViewControllersInHierarchy(UIViewController *rootViewController);
 
 // tabHeight 变量声明
 static CGFloat tabHeight = 0;
