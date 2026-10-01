@@ -102,10 +102,13 @@ static void dyyyUpdateSpeedHUD(CGFloat currentSpeed) {
     if (!dyyySpeedHUDLabel) {
         dyyySpeedHUDLabel = [[UILabel alloc] init];
         dyyySpeedHUDLabel.textColor = [UIColor whiteColor];
+        dyyySpeedHUDLabel.backgroundColor = [UIColor clearColor];
         dyyySpeedHUDLabel.font = [UIFont systemFontOfSize:16 weight:UIFontWeightMedium];
         dyyySpeedHUDLabel.textAlignment = NSTextAlignmentCenter;
         dyyySpeedHUDLabel.adjustsFontSizeToFitWidth = YES;
         dyyySpeedHUDLabel.minimumScaleFactor = 0.6;
+        // 必须显式设置 frame，否则默认 (0,0,0,0) 导致文字不可见
+        dyyySpeedHUDLabel.frame = CGRectMake(0, 0, hudWidth, hudHeight);
         [dyyySpeedHUDView addSubview:dyyySpeedHUDLabel];
     }
 
@@ -118,9 +121,15 @@ static void dyyyUpdateSpeedHUD(CGFloat currentSpeed) {
     CGFloat hudX = (screenWidth - hudWidth) / 2.0;
     dyyySpeedHUDView.frame = CGRectMake(hudX, hudY, hudWidth, hudHeight);
 
+    // 更新 label frame 填满 HUD，保证文字居中可见
+    dyyySpeedHUDLabel.frame = CGRectMake(0, 0, hudWidth, hudHeight);
+
     dyyySpeedHUDView.hidden = NO;
     dyyySpeedHUDView.alpha  = 1.0;
     dyyySpeedHUDLabel.alpha = 1.0;
+    // 强制布局刷新，确保文字立即渲染
+    [dyyySpeedHUDLabel setNeedsLayout];
+    [dyyySpeedHUDLabel layoutIfNeeded];
 }
 
 static void dyyyHideSpeedHUD(void) {
