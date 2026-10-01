@@ -665,137 +665,13 @@ void showVideoStatsListController(UIViewController *parentVC) {
 }
 
 
-// 判断当前 AWEUserModel 是否为已登录用户本人（仅「我」的 Tab 页生效）
-// 通过 KVC 读取 uid 并与当前登录用户 ID 对比
-static BOOL dyyyIsCurrentUserModel(id userModel) {
-    if (!userModel || ![userModel isKindOfClass:NSClassFromString(@"AWEUserModel")]) return NO;
-    NSString *modelUID = [userModel valueForKey:@"uid"];
-    if (!modelUID || modelUID.length == 0) return NO;
-    NSArray *classNames = @[@"AWEAccountManager", @"AWENetworkUserManager", @"AWEUserServiceManager"];
-    for (NSString *clsName in classNames) {
-        Class cls = NSClassFromString(clsName);
-        if (!cls) continue;
-        id manager = [cls valueForKey:@"sharedManager"];
-        if (!manager) continue;
-        id currentUser = [manager valueForKey:@"currentUser"];
-        if (!currentUser) continue;
-        NSString *currentUID = [currentUser valueForKey:@"uid"];
-        if (currentUID && [currentUID isEqualToString:modelUID]) return YES;
-    }
-    return NO;
-}
 
-%hook AWEUserModel
-- (id)init {
-    id instance = %orig;
-    if (socialStatsEnabled && instance) {
-        updateModelData(instance);
-    }
-    return instance;
-}
-
-- (NSNumber *)followerCount {
-    return socialStatsEnabled && dyyyIsCurrentUserModel(self) && cachedFollowersNumber ? cachedFollowersNumber : %orig;
-}
-
-- (void)setFollowerCount:(NSNumber *)count {
-    if (socialStatsEnabled && dyyyIsCurrentUserModel(self) && cachedFollowersNumber) {
-        %orig(cachedFollowersNumber);
-    } else {
-        %orig;
-    }
-}
-
-- (NSNumber *)followingCount {
-    return socialStatsEnabled && dyyyIsCurrentUserModel(self) && cachedFollowingNumber ? cachedFollowingNumber : %orig;
-}
-
-- (void)setFollowingCount:(NSNumber *)count {
-    if (socialStatsEnabled && dyyyIsCurrentUserModel(self) && cachedFollowingNumber) {
-        %orig(cachedFollowingNumber);
-    } else {
-        %orig;
-    }
-}
-
-- (NSNumber *)totalFavorited {
-    return socialStatsEnabled && dyyyIsCurrentUserModel(self) && cachedLikesNumber ? cachedLikesNumber : %orig;
-}
-
-- (void)setTotalFavorited:(NSNumber *)count {
-    if (socialStatsEnabled && dyyyIsCurrentUserModel(self) && cachedLikesNumber) {
-        %orig(cachedLikesNumber);
-    } else {
-        %orig;
-    }
-}
-
-- (NSNumber *)diggCount {
-    return socialStatsEnabled && dyyyIsCurrentUserModel(self) && cachedLikesNumber ? cachedLikesNumber : %orig;
-}
-
-- (void)setDiggCount:(NSNumber *)count {
-    if (socialStatsEnabled && dyyyIsCurrentUserModel(self) && cachedLikesNumber) {
-        %orig(cachedLikesNumber);
-    } else {
-        %orig;
-    }
-}
-
-- (NSNumber *)likeCount {
-    return socialStatsEnabled && dyyyIsCurrentUserModel(self) && cachedLikesNumber ? cachedLikesNumber : %orig;
-}
-
-- (void)setLikeCount:(NSNumber *)count {
-    if (socialStatsEnabled && dyyyIsCurrentUserModel(self) && cachedLikesNumber) {
-        %orig(cachedLikesNumber);
-    } else {
-        %orig;
-    }
-}
-
-- (NSNumber *)friendCount {
-    return socialStatsEnabled && dyyyIsCurrentUserModel(self) && cachedMutualNumber ? cachedMutualNumber : %orig;
-}
-
-- (void)setFriendCount:(NSNumber *)count {
-    if (socialStatsEnabled && dyyyIsCurrentUserModel(self) && cachedMutualNumber) {
-        %orig(cachedMutualNumber);
-    } else {
-        %orig;
-    }
-}
-
-- (NSNumber *)mutualFriendCount {
-    return socialStatsEnabled && dyyyIsCurrentUserModel(self) && cachedMutualNumber ? cachedMutualNumber : %orig;
-}
-
-- (void)setMutualFriendCount:(NSNumber *)count {
-    if (socialStatsEnabled && dyyyIsCurrentUserModel(self) && cachedMutualNumber) {
-        %orig(cachedMutualNumber);
-    } else {
-        %orig;
-    }
-}
-
-- (NSNumber *)followFriendCount {
-    return socialStatsEnabled && dyyyIsCurrentUserModel(self) && cachedMutualNumber ? cachedMutualNumber : %orig;
-}
-
-- (void)setFollowFriendCount:(NSNumber *)count {
-    if (socialStatsEnabled && dyyyIsCurrentUserModel(self) && cachedMutualNumber) {
-        %orig(cachedMutualNumber);
-    } else {
-        %orig;
-    }
-}
-%end
 
 
 // 统计视图
 %hook AWEProfileSocialStatisticView
 - (void)setFansCount:(NSNumber *)count {
-    if (socialStatsEnabled && dyyyIsCurrentUserModel(self) && cachedFollowersNumber) {
+    if (socialStatsEnabled && cachedFollowersNumber) {
         %orig(cachedFollowersNumber);
     } else {
         %orig;
@@ -803,21 +679,21 @@ static BOOL dyyyIsCurrentUserModel(id userModel) {
 }
 
 - (void)setPraiseCount:(NSNumber *)count {
-    if (socialStatsEnabled && dyyyIsCurrentUserModel(self) && cachedLikesNumber) {
+    if (socialStatsEnabled && cachedLikesNumber) {
         %orig(cachedLikesNumber);
     } else {
         %orig;
     }
 }
 - (void)setFollowingCount:(NSNumber *)count {
-    if (socialStatsEnabled && dyyyIsCurrentUserModel(self) && cachedFollowingNumber) {
+    if (socialStatsEnabled && cachedFollowingNumber) {
         %orig(cachedFollowingNumber);
     } else {
         %orig;
     }
 }
 - (void)setFriendCount:(NSNumber *)count {
-    if (socialStatsEnabled && dyyyIsCurrentUserModel(self) && cachedMutualNumber) {
+    if (socialStatsEnabled && cachedMutualNumber) {
         %orig(cachedMutualNumber);
     } else {
         %orig;
