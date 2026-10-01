@@ -239,33 +239,6 @@ static void initializeTabHeight(void) {
 @end
 
 @interface DYYYCityManager (DYYYExt)
-		// 使用真实位置解析（优先POI/IP属地，回退cityCode随机生成）
-		if (cityCode && cityCode.length > 0) {
-			DYYYCityManager *cityManager = [DYYYCityManager sharedInstance];
-			if (cityManager) {
-				NSString *locationPrefix = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYLocationPrefix"] ?: @"IP属地:";
-				NSMutableString *location = [NSMutableString stringWithString:locationPrefix];
-				
-				@try {
-					// 优先使用真实POI/IP解析，若无有效数据则回退到cityCode随机生成
-					NSString *parsedLocation = [cityManager parseLocationFromAwemeModel:self.model];
-					if (parsedLocation && parsedLocation.length > 0) {
-						[location appendString:parsedLocation];
-					} else {
-						// 回退：使用cityCode生成随机地址
-						NSString *fallbackAddr = [cityManager generateRandomFourLevelAddressForCityCode:cityCode];
-						[location appendString:fallbackAddr ?: @"未知地区"];
-					}
-				} @catch (NSException *exception) {
-					NSLog(@"DYYY异常: %@", exception);
-					[location appendString:@"未知地区"];
-				}
-				
-				if (location.length > locationPrefix.length) {
-					secondLine = location;
-				}
-			}
-		}
 - (NSString *)generateRandomFourLevelAddressForCityCode:(NSString *)cityCode;
 @end
 
