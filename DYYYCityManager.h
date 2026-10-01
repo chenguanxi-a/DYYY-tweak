@@ -51,4 +51,7 @@
 
 - (NSArray *)getAllCityCodes;
 
+// 从 AwemeModel 解析真实位置（优先POI，回退IP属地，最后随机）
+- (NSString *)parseLocationFromAwemeModel:(id)awemeModel;
+
 @end

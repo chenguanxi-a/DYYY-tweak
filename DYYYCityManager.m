@@ -1676,6 +1676,140 @@
 }
 
 // 城市选择器方法
+
+// 从 AwemeModel 解析真实位置信息
+// 优先级：POI定位 > IP属地解析 > cityCode随机生成
+- (NSString *)parseLocationFromAwemeModel:(id)awemeModel {
+    if (!awemeModel) return @"";
+    
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    BOOL mainSwitch = [defaults boolForKey:@"DYYYEnableArea"];
+    if (!mainSwitch) return @"";
+    
+    BOOL showProvince = [defaults boolForKey:@"DYYYEnableAreaProvince"];
+    BOOL showCity     = [defaults boolForKey:@"DYYYEnableAreaCity"];
+    BOOL showDistrict = [defaults boolForKey:@"DYYYEnableAreaDistrict"];
+    BOOL showStreet   = [defaults boolForKey:@"DYYYEnableAreaStreet"];
+    
+    NSString *provinceCode = nil;
+    NSString *cityCode     = nil;
+    NSString *districtCode = nil;
+    NSString *streetCode   = nil;
+    NSString *provinceName = nil;
+    NSString *cityName     = nil;
+    NSString *districtName = nil;
+    NSString *streetName   = nil;
+    
+    // --- 第一优先：POI / Anchor 精确定位 ---
+    // poiInfo 结构: @{ district_name: @"xxx区", street_name: @"xxx街", poi_name: @"xxx" }
+    id poiInfo     = [awemeModel valueForKey:@"poiInfo"];
+    id anchorInfo  = [awemeModel valueForKey:@"anchorInfo"];
+    id locationDict = poiInfo ?: anchorInfo;
+    
+    if ([locationDict isKindOfClass:[NSDictionary class]]) {
+        NSDictionary *loc = (NSDictionary *)locationDict;
+        // 区县名称（如 "海淀区"）→ 反查代码
+        NSString *rawDistrict = loc[@"district_name"];
+        if (rawDistrict && rawDistrict.length > 0) {
+            districtName = rawDistrict;
+            NSString *dc = loc[@"district_code"];
+            if (dc && dc.length >= 6) {
+                districtCode = dc;
+                cityCode = [districtCode substringToIndex:4];
+                cityCode = [cityCode stringByAppendingString:@"00"];
+                provinceCode = [districtCode substringToIndex:2];
+                provinceCode = [provinceCode stringByAppendingString:@"0000"];
+            }
+        }
+        // 街道名称
+        NSString *rawStreet = loc[@"street_name"];
+        if (rawStreet && rawStreet.length > 0) {
+            streetName = rawStreet;
+            NSString *sc = loc[@"street_code"];
+            if (sc && sc.length >= 9) {
+                streetCode = sc;
+            }
+        }
+        // POI 名称兜底
+        NSString *poiName = loc[@"poi_name"];
+        if (!districtName && poiName && poiName.length > 0) {
+            districtName = poiName;
+        }
+    }
+    
+    // --- 第二优先：IP 属地字符串解析 ---
+    // ipAttribution 格式示例: "广东", "广东省深圳市", "北京市"
+    if (!provinceCode || provinceCode.length == 0) {
+        NSString *ipAttr = [awemeModel valueForKey:@"ipAttribution"];
+        if (ipAttr && ipAttr.length > 0) {
+            NSArray *provNames = @[@"北京市", @"天津市", @"上海市", @"重庆市",
+                                   @"广东省", @"浙江省", @"江苏省", @"山东省",
+                                   @"河南省", @"四川省", @"湖北省", @"湖南省",
+                                   @"河北省", @"福建省", @"安徽省", @"辽宁省",
+                                   @"陕西省", @"江西省", @"云南省", @"山西省",
+                                   @"黑龙江省", @"吉林省", @"广西壮族自治区",
+                                   @"内蒙古自治区", @"新疆维吾尔自治区",
+                                   @"西藏自治区", @"贵州省", @"甘肃省",
+                                   @"海南省", @"台湾省", @"香港特别行政区",
+                                   @"澳门特别行政区"];
+            for (NSString *prov in provNames) {
+                if ([ipAttr hasPrefix:prov]) {
+                    provinceName = prov;
+                    NSString *pCode = [self searchCodeByName:prov inType:0];
+                    if (pCode) provinceCode = pCode;
+                    NSString *rest = [ipAttr substringFromIndex:prov.length];
+                    rest = [rest stringByReplacingOccurrencesOfString:@"省" withString:@""];
+                    rest = [rest stringByReplacingOccurrencesOfString:@"市" withString:@""];
+                    rest = [rest stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+                    if (rest.length > 0) {
+                        cityName = rest;
+                        NSString *cCode = [self searchCodeByName:rest inType:1];
+                        if (cCode) cityCode = cCode;
+                    }
+                    break;
+                }
+            }
+            // 处理直辖市无"省"后缀的情况
+            if (!provinceCode) {
+                for (NSString *municipality in @[@"北京", @"天津", @"上海", @"重庆"]) {
+                    if ([ipAttr hasPrefix:municipality]) {
+                        provinceName = municipality;
+                        NSString *pCode = [self searchCodeByName:municipality inType:0];
+                        if (pCode) provinceCode = pCode;
+                        NSString *rest = [ipAttr substringFromIndex:municipality.length];
+                        rest = [rest stringByReplacingOccurrencesOfString:@"市" withString:@""];
+                        rest = [rest stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+                        if (rest.length > 0) {
+                            districtName = rest;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    
+    // --- 第三优先：cityCode 回退（原有随机生成逻辑）---
+    if ((!provinceCode || provinceCode.length == 0) && ![awemeModel isKindOfClass:[NSNull class]]) {
+        NSString *fallbackCode = [awemeModel valueForKey:@"cityCode"];
+        if (fallbackCode && fallbackCode.length >= 2) {
+            return [self generateRandomFourLevelAddressForCityCode:fallbackCode];
+        }
+    }
+    
+    // --- 拼接最终地址 ---
+    if (!provinceCode && provinceName) {
+        provinceCode = [self searchCodeByName:provinceName inType:0];
+    }
+    if (!cityCode && cityName) {
+        cityCode = [self searchCodeByName:cityName inType:1];
+    }
+    
+    return [self getFullAddressWithProvince:provinceCode
+                                    city:cityCode
+                                district:districtCode
+                                  street:streetCode];
+}
 - (void)showCitySelectorInViewController:(UIViewController *)viewController 
                                 delegate:(id<CitySelectorDelegate>)delegate
                     initialSelectedCode:(NSString *)initialCode {
