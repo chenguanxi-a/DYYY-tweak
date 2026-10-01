@@ -20,6 +20,74 @@
 #import "DYYYBottomAlertView.h"
 #import "DYYYConfirmCloseView.h"
 #import "DYYYFloatSpeedButton.h"
+// ============================================================
+//  DYYYSpeedHUDHelper — 倍速 HUD 视图工具
+//  用于长按滑动手势过程中显示当前选中的倍速档位
+// ============================================================
+
+static UIView *dyyySpeedHUDView = nil;
+
+static void dyyyUpdateSpeedHUD(CGFloat currentSpeed) {
+    UIWindow *window = [DYYYManager getActiveWindow];
+    if (!window) return;
+
+    CGFloat screenWidth = window.bounds.size.width;
+    CGFloat bottomMargin = 120.0;
+    CGFloat hudHeight = 52.0;
+    CGFloat hudWidth = 180.0;
+    CGFloat hudY = window.bounds.size.height - bottomMargin - hudHeight;
+
+    if (!dyyySpeedHUDView) {
+        dyyySpeedHUDView = [[UIView alloc] init];
+        dyyySpeedHUDView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.72];
+        dyyySpeedHUDView.layer.cornerRadius = hudHeight / 2.0;
+        dyyySpeedHUDView.clipsToBounds = YES;
+        dyyySpeedHUDView.alpha = 0.0;
+        dyyySpeedHUDView.hidden = YES;
+        [window addSubview:dyyySpeedHUDView];
+    }
+
+    UILabel *speedLabel = (UILabel *)[dyyySpeedHUDView viewWithTag:99001];
+    if (!speedLabel) {
+        speedLabel = [[UILabel alloc] init];
+        speedLabel.tag = 99001;
+        speedLabel.textColor = [UIColor whiteColor];
+        speedLabel.font = [UIFont systemFontOfSize:17 weight:UIFontWeightMedium];
+        speedLabel.textAlignment = NSTextAlignmentCenter;
+        speedLabel.adjustsFontSizeToFitWidth = YES;
+        speedLabel.minimumScaleFactor = 0.7;
+        [dyyySpeedHUDView addSubview:speedLabel];
+    }
+
+    // 格式："当前 X.Xx 倍速，下滑松手锁定"
+    NSString *speedText = [NSString stringWithFormat:@"当前 %.1fx 倍速，下滑松手锁定", currentSpeed];
+    speedLabel.text = speedText;
+
+    // 自适应宽度
+    CGSize textSize = [speedText sizeWithAttributes:@{NSFontAttributeName: speedLabel.font}];
+    hudWidth = MAX(hudWidth, textSize.width + 32.0);
+    CGFloat hudX = (screenWidth - hudWidth) / 2.0;
+    dyyySpeedHUDView.frame = CGRectMake(hudX, hudY, hudWidth, hudHeight);
+
+    if (dyyySpeedHUDView.hidden) {
+        dyyySpeedHUDView.hidden = NO;
+        [UIView animateWithDuration:0.15 animations:^{
+            dyyySpeedHUDView.alpha = 1.0;
+        }];
+    } else {
+        dyyySpeedHUDView.alpha = 1.0;
+    }
+}
+
+static void dyyyHideSpeedHUD(void) {
+    if (!dyyySpeedHUDView) return;
+    [UIView animateWithDuration:0.2 animations:^{
+        dyyySpeedHUDView.alpha = 0.0;
+    } completion:^(BOOL finished) {
+        dyyySpeedHUDView.hidden = YES;
+    }];
+}
+
 
 // 函数声明（DYYYFloatSpeedButton.h 未导出）
 extern NSArray *findViewControllersInHierarchy(UIViewController *rootViewController);
@@ -6245,67 +6313,126 @@ static BOOL isGestureActive = NO;
 - (void)handleLongPressFastSpeed:(UILongPressGestureRecognizer *)gesture {
     BOOL enableSpeedGesture = DYYYGetBool(@"DYYYEnableLongPressSpeedGesture");
     CGPoint location = [gesture locationInView:gesture.view];
-    // Bug B fix: resolve screen height from active window so delta is independent of gesture view bounds
-    UIWindow *keyWindow = [DYYYManager getActiveWindow];
-    CGFloat screenHeight = keyWindow ? keyWindow.bounds.size.height : [UIScreen mainScreen].bounds.size.height;
+    // 累计向下滑动距离（全局静态，跨 StateChanged 保持）
+    static CGFloat cumulativeDownwardDistance = 0;
+    // 记录本次长按的起始 Y 坐标，作为滑动距离计算的基准
     static CGFloat initialTouchY = 0;
-    BOOL isBeginning = gesture.state == UIGestureRecognizerStateBegan;
-    BOOL isEnding = gesture.state == UIGestureRecognizerStateEnded ||
-                    gesture.state == UIGestureRecognizerStateCancelled ||
-                    gesture.state == UIGestureRecognizerStateFailed;
+    // 记录当前 HUD 上显示的档位索引，用于去抖（避免同档内重复更新）
+    static NSInteger currentHUDSpeedIndex = -1;
 
+    BOOL isBeginning = gesture.state == UIGestureRecognizerStateBegan;
+    BOOL isEnding    = gesture.state == UIGestureRecognizerStateEnded ||
+                       gesture.state == UIGestureRecognizerStateCancelled ||
+                       gesture.state == UIGestureRecognizerStateFailed;
+    BOOL isChanged   = gesture.state == UIGestureRecognizerStateChanged;
+
+    // ── Began：初始化状态 ──────────────────────────────────────
     if (isBeginning) {
+        cumulativeDownwardDistance = 0;
+        currentHUDSpeedIndex = -1;
+        initialTouchY = location.y;
         dyyyLongPressFastSpeedActive = YES;
         dyyyLongPressLockedSpeedActive = NO;
-    } else if (isEnding) {
+        isGestureActive = YES;
+
+        // 预读用户配置的默认长按倍速作为起始档位（最低 1.0x）
+        float configured = DYYYGetFloat(@"DYYYLongPressSpeed");
+        currentLongPressSpeed = (configured > 0.0f) ? configured : 1.0f;
+
+        // Bug A fix: 不调用 %orig，避免内部触发 changeSpeed: 导致 hook 递归重入卡死主线程。
+        // 所有倍速逻辑在本方法内自行处理。
+    }
+
+    // ── Ended / Cancelled / Failed：提交或恢复倍速 ────────────
+    else if (isEnding) {
         isGestureActive = NO;
-        currentLongPressSpeed = 0;
+
+        if (!enableSpeedGesture) {
+            dyyyLongPressFastSpeedActive = NO;
+            dyyyHideSpeedHUD();
+            if (isEnding) DYYYScheduleConfiguredPlaybackSpeedRestore();
+            // 清理静态状态
+            cumulativeDownwardDistance = 0;
+            currentHUDSpeedIndex = -1;
+            initialTouchY = 0;
+            currentLongPressSpeed = 0;
+            return;
+        }
+
+        if (dyyyLongPressLockedSpeedActive) {
+            // 锁定模式已激活，直接忽略本次结束事件
+            dyyyLongPressFastSpeedActive = NO;
+            dyyyHideSpeedHUD();
+            cumulativeDownwardDistance = 0;
+            currentHUDSpeedIndex = -1;
+            initialTouchY = 0;
+            currentLongPressSpeed = 0;
+            return;
+        }
+
+        if (cumulativeDownwardDistance >= 30.0) {
+            // 满足锁定条件：向下滑动 >= 30px → 锁定当前档位并应用
+            CGFloat lockedSpeed = currentLongPressSpeed;
+            dyyyLongPressLockedSpeedActive = YES;
+            dyyyLongPressFastSpeedActive = NO;
+            dyyyHideSpeedHUD();
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self changeSpeed:lockedSpeed];
+                NSString *msg = [NSString stringWithFormat:@"已锁定 %.1fx 倍速", lockedSpeed];
+                [DYYYToast showSuccessToastWithMessage:msg completion:nil];
+            });
+        } else {
+            // 未达锁定阈值：向下滑动不足 30px，恢复默认倍速
+            dyyyLongPressFastSpeedActive = NO;
+            dyyyHideSpeedHUD();
+            DYYYScheduleConfiguredPlaybackSpeedRestore();
+        }
+
+        // 清理静态状态
+        cumulativeDownwardDistance = 0;
+        currentHUDSpeedIndex = -1;
         initialTouchY = 0;
-        dyyyLongPressFastSpeedActive = NO;
+        currentLongPressSpeed = 0;
+        return;
     }
 
-    // Bug A fix: removed %orig to prevent recursive hook loop that freezes the main thread.
-    // The original app method may internally trigger changeSpeed: causing re-entrant hook calls.
-    // All speed logic is handled below without calling %orig.
-
-    if (isEnding) {
-        DYYYScheduleConfiguredPlaybackSpeedRestore();
-    }
-
+    // 功能未启用则不做任何操作
     if (!enableSpeedGesture) {
         return;
     }
 
-    if (isBeginning) {
-        initialTouchY = location.y;
-        isGestureActive = YES;
-
-        float longPressSpeed = DYYYGetFloat(@"DYYYLongPressSpeed");
-        if (longPressSpeed == 0) {
-            longPressSpeed = 2.0;
+    // ── Changed：根据累计向下距离更新档位与 HUD ───────────────
+    if (isChanged && isGestureActive) {
+        // Y 轴正方向向下（iOS view 坐标系）
+        CGFloat currentY = location.y;
+        CGFloat delta = currentY - initialTouchY;
+        if (delta > 0) {
+            cumulativeDownwardDistance += delta;
         }
-        currentLongPressSpeed = longPressSpeed;
-    }
-    else if (gesture.state == UIGestureRecognizerStateChanged && isGestureActive) {
-        // Bug B fix: use window height as reference for correct swipe delta
-        // Original: location.y - initialTouchY (wrong when gesture.view is smaller than full screen)
-        // Fixed:    initialTouchY - location.y (up swipe = positive deltaY = speed up)
-        CGFloat deltaY = (screenHeight > 0) ? (initialTouchY - location.y) : 0;
-        CGFloat threshold = 10.0;
+        initialTouchY = currentY;
 
-        if (fabs(deltaY) > threshold) {
-            CGFloat speedChange = (deltaY > 0) ? 0.25 : -0.25;
-            CGFloat newSpeed = currentLongPressSpeed + speedChange;
-            newSpeed = MAX(0.5, MIN(3.0, newSpeed));
+        // 根据累计距离计算当前档位索引（每 30px 一档）
+        // 0~29px  -> index 0 -> 1.0x
+        // 30~59px -> index 1 -> 1.5x
+        // 60~89px -> index 2 -> 2.0x
+        // 90~119px-> index 3 -> 2.5x
+        // >=120px -> index 4+ -> 3.0x
+        NSInteger newSpeedIndex = (NSInteger)(cumulativeDownwardDistance / 30.0);
+        newSpeedIndex = MIN(newSpeedIndex, 5);
 
-            if (newSpeed != currentLongPressSpeed) {
-                currentLongPressSpeed = newSpeed;
-                initialTouchY = location.y;
-                // Ensure playback rate change runs on main queue
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [self changeSpeed:currentLongPressSpeed];
-                });
-            }
+        if (newSpeedIndex != currentHUDSpeedIndex) {
+            currentHUDSpeedIndex = newSpeedIndex;
+            // 档位映射表
+            float speedLevels[] = {1.0f, 1.5f, 2.0f, 2.5f, 3.0f, 3.0f};
+            currentLongPressSpeed = speedLevels[newSpeedIndex];
+
+            // 实时更新底部 HUD
+            dyyyUpdateSpeedHUD(currentLongPressSpeed);
+
+            // 异步更新播放器 rate，不阻塞主线程手势回调
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self changeSpeed:currentLongPressSpeed];
+            });
         }
     }
 }
