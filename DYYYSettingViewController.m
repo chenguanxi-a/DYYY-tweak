@@ -626,234 +626,38 @@ NSDictionary *getCurrentABTestData(void) {
 
 - (void)setupAppearance {
     if (self.navigationController) {
-        self.navigationController.navigationBar.prefersLargeTitles = YES;
-        self.navigationItem.largeTitleDisplayMode = UINavigationItemLargeTitleDisplayModeAlways;
+        self.navigationController.navigationBar.prefersLargeTitles = NO;
         self.navigationController.navigationBar.translucent = YES;
         self.navigationController.navigationBar.backgroundColor = [UIColor clearColor];
-        self.navigationController.navigationBar.tintColor = [UIColor systemBlueColor];
+        self.navigationController.navigationBar.tintColor = [UIColor whiteColor];
+        if (@available(iOS 15.0, *)) {
+            UINavigationBarAppearance *appearance = [[UINavigationBarAppearance alloc] init];
+            [appearance configureWithTransparentBackground];
+            appearance.backgroundColor = [UIColor clearColor];
+            appearance.titleTextAttributes = @{NSForegroundColorAttributeName: [UIColor whiteColor]};
+            appearance.largeTitleTextAttributes = @{NSForegroundColorAttributeName: [UIColor whiteColor]};
+            self.navigationController.navigationBar.standardAppearance = appearance;
+            self.navigationController.navigationBar.scrollEdgeAppearance = appearance;
+        }
     }
 }
 
 - (void)setupBackgroundColorView {
-    self.backgroundColorView = [[UIView alloc] initWithFrame:self.view.bounds];
+    self.backgroundColorView = [[UIVisualEffectView alloc] initWithEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleDark]];
+    self.backgroundColorView.frame = self.view.bounds;
     self.backgroundColorView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    NSData *colorData = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYBackgroundColor"];
-    UIColor *savedColor = colorData ? [NSKeyedUnarchiver unarchiveObjectWithData:colorData] : [UIColor whiteColor]; // 默认白色
-    self.backgroundColorView.backgroundColor = savedColor;
     [self.view insertSubview:self.backgroundColorView atIndex:0];
 }
 
 - (void)setupAvatarView {
-    self.avatarContainerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, 160)];
-    self.avatarContainerView.backgroundColor = [UIColor clearColor];
-    
-    self.avatarImageView = [[UIImageView alloc] initWithFrame:CGRectMake((self.view.bounds.size.width - 100) / 2, 20, 100, 100)];
-    self.avatarImageView.layer.cornerRadius = 50;
-    self.avatarImageView.clipsToBounds = YES;
-    self.avatarImageView.contentMode = UIViewContentModeScaleAspectFill;
-    self.avatarImageView.backgroundColor = [UIColor systemGray4Color];
-    
-    NSString *avatarPath = [self avatarImagePath];
-    if ([[NSFileManager defaultManager] fileExistsAtPath:avatarPath]) {
-        self.avatarImageView.image = [UIImage imageWithContentsOfFile:avatarPath];
-    } else {
-        self.avatarImageView.image = [UIImage systemImageNamed:@"person.circle.fill"];
-        self.avatarImageView.tintColor = [UIColor systemGrayColor];
-    }
-    
-    [self.avatarContainerView addSubview:self.avatarImageView];
-    
-    self.avatarTapLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 120, self.view.bounds.size.width, 30)];
-    NSString *customTapText = [[NSUserDefaults standardUserDefaults] stringForKey:@"DYYYAvatarTapText"];
-    self.avatarTapLabel.text = customTapText.length > 0 ? customTapText : @"pxx917144686";
-    self.avatarTapLabel.textAlignment = NSTextAlignmentCenter;
-    self.avatarTapLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleTitle3];
-    self.avatarTapLabel.textColor = [UIColor systemBlueColor];
-    [self.avatarContainerView addSubview:self.avatarTapLabel];
-    
-    UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(avatarTapped:)];
-    self.avatarImageView.userInteractionEnabled = YES;
-    [self.avatarImageView addGestureRecognizer:tapGesture];
+    // 暗黑极简风格：不显示头像区域
 }
 
 - (void)setupSearchBar {
-    // 创建一个容器视图来承载搜索栏和阴影效果
-    // 减小搜索框高度，增加上边距使位置更合理
-    UIView *searchContainer = [[UIView alloc] initWithFrame:CGRectMake(24, 165, self.view.bounds.size.width - 48, 40)];
-    searchContainer.backgroundColor = [UIColor clearColor];
-    searchContainer.tag = 1001;
-    
-    // 创建内层阴影容器（减小高度）
-    UIView *innerShadowContainer = [[UIView alloc] initWithFrame:CGRectMake(0, 0, searchContainer.frame.size.width, 36)];
-    // 减小圆角，使按钮看起来更紧凑
-    innerShadowContainer.layer.cornerRadius = 18;
-    innerShadowContainer.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.95];
-    innerShadowContainer.layer.masksToBounds = NO;
-    
-    // 保持较小且锐利的环绕阴影
-    innerShadowContainer.layer.shadowColor = [UIColor colorWithWhite:0.0 alpha:0.1].CGColor;
-    innerShadowContainer.layer.shadowOffset = CGSizeMake(0, 1);
-    innerShadowContainer.layer.shadowOpacity = 0.8;
-    innerShadowContainer.layer.shadowRadius = 1.0;
-    
-    // 创建外层阴影容器
-    UIView *outerShadowContainer = [[UIView alloc] initWithFrame:innerShadowContainer.frame];
-    outerShadowContainer.layer.cornerRadius = 18;
-    outerShadowContainer.backgroundColor = [UIColor clearColor];
-    outerShadowContainer.layer.masksToBounds = NO;
-    
-    // 减小阴影效果，使整体更轻量
-    outerShadowContainer.layer.shadowColor = [UIColor colorWithWhite:0.0 alpha:0.15].CGColor;
-    outerShadowContainer.layer.shadowOffset = CGSizeMake(0, 2);
-    outerShadowContainer.layer.shadowOpacity = 0.5;
-    outerShadowContainer.layer.shadowRadius = 4;
-    
-    // 按照层次结构添加视图
-    [searchContainer addSubview:outerShadowContainer];
-    [searchContainer addSubview:innerShadowContainer];
-    
-    // 创建并配置搜索栏（减小尺寸）
-    self.searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(0, 0, innerShadowContainer.frame.size.width, 34)];
-    self.searchBar.delegate = self;
-    self.searchBar.placeholder = @"搜索设置";
-    self.searchBar.searchBarStyle = UISearchBarStyleMinimal;
-    self.searchBar.backgroundColor = [UIColor clearColor];
-    
-    // 优化搜索框内部文本
-    self.searchBar.searchTextField.backgroundColor = [UIColor clearColor];
-    self.searchBar.searchTextField.font = [UIFont systemFontOfSize:14]; // 减小字体大小
-    self.searchBar.searchTextField.textColor = [UIColor darkTextColor];
-    
-    // 调整内阴影效果
-    UIView *textFieldContainer = self.searchBar.searchTextField.superview;
-    textFieldContainer.layer.shadowColor = [UIColor colorWithWhite:0.8 alpha:0.4].CGColor;
-    textFieldContainer.layer.shadowOffset = CGSizeMake(0, 1);
-    textFieldContainer.layer.shadowOpacity = 0.3;
-    textFieldContainer.layer.shadowRadius = 0.5;
-    
-    // 调整搜索图标位置，更紧凑
-    UIOffset iconOffset = UIOffsetMake(20, 0);
-    [self.searchBar setPositionAdjustment:iconOffset forSearchBarIcon:UISearchBarIconSearch];
-    
-    // 添加搜索栏到内层容器
-    [innerShadowContainer addSubview:self.searchBar];
-    
-    // 保留水波纹效果
-    UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(searchBarTapped:)];
-    [innerShadowContainer addGestureRecognizer:tapGesture];
-    
-    // 将完整的搜索容器添加到表头视图
-    [self.tableView.tableHeaderView addSubview:searchContainer];
-    
-    // 减小tableHeaderView的高度，使搜索区域更紧凑
-    CGRect headerFrame = self.tableView.tableHeaderView.frame;
-    headerFrame.size.height = 60; // 减小高度
-    self.tableView.tableHeaderView.frame = headerFrame;
+    // 暗黑极简风格：不显示搜索栏
 }
-
-// 添加搜索栏点击触觉反馈
-- (void)searchBarTapped:(UITapGestureRecognizer *)gesture {
-    if (gesture.state == UIGestureRecognizerStateRecognized) {
-        // 执行水波纹动画
-        CGPoint tapPoint = [gesture locationInView:gesture.view];
-        [self addRippleEffectAtPoint:tapPoint inView:gesture.view];
-        
-        // 触发触觉反馈
-        if (@available(iOS 10.0, *)) {
-            UIImpactFeedbackGenerator *generator = [[UIImpactFeedbackGenerator alloc] initWithStyle:UIImpactFeedbackStyleLight];
-            [generator prepare];
-            [generator impactOccurred];
-        }
-        
-        // 激活搜索栏
-        [self.searchBar becomeFirstResponder];
-    }
-}
-
-// 添加水波纹效果
-- (void)addRippleEffectAtPoint:(CGPoint)point inView:(UIView *)view {
-    // 创建波纹层
-    CAShapeLayer *rippleLayer = [CAShapeLayer layer];
-    rippleLayer.position = point;
-    
-    // 设置波纹路径
-    UIBezierPath *circlePath = [UIBezierPath bezierPathWithArcCenter:CGPointZero 
-                                                             radius:10 
-                                                         startAngle:0 
-                                                           endAngle:2*M_PI 
-                                                          clockwise:YES];
-    rippleLayer.path = circlePath.CGPath;
-    
-    // 设置波纹外观
-    rippleLayer.fillColor = [UIColor colorWithWhite:0.9 alpha:0.3].CGColor;
-    rippleLayer.opacity = 1.0;
-    
-    // 添加到视图
-    [view.layer addSublayer:rippleLayer];
-    
-    // 创建扩散动画
-    CABasicAnimation *scaleAnimation = [CABasicAnimation animationWithKeyPath:@"transform.scale"];
-    scaleAnimation.fromValue = @1.0;
-    scaleAnimation.toValue = @15.0;
-    
-    CABasicAnimation *opacityAnimation = [CABasicAnimation animationWithKeyPath:@"opacity"];
-    opacityAnimation.fromValue = @1.0;
-    opacityAnimation.toValue = @0.0;
-    
-    // 组合动画
-    CAAnimationGroup *animationGroup = [CAAnimationGroup animation];
-    animationGroup.animations = @[scaleAnimation, opacityAnimation];
-    animationGroup.duration = 0.8;
-    animationGroup.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut];
-    
-    // 完成后移除波纹层
-    animationGroup.removedOnCompletion = YES;
-    animationGroup.fillMode = kCAFillModeForwards;
-    
-    [rippleLayer addAnimation:animationGroup forKey:@"rippleEffect"];
-    
-    // 延时删除图层
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.8 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        [rippleLayer removeFromSuperlayer];
-    });
-}
-
-// 根据主题动态调整搜索栏颜色
 - (void)handleBackgroundColorChanged {
-    NSData *colorData = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYBackgroundColor"];
-    UIColor *savedColor = colorData ? [NSKeyedUnarchiver unarchiveObjectWithData:colorData] : [UIColor whiteColor];
-    self.backgroundColorView.backgroundColor = savedColor;
-    
-    // 更新搜索栏背景色
-    // 提取背景颜色的亮度
-    CGFloat brightness = 0;
-    [savedColor getWhite:&brightness alpha:NULL];
-    
-    // 根据背景亮度调整搜索栏色调
-    UIView *searchContainer = [self.tableView.tableHeaderView viewWithTag:1001];
-    if (!searchContainer) {
-        return;
-    }
-    
-    for (UIView *subview in searchContainer.subviews) {
-        if (subview.layer.cornerRadius == 22) {
-            if (brightness < 0.5) {
-                // 深色背景下使用深色搜索栏
-                subview.backgroundColor = [UIColor colorWithWhite:0.2 alpha:0.9];
-                self.searchBar.searchTextField.textColor = [UIColor whiteColor];
-                self.searchBar.searchTextField.attributedPlaceholder = [[NSAttributedString alloc] 
-                    initWithString:@"搜索设置" 
-                    attributes:@{NSForegroundColorAttributeName: [UIColor lightGrayColor]}];
-            } else {
-                // 浅色背景下使用浅色搜索栏
-                subview.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.95];
-                self.searchBar.searchTextField.textColor = [UIColor darkTextColor];
-                self.searchBar.searchTextField.attributedPlaceholder = [[NSAttributedString alloc] 
-                    initWithString:@"搜索设置" 
-                    attributes:@{NSForegroundColorAttributeName: [UIColor grayColor]}];
-            }
-        }
-    }
+    // 暗黑毛玻璃风格：无需根据背景色调整
 }
 
 - (void)setupTableView {
@@ -868,10 +672,8 @@ NSDictionary *getCurrentABTestData(void) {
         self.tableView.sectionHeaderTopPadding = 2; // 减小组头部之间的垂直距离
     }
     
-    self.tableView.tableHeaderView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, 204)];
-    [self.tableView.tableHeaderView addSubview:self.avatarContainerView];
-    [self.tableView.tableHeaderView addSubview:self.searchBar];
-    self.searchBar.frame = CGRectMake(0, 160, self.view.bounds.size.width, 44);
+    self.tableView.tableHeaderView = nil;
+    self.tableView.backgroundColor = [UIColor clearColor];
     [self.view addSubview:self.tableView];
     
     UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleLongPress:)];
@@ -1462,66 +1264,20 @@ NSDictionary *getCurrentABTestData(void) {
 }
 
 - (void)setupFooterLabel {
-    // 创建一个容器视图，用于包含文本和按钮
-    UIView *footerContainer = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, 100)];
+    // 创建底部标识标签
+    UIView *footerContainer = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, 60)];
     
-    // 创建文本标签
-    self.footerLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, 40)];
-    self.footerLabel.text = @"DYYY++ (修改2025-10-05)";
+    self.footerLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, 50)];
+    self.footerLabel.text = @"Developer By @hackxq\nVersion: 1.00 (261001)";
     self.footerLabel.textAlignment = NSTextAlignmentCenter;
-    self.footerLabel.font = [UIFont systemFontOfSize:14];
-    self.footerLabel.textColor = [UIColor secondaryLabelColor];
+    self.footerLabel.font = [UIFont systemFontOfSize:12];
+    self.footerLabel.textColor = [UIColor colorWithWhite:1.0 alpha:0.6];
     self.footerLabel.numberOfLines = 2;
     [footerContainer addSubview:self.footerLabel];
     
-    // 创建"看看源代码"按钮 - 增强动画效果
-    UIButton *sourceCodeButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    sourceCodeButton.frame = CGRectMake((self.view.bounds.size.width - 200) / 2, 50, 200, 40);
-    sourceCodeButton.layer.cornerRadius = 20;
-    sourceCodeButton.clipsToBounds = YES;
-    sourceCodeButton.tag = 101;
-    
-    // 创建渐变背景
-    CAGradientLayer *gradientLayer = [CAGradientLayer layer];
-    gradientLayer.frame = CGRectMake(0, 0, 200, 40);
-    gradientLayer.cornerRadius = 20;
-    gradientLayer.colors = @[(id)[UIColor systemBlueColor].CGColor, (id)[UIColor systemPurpleColor].CGColor];
-    gradientLayer.startPoint = CGPointMake(0, 0.5);
-    gradientLayer.endPoint = CGPointMake(1, 0.5);
-    [sourceCodeButton.layer insertSublayer:gradientLayer atIndex:0];
-    
-    // 添加动画效果
-    CABasicAnimation *gradientAnimation = [CABasicAnimation animationWithKeyPath:@"colors"];
-    gradientAnimation.fromValue = @[(id)[UIColor systemBlueColor].CGColor, (id)[UIColor systemPurpleColor].CGColor];
-    gradientAnimation.toValue = @[(id)[UIColor systemPurpleColor].CGColor, (id)[UIColor systemBlueColor].CGColor];
-    gradientAnimation.duration = 3.0;
-    gradientAnimation.autoreverses = YES;
-    gradientAnimation.repeatCount = HUGE_VALF;
-    [gradientLayer addAnimation:gradientAnimation forKey:@"gradientAnimation"];
-    
-    [sourceCodeButton setTitle:@"👉 看看源代码！" forState:UIControlStateNormal];
-    [sourceCodeButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    sourceCodeButton.titleLabel.font = [UIFont systemFontOfSize:14 weight:UIFontWeightSemibold];
-    
-    // 添加阴影效果
-    sourceCodeButton.layer.shadowColor = [UIColor blackColor].CGColor;
-    sourceCodeButton.layer.shadowOffset = CGSizeMake(0, 2);
-    sourceCodeButton.layer.shadowRadius = 4;
-    sourceCodeButton.layer.shadowOpacity = 0.3;
-    
-    [sourceCodeButton addTarget:self action:@selector(showSourceCodePopup) forControlEvents:UIControlEventTouchUpInside];
-    
-    // 添加按下效果
-    [sourceCodeButton addTarget:self action:@selector(buttonTouchDown:) forControlEvents:UIControlEventTouchDown];
-    [sourceCodeButton addTarget:self action:@selector(buttonTouchUp:) forControlEvents:UIControlEventTouchUpInside | UIControlEventTouchUpOutside | UIControlEventTouchCancel];
-    
-    [footerContainer addSubview:sourceCodeButton];
-    
     // 设置容器为表格底部视图
     self.tableView.tableFooterView = footerContainer;
-}
-
-- (void)setupSectionTitles {
+} {
     self.sectionTitles = [NSMutableArray arrayWithObjects:
                           @"基本设置",
                           @"界面设置",
@@ -1959,7 +1715,7 @@ NSDictionary *getCurrentABTestData(void) {
                                          attributes:@{
                                              NSParagraphStyleAttributeName: paragraphStyle,
                                              NSFontAttributeName: [UIFont systemFontOfSize:16],
-                                             NSForegroundColorAttributeName: [UIColor labelColor],
+                                             NSForegroundColorAttributeName: [UIColor whiteColor],
                                              NSKernAttributeName: @(-0.5)
                                          }];
     cell.textLabel.attributedText = attributedText;
@@ -2033,18 +1789,15 @@ NSDictionary *getCurrentABTestData(void) {
             return cell;
         }
     }
-    // 为单元格添加左侧彩色图标
-    UIImage *icon = [self iconImageForSettingItem:item];
-    if (icon) {
-        cell.imageView.image = icon;
-        cell.imageView.tintColor = [self colorForSettingItem:item];
-    }
+    // 暗黑极简风格：移除左侧图标
+    cell.imageView.image = nil;
+    cell.imageView.contentMode = UIViewContentModeCenter;
     // 微软风格卡片背景
     UIView *card = [cell.contentView viewWithTag:8888];
     if (!card) {
         card = [[UIView alloc] initWithFrame:CGRectInset(cell.contentView.bounds, 8, 4)];
         card.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-        card.backgroundColor = [UIColor secondarySystemGroupedBackgroundColor];
+        card.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.08];
         card.layer.cornerRadius = 12;
         card.layer.shadowColor = [UIColor blackColor].CGColor;
         card.layer.shadowOpacity = 0.06;
@@ -2123,8 +1876,8 @@ NSDictionary *getCurrentABTestData(void) {
             UITextField *textField = [[UITextField alloc] initWithFrame:CGRectMake(0, 0, 160, 30)];
             textField.layer.cornerRadius = 8;
             textField.clipsToBounds = YES;
-            textField.backgroundColor = [UIColor tertiarySystemFillColor];
-            textField.textColor = [UIColor labelColor];
+            textField.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.15];
+            textField.textColor = [UIColor whiteColor];
             textField.placeholder = item.placeholder;
             textField.textAlignment = NSTextAlignmentRight;
             textField.text = [[NSUserDefaults standardUserDefaults] stringForKey:item.key];
@@ -2152,7 +1905,7 @@ NSDictionary *getCurrentABTestData(void) {
             colorView.layer.cornerRadius = 15;
             colorView.clipsToBounds = YES;
             colorView.layer.borderWidth = 1.0;
-            colorView.layer.borderColor = [UIColor whiteColor].CGColor;
+            colorView.layer.borderColor = [[UIColor whiteColor] colorWithAlphaComponent:0.5].CGColor;
             NSData *colorData = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYBackgroundColor"];
             UIColor *currentColor = colorData ? [NSKeyedUnarchiver unarchiveObjectWithData:colorData] : [UIColor systemBackgroundColor];
             CAGradientLayer *gradientLayer = [CAGradientLayer layer];
