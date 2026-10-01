@@ -748,12 +748,12 @@ void showVideoStatsListController(UIViewController *parentVC) {
 
 %hook AWEProfileHeaderMyProfileViewController
 - (void)viewDidAppear:(BOOL)animated {
-    [super viewDidAppear:animated];
+    %orig;
     dyyyIsMyProfilePage = YES;
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
-    [super viewDidDisappear:animated];
+    %orig;
     dyyyIsMyProfilePage = NO;
 }
 %end
