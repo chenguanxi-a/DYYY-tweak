@@ -664,6 +664,27 @@ void showVideoStatsListController(UIViewController *parentVC) {
     [parentVC presentViewController:navVC animated:YES completion:nil];
 }
 
+
+// 判断当前 AWEUserModel 是否为已登录用户本人（仅「我」的 Tab 页生效）
+// 通过 KVC 读取 uid 并与当前登录用户 ID 对比
+static BOOL dyyyIsCurrentUserModel(id userModel) {
+    if (!userModel || ![userModel isKindOfClass:NSClassFromString(@"AWEUserModel")]) return NO;
+    NSString *modelUID = [userModel valueForKey:@"uid"];
+    if (!modelUID || modelUID.length == 0) return NO;
+    NSArray *classNames = @[@"AWEAccountManager", @"AWENetworkUserManager", @"AWEUserServiceManager"];
+    for (NSString *clsName in classNames) {
+        Class cls = NSClassFromString(clsName);
+        if (!cls) continue;
+        id manager = [cls valueForKey:@"sharedManager"];
+        if (!manager) continue;
+        id currentUser = [manager valueForKey:@"currentUser"];
+        if (!currentUser) continue;
+        NSString *currentUID = [currentUser valueForKey:@"uid"];
+        if (currentUID && [currentUID isEqualToString:modelUID]) return YES;
+    }
+    return NO;
+}
+
 %hook AWEUserModel
 - (id)init {
     id instance = %orig;
@@ -674,11 +695,11 @@ void showVideoStatsListController(UIViewController *parentVC) {
 }
 
 - (NSNumber *)followerCount {
-    return socialStatsEnabled && cachedFollowersNumber ? cachedFollowersNumber : %orig;
+    return socialStatsEnabled && dyyyIsCurrentUserModel(self) && cachedFollowersNumber ? cachedFollowersNumber : %orig;
 }
 
 - (void)setFollowerCount:(NSNumber *)count {
-    if (socialStatsEnabled && cachedFollowersNumber) {
+    if (socialStatsEnabled && dyyyIsCurrentUserModel(self) && cachedFollowersNumber) {
         %orig(cachedFollowersNumber);
     } else {
         %orig;
@@ -686,11 +707,11 @@ void showVideoStatsListController(UIViewController *parentVC) {
 }
 
 - (NSNumber *)followingCount {
-    return socialStatsEnabled && cachedFollowingNumber ? cachedFollowingNumber : %orig;
+    return socialStatsEnabled && dyyyIsCurrentUserModel(self) && cachedFollowingNumber ? cachedFollowingNumber : %orig;
 }
 
 - (void)setFollowingCount:(NSNumber *)count {
-    if (socialStatsEnabled && cachedFollowingNumber) {
+    if (socialStatsEnabled && dyyyIsCurrentUserModel(self) && cachedFollowingNumber) {
         %orig(cachedFollowingNumber);
     } else {
         %orig;
@@ -698,11 +719,11 @@ void showVideoStatsListController(UIViewController *parentVC) {
 }
 
 - (NSNumber *)totalFavorited {
-    return socialStatsEnabled && cachedLikesNumber ? cachedLikesNumber : %orig;
+    return socialStatsEnabled && dyyyIsCurrentUserModel(self) && cachedLikesNumber ? cachedLikesNumber : %orig;
 }
 
 - (void)setTotalFavorited:(NSNumber *)count {
-    if (socialStatsEnabled && cachedLikesNumber) {
+    if (socialStatsEnabled && dyyyIsCurrentUserModel(self) && cachedLikesNumber) {
         %orig(cachedLikesNumber);
     } else {
         %orig;
@@ -710,11 +731,11 @@ void showVideoStatsListController(UIViewController *parentVC) {
 }
 
 - (NSNumber *)diggCount {
-    return socialStatsEnabled && cachedLikesNumber ? cachedLikesNumber : %orig;
+    return socialStatsEnabled && dyyyIsCurrentUserModel(self) && cachedLikesNumber ? cachedLikesNumber : %orig;
 }
 
 - (void)setDiggCount:(NSNumber *)count {
-    if (socialStatsEnabled && cachedLikesNumber) {
+    if (socialStatsEnabled && dyyyIsCurrentUserModel(self) && cachedLikesNumber) {
         %orig(cachedLikesNumber);
     } else {
         %orig;
@@ -722,11 +743,11 @@ void showVideoStatsListController(UIViewController *parentVC) {
 }
 
 - (NSNumber *)likeCount {
-    return socialStatsEnabled && cachedLikesNumber ? cachedLikesNumber : %orig;
+    return socialStatsEnabled && dyyyIsCurrentUserModel(self) && cachedLikesNumber ? cachedLikesNumber : %orig;
 }
 
 - (void)setLikeCount:(NSNumber *)count {
-    if (socialStatsEnabled && cachedLikesNumber) {
+    if (socialStatsEnabled && dyyyIsCurrentUserModel(self) && cachedLikesNumber) {
         %orig(cachedLikesNumber);
     } else {
         %orig;
@@ -734,11 +755,11 @@ void showVideoStatsListController(UIViewController *parentVC) {
 }
 
 - (NSNumber *)friendCount {
-    return socialStatsEnabled && cachedMutualNumber ? cachedMutualNumber : %orig;
+    return socialStatsEnabled && dyyyIsCurrentUserModel(self) && cachedMutualNumber ? cachedMutualNumber : %orig;
 }
 
 - (void)setFriendCount:(NSNumber *)count {
-    if (socialStatsEnabled && cachedMutualNumber) {
+    if (socialStatsEnabled && dyyyIsCurrentUserModel(self) && cachedMutualNumber) {
         %orig(cachedMutualNumber);
     } else {
         %orig;
@@ -746,11 +767,11 @@ void showVideoStatsListController(UIViewController *parentVC) {
 }
 
 - (NSNumber *)mutualFriendCount {
-    return socialStatsEnabled && cachedMutualNumber ? cachedMutualNumber : %orig;
+    return socialStatsEnabled && dyyyIsCurrentUserModel(self) && cachedMutualNumber ? cachedMutualNumber : %orig;
 }
 
 - (void)setMutualFriendCount:(NSNumber *)count {
-    if (socialStatsEnabled && cachedMutualNumber) {
+    if (socialStatsEnabled && dyyyIsCurrentUserModel(self) && cachedMutualNumber) {
         %orig(cachedMutualNumber);
     } else {
         %orig;
@@ -758,11 +779,11 @@ void showVideoStatsListController(UIViewController *parentVC) {
 }
 
 - (NSNumber *)followFriendCount {
-    return socialStatsEnabled && cachedMutualNumber ? cachedMutualNumber : %orig;
+    return socialStatsEnabled && dyyyIsCurrentUserModel(self) && cachedMutualNumber ? cachedMutualNumber : %orig;
 }
 
 - (void)setFollowFriendCount:(NSNumber *)count {
-    if (socialStatsEnabled && cachedMutualNumber) {
+    if (socialStatsEnabled && dyyyIsCurrentUserModel(self) && cachedMutualNumber) {
         %orig(cachedMutualNumber);
     } else {
         %orig;
@@ -774,7 +795,7 @@ void showVideoStatsListController(UIViewController *parentVC) {
 // 统计视图
 %hook AWEProfileSocialStatisticView
 - (void)setFansCount:(NSNumber *)count {
-    if (socialStatsEnabled && cachedFollowersNumber) {
+    if (socialStatsEnabled && dyyyIsCurrentUserModel(self) && cachedFollowersNumber) {
         %orig(cachedFollowersNumber);
     } else {
         %orig;
@@ -782,21 +803,21 @@ void showVideoStatsListController(UIViewController *parentVC) {
 }
 
 - (void)setPraiseCount:(NSNumber *)count {
-    if (socialStatsEnabled && cachedLikesNumber) {
+    if (socialStatsEnabled && dyyyIsCurrentUserModel(self) && cachedLikesNumber) {
         %orig(cachedLikesNumber);
     } else {
         %orig;
     }
 }
 - (void)setFollowingCount:(NSNumber *)count {
-    if (socialStatsEnabled && cachedFollowingNumber) {
+    if (socialStatsEnabled && dyyyIsCurrentUserModel(self) && cachedFollowingNumber) {
         %orig(cachedFollowingNumber);
     } else {
         %orig;
     }
 }
 - (void)setFriendCount:(NSNumber *)count {
-    if (socialStatsEnabled && cachedMutualNumber) {
+    if (socialStatsEnabled && dyyyIsCurrentUserModel(self) && cachedMutualNumber) {
         %orig(cachedMutualNumber);
     } else {
         %orig;
