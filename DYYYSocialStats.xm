@@ -135,6 +135,7 @@ static NSString *customLikesCount = nil;
 static NSString *customFollowingCount = nil;
 static NSString *customMutualCount = nil;
 static BOOL socialStatsEnabled = NO;
+static BOOL dyyyIsMyProfilePage = NO;
 
 static BOOL videoStatsEnabled = NO;
 static NSString *customVideoLikes = nil;
@@ -671,7 +672,7 @@ void showVideoStatsListController(UIViewController *parentVC) {
 // 统计视图
 %hook AWEProfileSocialStatisticView
 - (void)setFansCount:(NSNumber *)count {
-    if (socialStatsEnabled && cachedFollowersNumber) {
+    if (socialStatsEnabled && dyyyIsMyProfilePage && cachedFollowersNumber) {
         %orig(cachedFollowersNumber);
     } else {
         %orig;
@@ -679,21 +680,21 @@ void showVideoStatsListController(UIViewController *parentVC) {
 }
 
 - (void)setPraiseCount:(NSNumber *)count {
-    if (socialStatsEnabled && cachedLikesNumber) {
+    if (socialStatsEnabled && dyyyIsMyProfilePage && cachedLikesNumber) {
         %orig(cachedLikesNumber);
     } else {
         %orig;
     }
 }
 - (void)setFollowingCount:(NSNumber *)count {
-    if (socialStatsEnabled && cachedFollowingNumber) {
+    if (socialStatsEnabled && dyyyIsMyProfilePage && cachedFollowingNumber) {
         %orig(cachedFollowingNumber);
     } else {
         %orig;
     }
 }
 - (void)setFriendCount:(NSNumber *)count {
-    if (socialStatsEnabled && cachedMutualNumber) {
+    if (socialStatsEnabled && dyyyIsMyProfilePage && cachedMutualNumber) {
         %orig(cachedMutualNumber);
     } else {
         %orig;
@@ -719,10 +720,10 @@ void showVideoStatsListController(UIViewController *parentVC) {
             }
             
             @try {
-                if (cachedFollowersNumber) [strongSelf setFansCount:cachedFollowersNumber];
-                if (cachedLikesNumber) [strongSelf setPraiseCount:cachedLikesNumber];
-                if (cachedFollowingNumber) [strongSelf setFollowingCount:cachedFollowingNumber];
-                if (cachedMutualNumber) [strongSelf setFriendCount:cachedMutualNumber];
+                if (cachedFollowersNumber && dyyyIsMyProfilePage) [strongSelf setFansCount:cachedFollowersNumber];
+                if (cachedLikesNumber && dyyyIsMyProfilePage) [strongSelf setPraiseCount:cachedLikesNumber];
+                if (cachedFollowingNumber && dyyyIsMyProfilePage) [strongSelf setFollowingCount:cachedFollowingNumber];
+                if (cachedMutualNumber && dyyyIsMyProfilePage) [strongSelf setFriendCount:cachedMutualNumber];
             } @catch (NSException *e) {
                 NSLog(@"[DYYY] Exception in updating stats: %@", e);
             } @finally {
@@ -744,6 +745,19 @@ void showVideoStatsListController(UIViewController *parentVC) {
     }
 }
 %end
+
+%hook AWEProfileHeaderMyProfileViewController
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+    dyyyIsMyProfilePage = YES;
+}
+
+- (void)viewDidDisappear:(BOOL)animated {
+    [super viewDidDisappear:animated];
+    dyyyIsMyProfilePage = NO;
+}
+%end
+
 
 
 // 字典数据源
