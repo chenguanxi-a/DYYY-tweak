@@ -142,17 +142,6 @@ static void dyyyHideSpeedHUD(void) {
     }];
 }
 
-// ── 倍速档位切换震动反馈 ──────────────────────────────────────
-static UIImpactFeedbackGenerator *dyyySpeedHapticGenerator = nil;
-static void dyyyTriggerSpeedHaptic(void) {
-    if (@available(iOS 10.0, *)) {
-        if (!dyyySpeedHapticGenerator) {
-            dyyySpeedHapticGenerator = [[UIImpactFeedbackGenerator alloc] initWithStyle:UIImpactFeedbackStyleLight];
-        }
-        [dyyySpeedHapticGenerator prepare];
-        [dyyySpeedHapticGenerator impactOccurred];
-    }
-}
 
 
 // 函数声明（DYYYFloatSpeedButton.h 未导出）
@@ -6492,8 +6481,6 @@ static BOOL isGestureActive = NO;
             // 档位映射表
             float speedLevels[] = {1.0f, 1.5f, 2.0f, 2.5f, 3.0f, 3.0f};
             currentLongPressSpeed = speedLevels[newSpeedIndex];
-                // 档位切换时触发震动反馈
-                dyyyTriggerSpeedHaptic();
 
             // 实时更新底部 HUD
             dyyyUpdateSpeedHUD(currentLongPressSpeed);
