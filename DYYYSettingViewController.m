@@ -731,7 +731,8 @@ NSDictionary *getCurrentABTestData(void) {
                 [DYYYSettingItem itemWithTitle:@"设置朋友标题" key:@"DYYYFriendsTitle" type:DYYYSettingItemTypeTextField placeholder:@"不填默认"],
                 [DYYYSettingItem itemWithTitle:@"设置消息标题" key:@"DYYYMsgTitle" type:DYYYSettingItemTypeTextField placeholder:@"不填默认"],
                 [DYYYSettingItem itemWithTitle:@"设置我的标题" key:@"DYYYSelfTitle" type:DYYYSettingItemTypeTextField placeholder:@"不填默认"],
-                [DYYYSettingItem itemWithTitle:@"设置顶栏横幅" key:@"DYYYModifyTopTabText" type:DYYYSettingItemTypeTextField placeholder:@"格式:原标题=新标题"]
+                [DYYYSettingItem itemWithTitle:@"设置顶栏横幅" key:@"DYYYModifyTopTabText" type:DYYYSettingItemTypeTextField placeholder:@"格式:原标题=新标题"],
+                [DYYYSettingItem itemWithTitle:@"液态玻璃效果" key:@"dyyy_enable_liquid_glass" type:DYYYSettingItemTypeSwitch]
             ],
             
             // 第三部分 - 隐藏设置
