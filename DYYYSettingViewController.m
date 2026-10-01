@@ -666,6 +666,7 @@ NSDictionary *getCurrentABTestData(void) {
     self.tableView.dataSource = self;
     self.tableView.backgroundColor = [UIColor clearColor];
     self.tableView.separatorStyle = UITableViewCellSeparatorStyleSingleLine;
+    self.tableView.separatorColor = [[UIColor whiteColor] colorWithAlphaComponent:0.15];
     
     // 调整section头部间距，减小或移除这个设置
     if (@available(iOS 15.0, *)) {
@@ -1722,6 +1723,9 @@ NSDictionary *getCurrentABTestData(void) {
                                          }];
     cell.textLabel.attributedText = attributedText;
     cell.backgroundColor = [UIColor clearColor];
+    cell.contentView.backgroundColor = [UIColor clearColor];
+    cell.textLabel.textColor = [UIColor whiteColor];
+    cell.detailTextLabel.textColor = [UIColor lightGrayColor];
     cell.detailTextLabel.text = nil;
     
     // 特殊处理备份和恢复功能
@@ -1794,20 +1798,6 @@ NSDictionary *getCurrentABTestData(void) {
     // 暗黑极简风格：移除左侧图标
     cell.imageView.image = nil;
     cell.imageView.contentMode = UIViewContentModeCenter;
-    // 微软风格卡片背景
-    UIView *card = [cell.contentView viewWithTag:8888];
-    if (!card) {
-        card = [[UIView alloc] initWithFrame:CGRectInset(cell.contentView.bounds, 8, 4)];
-        card.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-        card.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.08];
-        card.layer.cornerRadius = 12;
-        card.layer.shadowColor = [UIColor blackColor].CGColor;
-        card.layer.shadowOpacity = 0.06;
-        card.layer.shadowOffset = CGSizeMake(0, 2);
-        card.layer.shadowRadius = 4;
-        card.tag = 8888;
-        [cell.contentView insertSubview:card atIndex:0];
-    }
     // 创建单元格的配件视图
     UIView *accessoryView = nil;
     // 针对scheduleStyle的特殊处理
@@ -1878,8 +1868,11 @@ NSDictionary *getCurrentABTestData(void) {
             UITextField *textField = [[UITextField alloc] initWithFrame:CGRectMake(0, 0, 160, 30)];
             textField.layer.cornerRadius = 8;
             textField.clipsToBounds = YES;
-            textField.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.15];
+            textField.backgroundColor = [UIColor colorWithWhite:0.2 alpha:0.6];
             textField.textColor = [UIColor whiteColor];
+            textField.borderStyle = UITextBorderStyleRoundedRect;
+            textField.layer.cornerRadius = 6;
+            textField.clipsToBounds = YES;
             textField.placeholder = item.placeholder;
             textField.textAlignment = NSTextAlignmentRight;
             textField.text = [[NSUserDefaults standardUserDefaults] stringForKey:item.key];
@@ -2257,43 +2250,24 @@ NSDictionary *getCurrentABTestData(void) {
     return [UIColor systemBlueColor];
 }
 
-// 微软风格UISwitch动画，联动卡片
+// UISwitch弹跳动画
 - (void)animatedSwitchToggled:(UISwitch *)sender {
     [sender applyFuturisticEffects];
     [sender updateFuturisticEffectsWithState:sender.isOn animated:YES];
-    UITableViewCell *cell = (UITableViewCell *)sender.superview.superview;
-    UIView *card = [cell.contentView viewWithTag:8888];
-    // 卡片和switch联动弹跳+高光
     [UIView animateWithDuration:0.10 animations:^{
         sender.transform = CGAffineTransformMakeScale(0.90, 0.90);
         sender.alpha = 0.7;
-        sender.layer.shadowColor = [UIColor systemBlueColor].CGColor;
-        sender.layer.shadowOpacity = 0.18;
-        sender.layer.shadowRadius = 8;
-        sender.layer.shadowOffset = CGSizeMake(0, 2);
-        card.transform = CGAffineTransformMakeScale(0.97, 0.97);
-               card.layer.shadowOpacity =0.18;
     } completion:^(BOOL finished) {
         [UIView animateWithDuration:0.22 delay:0 usingSpringWithDamping:0.5 initialSpringVelocity:0.7 options:0 animations:^{
             sender.transform = CGAffineTransformIdentity;
             sender.alpha = 1.0;
-            sender.layer.shadowOpacity = 0.0;
-            card.transform = CGAffineTransformIdentity;
-            card.layer.shadowOpacity = 0.06;
         } completion:nil];
     }];
     [self switchToggled:sender];
 }
 
 - (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
-    CGFloat cornerRadius = 10.0;
-    UIBezierPath *maskPath = [UIBezierPath bezierPathWithRoundedRect:cell.bounds
-                                                  byRoundingCorners:(indexPath.row == 0 ? (UIRectCornerTopLeft | UIRectCornerTopRight) : 0) |
-                                                                   (indexPath.row == [tableView numberOfRowsInSection:indexPath.section] - 1 ? (UIRectCornerBottomLeft | UIRectCornerBottomRight) : 0)
-                                                        cornerRadii:CGSizeMake(cornerRadius, cornerRadius)];
-    CAShapeLayer *maskLayer = [CAShapeLayer layer];
-    maskLayer.path = maskPath.CGPath;
-    cell.layer.mask = maskLayer;
+    // 原生圆角由 UITableViewStyleGrouped 自动处理，无需手动遮罩
 }
 
 #pragma mark - UITableViewDelegate
