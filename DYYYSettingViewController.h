@@ -41,7 +41,8 @@
 @property (nonatomic, strong) UIImpactFeedbackGenerator *feedbackGenerator;
 @property (nonatomic, strong) NSArray *filteredSections;
 @property (nonatomic, strong) NSArray *filteredSectionTitles;
-\\n- (void)setupSectionTitles;
+
+- (void)setupSectionTitles;
 @property (nonatomic, strong) NSArray *settingSections;
 @property (nonatomic, strong) UILabel *footerLabel;
 @property (nonatomic, strong) UIView *backgroundColorView;
