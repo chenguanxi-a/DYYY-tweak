@@ -1277,7 +1277,9 @@ NSDictionary *getCurrentABTestData(void) {
     
     // 设置容器为表格底部视图
     self.tableView.tableFooterView = footerContainer;
-} {
+}
+
+- (void)setupSectionTitles {
     self.sectionTitles = [NSMutableArray arrayWithObjects:
                           @"基本设置",
                           @"界面设置",

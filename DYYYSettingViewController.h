@@ -53,6 +53,8 @@ typedef NS_ENUM(NSInteger, DYYYButtonSize) {
 @property (nonatomic, strong) DYYYBackupPickerDelegate *backupPickerDelegate;
 @property (nonatomic, strong) DYYYBackupPickerDelegate *restorePickerDelegate;
 
+- (void)setupSectionTitles;
+
 // 添加热更新功能相关方法
 - (void)saveCurrentABTestData;
 - (void)loadABTestConfigFile;
