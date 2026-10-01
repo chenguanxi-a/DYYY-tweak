@@ -1,4 +1,4 @@
-﻿#define DYYYFilterSettingsView_DEFINED
+#define DYYYFilterSettingsView_DEFINED
 #define DYYYBottomAlertView_DEFINED
 #define DYYYUtils_DEFINED
 
@@ -20,12 +20,12 @@
 
 extern NSDictionary *dyyySettings;
 
-// 娣诲姞鍥剧墖閫夋嫨鍣ㄤ唬鐞?
+// 添加图片选择器代理
 @interface DYYYImagePickerDelegate : NSObject <UIImagePickerControllerDelegate, UINavigationControllerDelegate>
 @property (nonatomic, copy) void (^completionBlock)(NSDictionary *info);
 @end
 
-// 娣诲姞澶囦唤閫夋嫨鍣ㄤ唬鐞?
+// 添加备份选择器代理
 @interface DYYYBackupPickerDelegate : NSObject <UIDocumentPickerDelegate>
 @property (nonatomic, strong) NSString *tempFilePath;
 @property (nonatomic, copy) void (^completionBlock)(NSURL *url);
@@ -44,24 +44,24 @@ extern NSDictionary *dyyySettings;
 - (instancetype)initWithTitle:(NSString *)title previewImage:(UIImage *)previewImage {
     self = [super init];
     if (self) {
-        // 鍩烘湰璁剧疆
+        // 基本设置
         self.frame = [UIScreen mainScreen].bounds;
         self.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5];
         
-        // 鍒涘缓鍐呭瑙嗗浘
+        // 创建内容视图
         UIView *contentView = [[UIView alloc] initWithFrame:CGRectMake(50, 200, self.bounds.size.width - 100, 300)];
         contentView.backgroundColor = [UIColor systemBackgroundColor];
         contentView.layer.cornerRadius = 15;
         contentView.clipsToBounds = YES;
         
-        // 鏍囬鏍囩
+        // 标题标签
         UILabel *titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, 20, contentView.bounds.size.width - 40, 30)];
         titleLabel.text = title;
         titleLabel.textAlignment = NSTextAlignmentCenter;
         titleLabel.font = [UIFont boldSystemFontOfSize:18];
         [contentView addSubview:titleLabel];
         
-        // 棰勮鍥剧墖瑙嗗浘
+        // 预览图片视图
         if (previewImage) {
             UIImageView *previewImageView = [[UIImageView alloc] initWithFrame:CGRectMake((contentView.bounds.size.width - 100) / 2, 60, 100, 100)];
             previewImageView.image = previewImage;
@@ -71,33 +71,33 @@ extern NSDictionary *dyyySettings;
             [contentView addSubview:previewImageView];
         }
         
-        // 鎸夐挳瀹瑰櫒
+        // 按钮容器
         UIView *buttonContainer = [[UIView alloc] initWithFrame:CGRectMake(20, 180, contentView.bounds.size.width - 40, 80)];
         
-        // 娓呴櫎鎸夐挳
+        // 清除按钮
         UIButton *clearButton = [UIButton buttonWithType:UIButtonTypeSystem];
         clearButton.frame = CGRectMake(0, 0, (buttonContainer.bounds.size.width - 10) / 2, 35);
-        [clearButton setTitle:@"娓呴櫎" forState:UIControlStateNormal];
+        [clearButton setTitle:@"清除" forState:UIControlStateNormal];
         clearButton.backgroundColor = [UIColor systemRedColor];
         [clearButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
         clearButton.layer.cornerRadius = 8;
         [clearButton addTarget:self action:@selector(clearButtonTapped) forControlEvents:UIControlEventTouchUpInside];
         [buttonContainer addSubview:clearButton];
         
-        // 閫夋嫨鎸夐挳
+        // 选择按钮
         UIButton *selectButton = [UIButton buttonWithType:UIButtonTypeSystem];
         selectButton.frame = CGRectMake((buttonContainer.bounds.size.width + 10) / 2, 0, (buttonContainer.bounds.size.width - 10) / 2, 35);
-        [selectButton setTitle:@"閫夋嫨" forState:UIControlStateNormal];
+        [selectButton setTitle:@"选择" forState:UIControlStateNormal];
         selectButton.backgroundColor = [UIColor systemBlueColor];
         [selectButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
         selectButton.layer.cornerRadius = 8;
         [selectButton addTarget:self action:@selector(selectButtonTapped) forControlEvents:UIControlEventTouchUpInside];
         [buttonContainer addSubview:selectButton];
         
-        // 鍙栨秷鎸夐挳
+        // 取消按钮
         UIButton *cancelButton = [UIButton buttonWithType:UIButtonTypeSystem];
         cancelButton.frame = CGRectMake(0, 45, buttonContainer.bounds.size.width, 35);
-        [cancelButton setTitle:@"鍙栨秷" forState:UIControlStateNormal];
+        [cancelButton setTitle:@"取消" forState:UIControlStateNormal];
         cancelButton.backgroundColor = [UIColor systemGrayColor];
         [cancelButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
         cancelButton.layer.cornerRadius = 8;
@@ -148,7 +148,7 @@ extern NSDictionary *dyyySettings;
 
 @end
 
-// 瀹炵幇澶囦唤閫夋嫨鍣ㄤ唬鐞?
+// 实现备份选择器代理
 @implementation DYYYBackupPickerDelegate
 - (void)documentPicker:(UIDocumentPickerViewController *)controller didPickDocumentsAtURLs:(NSArray<NSURL *> *)urls {
     if (urls.count > 0) {
@@ -156,7 +156,7 @@ extern NSDictionary *dyyySettings;
             self.completionBlock(urls.firstObject);
         }
         
-        // 娓呯悊涓存椂鏂囦欢
+        // 清理临时文件
         if (self.tempFilePath) {
             [[NSFileManager defaultManager] removeItemAtPath:self.tempFilePath error:nil];
         }
@@ -164,7 +164,7 @@ extern NSDictionary *dyyySettings;
 }
 
 - (void)documentPickerWasCancelled:(UIDocumentPickerViewController *)controller {
-    // 娓呯悊涓存椂鏂囦欢
+    // 清理临时文件
     if (self.tempFilePath) {
         [[NSFileManager defaultManager] removeItemAtPath:self.tempFilePath error:nil];
     }
@@ -175,50 +175,50 @@ extern NSDictionary *dyyySettings;
 @implementation UISwitch (DYYY_FuturisticEffects)
 
 - (void)applyFuturisticEffects {
-    // 纭繚鍙簲鐢ㄤ竴娆℃晥鏋?
+    // 确保只应用一次效果
     if ([objc_getAssociatedObject(self, "DYYY_hasAppliedEffects") boolValue]) {
         return;
     }
     
     objc_setAssociatedObject(self, "DYYY_hasAppliedEffects", @YES, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     
-    // 閰嶇疆涓诲鍣ㄨ鍥惧拰鏁堟灉
+    // 配置主容器视图和效果
     self.clipsToBounds = NO;
     
-    // 1. 鍒涘缓楂樺厜鎻忚竟灞?- 澧炲ぇ杈规瀹藉害鍜岄槾褰?
+    // 1. 创建高光描边层 - 增大边框宽度和阴影
     CALayer *glowBorderLayer = [CALayer layer];
-    glowBorderLayer.frame = CGRectInset(self.bounds, -4, -4); // 澧炲ぇ杈规瀹藉害
+    glowBorderLayer.frame = CGRectInset(self.bounds, -4, -4); // 增大边框宽度
     glowBorderLayer.cornerRadius = self.bounds.size.height / 2 + 4;
     glowBorderLayer.shadowColor = self.isOn ? [UIColor colorWithRed:0/255.0 green:122/255.0 blue:255/255.0 alpha:1.0].CGColor : [UIColor colorWithWhite:0.8 alpha:1.0].CGColor;
     glowBorderLayer.shadowOffset = CGSizeMake(0, 0);
-    glowBorderLayer.shadowOpacity = self.isOn ? 0.8 : 0.3; // 榛樿绔嬪嵆鏄剧ず闃村奖
-    glowBorderLayer.shadowRadius = 5.0; // 澧炲ぇ闃村奖鍗婂緞
+    glowBorderLayer.shadowOpacity = self.isOn ? 0.8 : 0.3; // 默认立即显示阴影
+    glowBorderLayer.shadowRadius = 5.0; // 增大阴影半径
     glowBorderLayer.masksToBounds = NO;
     
-    // 2. 鍒涘缓鐜荤拑鏁堟灉瑕嗙洊灞?- 澧炲姞閫忔槑搴︿娇鏁堟灉鏇存槑鏄?
+    // 2. 创建玻璃效果覆盖层 - 增加透明度使效果更明显
     UIVisualEffectView *glassEffectView = [[UIVisualEffectView alloc] initWithEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleLight]];
     glassEffectView.frame = self.bounds;
     glassEffectView.clipsToBounds = YES;
     glassEffectView.layer.cornerRadius = self.bounds.size.height / 2;
-    glassEffectView.alpha = 0.18; // 澧炲姞閫忔槑搴?
+    glassEffectView.alpha = 0.18; // 增加透明度
     glassEffectView.userInteractionEnabled = NO;
     
-    // 3. 鍒涘缓娑蹭綋鍔ㄧ敾灞?
+    // 3. 创建液体动画层
     CALayer *liquidLayer = [CALayer layer];
     liquidLayer.frame = CGRectMake(0, 0, self.bounds.size.width, self.bounds.size.height);
     liquidLayer.masksToBounds = YES;
     liquidLayer.cornerRadius = self.bounds.size.height / 2;
     liquidLayer.opacity = 0.0;
     
-    // 鍒涘缓娑蹭綋娓愬彉
+    // 创建液体渐变
     CAGradientLayer *gradientLayer = [CAGradientLayer layer];
     gradientLayer.frame = liquidLayer.bounds;
     gradientLayer.cornerRadius = liquidLayer.cornerRadius;
     
-    // 璁剧疆娓愬彉棰滆壊鍩轰簬寮€鍏崇姸鎬?- 浣跨敤鏇存槑浜殑棰滆壊
+    // 设置渐变颜色基于开关状态 - 使用更明亮的颜色
     UIColor *liquidColor = self.isOn ? 
-        [UIColor colorWithRed:20/255.0 green:142/255.0 blue:255/255.0 alpha:0.8] : // 鏇翠寒鐨勮摑鑹?
-        [UIColor colorWithWhite:0.85 alpha:0.8]; // 鏇翠寒鐨勭伆鑹?
+        [UIColor colorWithRed:20/255.0 green:142/255.0 blue:255/255.0 alpha:0.8] : // 更亮的蓝色
+        [UIColor colorWithWhite:0.85 alpha:0.8]; // 更亮的灰色
     UIColor *transparentColor = [liquidColor colorWithAlphaComponent:0.0];
     
     gradientLayer.colors = @[(id)liquidColor.CGColor, (id)transparentColor.CGColor];
@@ -227,21 +227,21 @@ extern NSDictionary *dyyySettings;
     
     [liquidLayer addSublayer:gradientLayer];
     
-    // 瀛樺偍杩欎簺灞備互渚垮悗缁洿鏂?
+    // 存储这些层以便后续更新
     objc_setAssociatedObject(self, "DYYY_glowBorderLayer", glowBorderLayer, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     objc_setAssociatedObject(self, "DYYY_glassEffectView", glassEffectView, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     objc_setAssociatedObject(self, "DYYY_liquidLayer", liquidLayer, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     objc_setAssociatedObject(self, "DYYY_gradientLayer", gradientLayer, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     
-    // 灞傜骇椤哄簭寰堥噸瑕侊細楂樺厜灞傚湪搴曢儴锛岀幓鐠冩晥鏋滃湪鏈€涓婂眰
-    [self.layer insertSublayer:glowBorderLayer atIndex:0]; // 楂樺厜灞傛斁鍦ㄥ簳閮?
-    [self.layer addSublayer:liquidLayer]; // 娑蹭綋灞傚湪涓棿
-    [self addSubview:glassEffectView]; // 鐜荤拑鏁堟灉鍦ㄦ渶涓婂眰
+    // 层级顺序很重要：高光层在底部，玻璃效果在最上层
+    [self.layer insertSublayer:glowBorderLayer atIndex:0]; // 高光层放在底部
+    [self.layer addSublayer:liquidLayer]; // 液体层在中间
+    [self addSubview:glassEffectView]; // 玻璃效果在最上层
     
-    // 鍒濆鏇存柊鏁堟灉
+    // 初始更新效果
     [self updateFuturisticEffectsWithState:self.isOn animated:NO];
     
-    // 纭繚鐩戝惉鐘舵€佸彉鍖?
+    // 确保监听状态变化
     [self removeTarget:self action:@selector(futuristicSwitchValueChanged) forControlEvents:UIControlEventValueChanged];
     [self addTarget:self action:@selector(futuristicSwitchValueChanged) forControlEvents:UIControlEventValueChanged];
 }
@@ -255,15 +255,15 @@ extern NSDictionary *dyyySettings;
     CALayer *liquidLayer = objc_getAssociatedObject(self, "DYYY_liquidLayer");
     CAGradientLayer *gradientLayer = objc_getAssociatedObject(self, "DYYY_gradientLayer");
     
-    // 鍑嗗鍔ㄧ敾
+    // 准备动画
     NSTimeInterval animDuration = animated ? 0.35 : 0.0;
     
-    // 1. 鏇存柊楂樺厜杈规棰滆壊鍜屼笉閫忔槑搴?
+    // 1. 更新高光边框颜色和不透明度
     UIColor *glowColor = isOn ? [UIColor colorWithRed:0/255.0 green:122/255.0 blue:255/255.0 alpha:1.0] : [UIColor colorWithWhite:0.8 alpha:1.0];
     CGFloat glowOpacity = isOn ? 0.8 : 0.3;
     
     if (animated) {
-        // 楂樺厜杈规鍔ㄧ敾
+        // 高光边框动画
         CABasicAnimation *shadowColorAnimation = [CABasicAnimation animationWithKeyPath:@"shadowColor"];
         shadowColorAnimation.toValue = (__bridge id)glowColor.CGColor;
         shadowColorAnimation.duration = animDuration;
@@ -278,23 +278,23 @@ extern NSDictionary *dyyySettings;
     glowBorderLayer.shadowColor = glowColor.CGColor;
     glowBorderLayer.shadowOpacity = glowOpacity;
     
-    // 2. 瑙﹀彂娑蹭綋鍔ㄧ敾鏁堟灉
+    // 2. 触发液体动画效果
     if (animated) {
-        // 璁剧疆娑蹭綋棰滆壊
+        // 设置液体颜色
         UIColor *liquidColor = isOn ? [UIColor colorWithRed:0/255.0 green:122/255.0 blue:255/255.0 alpha:0.7] : [UIColor colorWithWhite:0.8 alpha:0.7];
         UIColor *transparentColor = [liquidColor colorWithAlphaComponent:0.0];
         
-        // 鏇存柊娓愬彉棰滆壊
+        // 更新渐变颜色
         gradientLayer.colors = @[(id)liquidColor.CGColor, (id)transparentColor.CGColor];
         
-        // 娑蹭綋娉㈠姩鍔ㄧ敾
+        // 液体波动动画
         [CATransaction begin];
         [CATransaction setAnimationDuration:animDuration];
         
-        // 鏄剧ず娑蹭綋灞?
+        // 显示液体层
         liquidLayer.opacity = 1.0;
         
-        // 娑蹭綋娴佸姩鍔ㄧ敾
+        // 液体流动动画
         CABasicAnimation *positionAnimation = [CABasicAnimation animationWithKeyPath:@"position.x"];
         positionAnimation.fromValue = @(isOn ? -self.bounds.size.width : self.bounds.size.width * 2);
         positionAnimation.toValue = @(isOn ? self.bounds.size.width * 2 : -self.bounds.size.width);
@@ -302,7 +302,7 @@ extern NSDictionary *dyyySettings;
         positionAnimation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut];
         
         [CATransaction setCompletionBlock:^{
-            // 瀹屾垚鍚庨殣钘忔恫浣撳眰
+            // 完成后隐藏液体层
             [UIView animateWithDuration:0.2 animations:^{
                 liquidLayer.opacity = 0.0;
             }];
@@ -311,7 +311,7 @@ extern NSDictionary *dyyySettings;
         [liquidLayer addAnimation:positionAnimation forKey:@"liquidFlow"];
         [CATransaction commit];
         
-        // 娣诲姞鑴夊啿鏁堟灉
+        // 添加脉冲效果
         CAKeyframeAnimation *pulseAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
         pulseAnimation.values = @[@1.0, @1.03, @1.0];
         pulseAnimation.keyTimes = @[@0, @0.5, @1.0];
@@ -338,7 +338,7 @@ extern NSDictionary *dyyySettings;
 
 @end
 
-// DYYYSettingItem绫?
+// DYYYSettingItem类
 @interface DYYYSettingItem : NSObject
 @property (nonatomic, strong) NSString *title;
 @property (nonatomic, strong) NSString *key;
@@ -366,7 +366,7 @@ extern NSDictionary *dyyySettings;
 
 @end
 
-// 鑾峰彇椤跺眰瑙嗗浘鎺у埗鍣?
+// 获取顶层视图控制器
 UIViewController *topView(void) {
     UIWindow *window = nil;
     if (@available(iOS 13.0, *)) {
@@ -395,7 +395,7 @@ UIViewController *topView(void) {
     return topVC;
 }
 
-// 鏄剧ず鍥炬爣閫夐」寮圭獥
+// 显示图标选项弹窗
 static void showIconOptionsDialog(NSString *title, UIImage *previewImage, NSString *saveFilename, void (^onClear)(void), void (^onSelect)(void)) {
     DYYYIconOptionsDialogView *optionsDialog = [[DYYYIconOptionsDialogView alloc] initWithTitle:title previewImage:previewImage];
     optionsDialog.onClear = onClear;
@@ -403,10 +403,10 @@ static void showIconOptionsDialog(NSString *title, UIImage *previewImage, NSStri
     [optionsDialog show];
 }
 
-// 鍔犺浇鍥哄畾ABTest鏁版嵁锛堜娇鐢?DYYYABTestHook 鐨勭粺涓€瀹炵幇锛屼笉鍐嶉噸澶嶅畾涔夛級
-// ensureABTestDataLoaded() / loadFixedABTestData() 宸插湪 DYYYABTestHook.xm 涓疄鐜?
+// 加载固定ABTest数据（使用 DYYYABTestHook 的统一实现，不再重复定义）
+// ensureABTestDataLoaded() / loadFixedABTestData() 已在 DYYYABTestHook.xm 中实现
 
-// 鑾峰彇褰撳墠ABTest鏁版嵁
+// 获取当前ABTest数据
 NSDictionary *getCurrentABTestData(void) {
     Class AWEABTestManagerClass = NSClassFromString(@"AWEABTestManager");
     if (!AWEABTestManagerClass) {
@@ -441,7 +441,7 @@ NSDictionary *getCurrentABTestData(void) {
     Class AWESettingItemModelClass = NSClassFromString(@"AWESettingItemModel");
     AWESettingItemModel *cleanCacheItem = [[AWESettingItemModelClass alloc] init];
     cleanCacheItem.identifier = @"DYYYCleanCache";
-    cleanCacheItem.title = @"娓呯悊缂撳瓨";
+    cleanCacheItem.title = @"清理缓存";
     cleanCacheItem.detail = @"";
     cleanCacheItem.type = 0;
     cleanCacheItem.svgIconImageName = @"ic_broom_outlined";
@@ -449,28 +449,28 @@ NSDictionary *getCurrentABTestData(void) {
     cleanCacheItem.colorStyle = 0;
     cleanCacheItem.isEnable = YES;
     
-    // 缁戝畾鐐瑰嚮浜嬩欢
+    // 绑定点击事件
     cleanCacheItem.cellTappedBlock = ^{
-        // 澶勭悊娓呯悊缂撳瓨閫昏緫
+        // 处理清理缓存逻辑
         [self handleCleanCache];
     };
 }
 
 - (void)handleCleanCache {
-    // DYYYBottomAlertView 璋冪敤锛屼娇鐢ㄦ纭殑鏂规硶鍚嶅拰鍙傛暟椤哄簭
-    [DYYYBottomAlertView showAlertWithTitle:@"娓呯悊缂撳瓨"
-                               message:@"纭畾瑕佹竻鐞嗙紦瀛樺悧锛焅n杩欏皢鍒犻櫎涓存椂鏂囦欢鍜岀紦瀛?
-                         cancelButtonText:@"鍙栨秷"
-                         confirmButtonText:@"纭畾"
+    // DYYYBottomAlertView 调用，使用正确的方法名和参数顺序
+    [DYYYBottomAlertView showAlertWithTitle:@"清理缓存"
+                               message:@"确定要清理缓存吗？\n这将删除临时文件和缓存"
+                         cancelButtonText:@"取消"
+                         confirmButtonText:@"确定"
                          cancelAction:nil
                          confirmAction:^{
         NSFileManager *fileManager = [NSFileManager defaultManager];
         NSUInteger totalSize = 0;
 
-        // 涓存椂鐩綍
+        // 临时目录
         NSString *tempDir = NSTemporaryDirectory();
 
-        // Library鐩綍涓嬬殑缂撳瓨鐩綍
+        // Library目录下的缓存目录
         NSArray<NSString *> *customDirs = @[@"Caches", @"BDByteCast", @"kitelog"];
         NSString *libraryDir = NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES).firstObject;
 
@@ -482,13 +482,13 @@ NSDictionary *getCurrentABTestData(void) {
             }
         }
 
-        // 閬嶅巻鎵€鏈夌洰褰曞苟娓呯悊
+        // 遍历所有目录并清理
         for (NSString *basePath in allPaths) {
             totalSize += [DYYYUtils clearDirectoryContents:basePath];
         }
 
         float sizeInMB = totalSize / 1024.0 / 1024.0;
-        NSString *toastMsg = [NSString stringWithFormat:@"宸叉竻鐞?%.2f MB 鐨勭紦瀛?, sizeInMB];
+        NSString *toastMsg = [NSString stringWithFormat:@"已清理 %.2f MB 的缓存", sizeInMB];
         [DYYYManager showToast:toastMsg];
     }];
 }
@@ -498,12 +498,12 @@ NSDictionary *getCurrentABTestData(void) {
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    self.title = @"DYYY璁剧疆";
+    self.title = @"DYYY设置";
     self.expandedSections = [NSMutableSet set];
     self.isSearching = NO;
     self.isKVOAdded = NO;
     
-    // 闅愯棌椤堕儴鎸囩ず鍣ㄦ潯
+    // 隐藏顶部指示器条
     if (@available(iOS 13.0, *)) {
         UINavigationBarAppearance *appearance = [[UINavigationBarAppearance alloc] init];
         [appearance configureWithTransparentBackground];
@@ -513,7 +513,7 @@ NSDictionary *getCurrentABTestData(void) {
         self.navigationController.navigationBar.scrollEdgeAppearance = appearance;
     }
     
-    // 鍒濆鍖栬Е瑙夊弽棣堢敓鎴愬櫒
+    // 初始化触觉反馈生成器
     self.feedbackGenerator = [[UIImpactFeedbackGenerator alloc] initWithStyle:UIImpactFeedbackStyleMedium];
     [self.feedbackGenerator prepare];
     
@@ -533,14 +533,14 @@ NSDictionary *getCurrentABTestData(void) {
     [self setupFooterLabel];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleBackgroundColorChanged) name:@"DYYYBackgroundColorChanged" object:nil];
     
-    // 璁剧疆閾炬帴瑙ｆ瀽鐨勯粯璁ゅ€?
+    // 设置链接解析的默认值
     NSString *interfaceDownload = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYInterfaceDownload"];
     if (interfaceDownload == nil || [interfaceDownload stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]].length == 0) {
         [[NSUserDefaults standardUserDefaults] setObject:@"https://api.qsy.ink/api/douyin?key=DYYY&url=" forKey:@"DYYYInterfaceDownload"];
         [[NSUserDefaults standardUserDefaults] synchronize];
     }
     
-    // 鍒濆鍖栫儹鏇存柊鏁版嵁锛堜娇鐢?DYYYABTestHook 缁熶竴鎺ュ彛锛?
+    // 初始化热更新数据（使用 DYYYABTestHook 统一接口）
     ensureABTestDataLoaded();
 
     [self ensureCustomAlbumSizeDefault];
@@ -552,14 +552,14 @@ NSDictionary *getCurrentABTestData(void) {
     BOOL medium = [defaults objectForKey:@"DYYYCustomAlbumSizeMedium"] ? [defaults boolForKey:@"DYYYCustomAlbumSizeMedium"] : NO;
     BOOL small = [defaults objectForKey:@"DYYYCustomAlbumSizeSmall"] ? [defaults boolForKey:@"DYYYCustomAlbumSizeSmall"] : NO;
 
-    // 濡傛灉閮芥病璁剧疆杩囷紝榛樿鈥滀腑鈥濅负YES锛屽叾瀹僋O
+    // 如果都没设置过，默认“中”为YES，其它NO
     if (!large && !medium && !small) {
         [defaults setBool:NO forKey:@"DYYYCustomAlbumSizeLarge"];
         [defaults setBool:YES forKey:@"DYYYCustomAlbumSizeMedium"];
         [defaults setBool:NO forKey:@"DYYYCustomAlbumSizeSmall"];
         [defaults synchronize];
     } else {
-        // 淇濊瘉浜掓枼锛氬鏋滄湁澶氫釜涓篩ES锛屽彧淇濈暀绗竴涓负YES
+        // 保证互斥：如果有多个为YES，只保留第一个为YES
         NSArray *keys = @[@"DYYYCustomAlbumSizeLarge", @"DYYYCustomAlbumSizeMedium", @"DYYYCustomAlbumSizeSmall"];
         NSMutableArray *onKeys = [NSMutableArray array];
         for (NSString *key in keys) {
@@ -568,7 +568,7 @@ NSDictionary *getCurrentABTestData(void) {
             }
         }
         if (onKeys.count > 1) {
-            // 鍙繚鐣欑涓€涓负YES锛屽叾瀹冭涓篘O
+            // 只保留第一个为YES，其它设为NO
             for (NSInteger i = 1; i < onKeys.count; i++) {
                 [defaults setBool:NO forKey:onKeys[i]];
             }
@@ -650,14 +650,14 @@ NSDictionary *getCurrentABTestData(void) {
 }
 
 - (void)setupAvatarView {
-    // 鏆楅粦鏋佺畝椋庢牸锛氫笉鏄剧ず澶村儚鍖哄煙
+    // 暗黑极简风格：不显示头像区域
 }
 
 - (void)setupSearchBar {
-    // 鏆楅粦鏋佺畝椋庢牸锛氫笉鏄剧ず鎼滅储鏍?
+    // 暗黑极简风格：不显示搜索栏
 }
 - (void)handleBackgroundColorChanged {
-    // 鏆楅粦姣涚幓鐠冮鏍硷細鏃犻渶鏍规嵁鑳屾櫙鑹茶皟鏁?
+    // 暗黑毛玻璃风格：无需根据背景色调整
 }
 
 - (void)setupTableView {
@@ -667,9 +667,9 @@ NSDictionary *getCurrentABTestData(void) {
     self.tableView.backgroundColor = [UIColor clearColor];
     self.tableView.separatorStyle = UITableViewCellSeparatorStyleSingleLine;
     
-    // 璋冩暣section澶撮儴闂磋窛锛屽噺灏忔垨绉婚櫎杩欎釜璁剧疆
+    // 调整section头部间距，减小或移除这个设置
     if (@available(iOS 15.0, *)) {
-        self.tableView.sectionHeaderTopPadding = 2; // 鍑忓皬缁勫ご閮ㄤ箣闂寸殑鍨傜洿璺濈
+        self.tableView.sectionHeaderTopPadding = 2; // 减小组头部之间的垂直距离
     }
     
     self.tableView.tableHeaderView = nil;
@@ -683,326 +683,326 @@ NSDictionary *getCurrentABTestData(void) {
 - (void)setupSettingItems {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         NSArray *sections = @[
-            // 绗竴閮ㄥ垎 - 鍩烘湰璁剧疆
+            // 第一部分 - 基本设置
             @[
-                [DYYYSettingItem itemWithTitle:@"鍚敤寮瑰箷鏀硅壊" key:@"DYYYEnableDanmuColor" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"鑷畾寮瑰箷棰滆壊" key:@"DYYYDanmuColor" type:DYYYSettingItemTypeTextField placeholder:@"鍗佸叚杩涘埗"],
-                [DYYYSettingItem itemWithTitle:@"鏄剧ず杩涘害鏃堕暱" key:@"DYYYShowScheduleDisplay" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"杩涘害绾佃酱浣嶇疆" key:@"DYYYTimelineVerticalPosition" type:DYYYSettingItemTypeTextField placeholder:@"-12.5"],
-                [DYYYSettingItem itemWithTitle:@"鏃堕棿杩涘害浣嶇疆" key:@"DYYYScheduleStyle" type:DYYYSettingItemTypeCustomPicker placeholder:@"鐐瑰嚮閫夋嫨"],
-                [DYYYSettingItem itemWithTitle:@"杩涘害鏍囩棰滆壊" key:@"DYYYProgressLabelColor" type:DYYYSettingItemTypeTextField placeholder:@"鍗佸叚杩涘埗"],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌瑙嗛杩涘害" key:@"DYYYHideVideoProgress" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"杩囨护鐩存挱" key:@"DYYYSkipLive" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"杩囨护鐑偣" key:@"DYYYSkipHotSpot" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"杩囨护鍥鹃泦" key:@"DYYYSkipPhoto" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"杩囨护鍥炬枃" key:@"DYYYSkipPhotoText" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"杩囨护闊充箰鍗? key:@"DYYYSkipMusic" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"杩囨护鎶栭煶AI" key:@"DYYYSkipAIInteraction" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"杩囨护閬撳叿" key:@"DYYYFilterProp" type:DYYYSettingItemTypeTextField placeholder:@"鑻辨枃閫楀彿鍒嗛殧"],
-                [DYYYSettingItem itemWithTitle:@"绂佺敤鑷姩杩涘叆鐩存挱" key:@"DYYYDisableAutoEnterLive" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"杩囨护浣庤禐" key:@"DYYYFilterLowLikes" type:DYYYSettingItemTypeTextField placeholder:@"濉?鍏抽棴"],
-                [DYYYSettingItem itemWithTitle:@"杩囨护鏂囨" key:@"DYYYFilterKeywords" type:DYYYSettingItemTypeTextField placeholder:@"涓嶅～鍏抽棴"],
-                [DYYYSettingItem itemWithTitle:@"瑙嗛鏃堕檺" key:@"DYYYFilterTimeLimit" type:DYYYSettingItemTypeTextField placeholder:@"濉?鍏抽棴锛屽崟浣嶄负澶?],
-                [DYYYSettingItem itemWithTitle:@"棣栭〉鍏ㄥ睆+閫忔槑" key:@"DYYYEnableFullScreen" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"鍘婚櫎App鍐呮洿鏂? key:@"DYYYNoUpdates" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"鍘婚潚灏戝勾寮圭獥" key:@"DYYYHideTeenMode" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"璇勮鍖烘瘺鐜荤拑" key:@"DYYYEnableCommentBlur" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"姣涚幓鐠冮€忔槑搴? key:@"DYYYCommentBlurTransparent" type:DYYYSettingItemTypeTextField placeholder:@"0-1灏忔暟"],
-                [DYYYSettingItem itemWithTitle:@"閫氱煡鐜荤拑鏁堟灉" key:@"DYYYEnableNotificationTransparency" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"閫氱煡鍦嗚鍗婂緞" key:@"DYYYNotificationCornerRadius" type:DYYYSettingItemTypeTextField placeholder:@"榛樿12"],
-                [DYYYSettingItem itemWithTitle:@"鏃堕棿鏍囩棰滆壊" key:@"DYYYLabelColor" type:DYYYSettingItemTypeTextField placeholder:@"鍗佸叚杩涘埗"],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌绯荤粺椤舵爮" key:@"DYYYHideStatusbar" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"鍏虫敞浜屾纭" key:@"DYYYFollowTips" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"鏀惰棌浜屾纭" key:@"DYYYCollectTips" type:DYYYSettingItemTypeSwitch]
+                [DYYYSettingItem itemWithTitle:@"启用弹幕改色" key:@"DYYYEnableDanmuColor" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"自定弹幕颜色" key:@"DYYYDanmuColor" type:DYYYSettingItemTypeTextField placeholder:@"十六进制"],
+                [DYYYSettingItem itemWithTitle:@"显示进度时长" key:@"DYYYShowScheduleDisplay" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"进度纵轴位置" key:@"DYYYTimelineVerticalPosition" type:DYYYSettingItemTypeTextField placeholder:@"-12.5"],
+                [DYYYSettingItem itemWithTitle:@"时间进度位置" key:@"DYYYScheduleStyle" type:DYYYSettingItemTypeCustomPicker placeholder:@"点击选择"],
+                [DYYYSettingItem itemWithTitle:@"进度标签颜色" key:@"DYYYProgressLabelColor" type:DYYYSettingItemTypeTextField placeholder:@"十六进制"],
+                [DYYYSettingItem itemWithTitle:@"隐藏视频进度" key:@"DYYYHideVideoProgress" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"过滤直播" key:@"DYYYSkipLive" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"过滤热点" key:@"DYYYSkipHotSpot" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"过滤图集" key:@"DYYYSkipPhoto" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"过滤图文" key:@"DYYYSkipPhotoText" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"过滤音乐卡" key:@"DYYYSkipMusic" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"过滤抖音AI" key:@"DYYYSkipAIInteraction" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"过滤道具" key:@"DYYYFilterProp" type:DYYYSettingItemTypeTextField placeholder:@"英文逗号分隔"],
+                [DYYYSettingItem itemWithTitle:@"禁用自动进入直播" key:@"DYYYDisableAutoEnterLive" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"过滤低赞" key:@"DYYYFilterLowLikes" type:DYYYSettingItemTypeTextField placeholder:@"填0关闭"],
+                [DYYYSettingItem itemWithTitle:@"过滤文案" key:@"DYYYFilterKeywords" type:DYYYSettingItemTypeTextField placeholder:@"不填关闭"],
+                [DYYYSettingItem itemWithTitle:@"视频时限" key:@"DYYYFilterTimeLimit" type:DYYYSettingItemTypeTextField placeholder:@"填0关闭，单位为天"],
+                [DYYYSettingItem itemWithTitle:@"首页全屏+透明" key:@"DYYYEnableFullScreen" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"去除App内更新" key:@"DYYYNoUpdates" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"去青少年弹窗" key:@"DYYYHideTeenMode" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"评论区毛玻璃" key:@"DYYYEnableCommentBlur" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"毛玻璃透明度" key:@"DYYYCommentBlurTransparent" type:DYYYSettingItemTypeTextField placeholder:@"0-1小数"],
+                [DYYYSettingItem itemWithTitle:@"通知玻璃效果" key:@"DYYYEnableNotificationTransparency" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"通知圆角半径" key:@"DYYYNotificationCornerRadius" type:DYYYSettingItemTypeTextField placeholder:@"默认12"],
+                [DYYYSettingItem itemWithTitle:@"时间标签颜色" key:@"DYYYLabelColor" type:DYYYSettingItemTypeTextField placeholder:@"十六进制"],
+                [DYYYSettingItem itemWithTitle:@"隐藏系统顶栏" key:@"DYYYHideStatusbar" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"关注二次确认" key:@"DYYYFollowTips" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"收藏二次确认" key:@"DYYYCollectTips" type:DYYYSettingItemTypeSwitch]
             ],
             
-            // 绗簩閮ㄥ垎 - 鐣岄潰璁剧疆
+            // 第二部分 - 界面设置
             @[
-                [DYYYSettingItem itemWithTitle:@"璁剧疆椤舵爮鏂囧瓧閫忔槑" key:@"DYYYtopbartransparent" type:DYYYSettingItemTypeTextField placeholder:@"0-1灏忔暟"],
-                [DYYYSettingItem itemWithTitle:@"璁剧疆鍏ㄥ眬閫忔槑" key:@"DYYYGlobalTransparency" type:DYYYSettingItemTypeTextField placeholder:@"0-1灏忔暟"],
-                [DYYYSettingItem itemWithTitle:@"棣栭〉澶村儚閫忔槑" key:@"DYYYAvatarViewTransparency" type:DYYYSettingItemTypeTextField placeholder:@"0-1灏忔暟"],
-                [DYYYSettingItem itemWithTitle:@"鍙充晶鏍忕缉鏀惧害" key:@"DYYYElementScale" type:DYYYSettingItemTypeTextField placeholder:@"涓嶅～榛樿"],
-                [DYYYSettingItem itemWithTitle:@"鏄电О鏂囨缂╂斁" key:@"DYYYNicknameScale" type:DYYYSettingItemTypeTextField placeholder:@"涓嶅～榛樿"],
-                [DYYYSettingItem itemWithTitle:@"鏄电О涓嬬Щ璺濈" key:@"DYYYNicknameVerticalOffset" type:DYYYSettingItemTypeTextField placeholder:@"涓嶅～榛樿"],
-                [DYYYSettingItem itemWithTitle:@"鏂囨涓嬬Щ璺濈" key:@"DYYYDescriptionVerticalOffset" type:DYYYSettingItemTypeTextField placeholder:@"涓嶅～榛樿"],
-                [DYYYSettingItem itemWithTitle:@"灞炲湴涓嬬Щ璺濈" key:@"DYYYIPLabelVerticalOffset" type:DYYYSettingItemTypeTextField placeholder:@"涓嶅～榛樿"],
-                [DYYYSettingItem itemWithTitle:@"璁剧疆棣栭〉鏍囬" key:@"DYYYIndexTitle" type:DYYYSettingItemTypeTextField placeholder:@"涓嶅～榛樿"],
-                [DYYYSettingItem itemWithTitle:@"璁剧疆鏈嬪弸鏍囬" key:@"DYYYFriendsTitle" type:DYYYSettingItemTypeTextField placeholder:@"涓嶅～榛樿"],
-                [DYYYSettingItem itemWithTitle:@"璁剧疆娑堟伅鏍囬" key:@"DYYYMsgTitle" type:DYYYSettingItemTypeTextField placeholder:@"涓嶅～榛樿"],
-                [DYYYSettingItem itemWithTitle:@"璁剧疆鎴戠殑鏍囬" key:@"DYYYSelfTitle" type:DYYYSettingItemTypeTextField placeholder:@"涓嶅～榛樿"],
-                [DYYYSettingItem itemWithTitle:@"璁剧疆椤舵爮妯箙" key:@"DYYYModifyTopTabText" type:DYYYSettingItemTypeTextField placeholder:@"鏍煎紡:鍘熸爣棰?鏂版爣棰?]
+                [DYYYSettingItem itemWithTitle:@"设置顶栏文字透明" key:@"DYYYtopbartransparent" type:DYYYSettingItemTypeTextField placeholder:@"0-1小数"],
+                [DYYYSettingItem itemWithTitle:@"设置全局透明" key:@"DYYYGlobalTransparency" type:DYYYSettingItemTypeTextField placeholder:@"0-1小数"],
+                [DYYYSettingItem itemWithTitle:@"首页头像透明" key:@"DYYYAvatarViewTransparency" type:DYYYSettingItemTypeTextField placeholder:@"0-1小数"],
+                [DYYYSettingItem itemWithTitle:@"右侧栏缩放度" key:@"DYYYElementScale" type:DYYYSettingItemTypeTextField placeholder:@"不填默认"],
+                [DYYYSettingItem itemWithTitle:@"昵称文案缩放" key:@"DYYYNicknameScale" type:DYYYSettingItemTypeTextField placeholder:@"不填默认"],
+                [DYYYSettingItem itemWithTitle:@"昵称下移距离" key:@"DYYYNicknameVerticalOffset" type:DYYYSettingItemTypeTextField placeholder:@"不填默认"],
+                [DYYYSettingItem itemWithTitle:@"文案下移距离" key:@"DYYYDescriptionVerticalOffset" type:DYYYSettingItemTypeTextField placeholder:@"不填默认"],
+                [DYYYSettingItem itemWithTitle:@"属地下移距离" key:@"DYYYIPLabelVerticalOffset" type:DYYYSettingItemTypeTextField placeholder:@"不填默认"],
+                [DYYYSettingItem itemWithTitle:@"设置首页标题" key:@"DYYYIndexTitle" type:DYYYSettingItemTypeTextField placeholder:@"不填默认"],
+                [DYYYSettingItem itemWithTitle:@"设置朋友标题" key:@"DYYYFriendsTitle" type:DYYYSettingItemTypeTextField placeholder:@"不填默认"],
+                [DYYYSettingItem itemWithTitle:@"设置消息标题" key:@"DYYYMsgTitle" type:DYYYSettingItemTypeTextField placeholder:@"不填默认"],
+                [DYYYSettingItem itemWithTitle:@"设置我的标题" key:@"DYYYSelfTitle" type:DYYYSettingItemTypeTextField placeholder:@"不填默认"],
+                [DYYYSettingItem itemWithTitle:@"设置顶栏横幅" key:@"DYYYModifyTopTabText" type:DYYYSettingItemTypeTextField placeholder:@"格式:原标题=新标题"]
             ],
             
-            // 绗笁閮ㄥ垎 - 闅愯棌璁剧疆
+            // 第三部分 - 隐藏设置
             @[
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鍏ㄥ睆瑙傜湅" key:@"DYYYHideEntry" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌搴曟爮鍟嗗煄" key:@"DYYYHideShopButton" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌搴曟爮娑堟伅" key:@"DYYYHideMessageButton" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌搴曟爮鏈嬪弸" key:@"DYYYHideFriendsButton" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌搴曟爮鍔犲彿" key:@"DYYYisHiddenJia" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌搴曟爮绾㈢偣" key:@"DYYYHideBottomDot" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌搴曟爮鑳屾櫙" key:@"DYYYHideBottomBg" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌渚ф爮绾㈢偣" key:@"DYYYHideSidebarDot" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鍙戜綔鍝佹" key:@"DYYYHidePostView" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌澶村儚鍔犲彿" key:@"DYYYHideLOTAnimationView" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鐐硅禐鏁板€? key:@"DYYYHideLikeLabel" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌璇勮鏁板€? key:@"DYYYHideCommentLabel" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鏀惰棌鏁板€? key:@"DYYYHideCollectLabel" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鍒嗕韩鏁板€? key:@"DYYYHideShareLabel" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鐐硅禐鎸夐挳" key:@"DYYYHideLikeButton" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌璇勮鎸夐挳" key:@"DYYYHideCommentButton" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鏀惰棌鎸夐挳" key:@"DYYYHideCollectButton" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌澶村儚鎸夐挳" key:@"DYYYHideAvatarButton" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌闊充箰鎸夐挳" key:@"DYYYHideMusicButton" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鍒嗕韩鎸夐挳" key:@"DYYYHideShareButton" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌瑙嗛瀹氫綅" key:@"DYYYHideLocation" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鍙充笂鎼滅储" key:@"DYYYHideDiscover" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鐩稿叧鎼滅储" key:@"DYYYHideInteractionSearch" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌杩涘叆鐩存挱" key:@"DYYYHideEnterLive" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌璇勮瑙嗗浘" key:@"DYYYHideCommentViews" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌閫氱煡鎻愮ず" key:@"DYYYHidePushBanner" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌澶村儚鍒楄〃" key:@"DYYYHideAvatarList" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌澶村儚姘旀场" key:@"DYYYHideAvatarBubble" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌宸︿晶杈规爮" key:@"DYYYHideLeftSideBar" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鍚冨枬鐜╀箰" key:@"DYYYHideNearbyCapsuleView" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌寮瑰箷鎸夐挳" key:@"DYYYHideDanmuButton" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鍙栨秷闈欓煶" key:@"DYYYHideCancelMute" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鍘绘苯姘村惉" key:@"DYYYHideQuqishuiting" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鍏卞垱澶村儚" key:@"DYYYHideGongChuang" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鐑偣鎻愮ず" key:@"DYYYHideHotspot" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鎺ㄨ崘鎻愮ず" key:@"DYYYHideRecommendTips" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鍒嗕韩鎻愮ず" key:@"DYYYHideShareContentView" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌浣滆€呭０鏄? key:@"DYYYHideAntiAddictedNotice" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌搴曢儴鐩稿叧" key:@"DYYYHideBottomRelated" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鎷嶆憚鍚屾" key:@"DYYYHideFeedAnchorContainer" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鎸戞垬璐寸焊" key:@"DYYYHideChallengeStickers" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鏍″洯鎻愮ず" key:@"DYYYHideTemplateTags" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌浣滆€呭簵閾? key:@"DYYYHideHisShop" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鍏虫敞鐩存挱" key:@"DYYYHideConcernCapsuleView" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌椤舵爮妯嚎" key:@"DYYYHidentopbarprompt" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌瑙嗛鍚堥泦" key:@"DYYYHideTemplateVideo" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鐭墽鍚堥泦" key:@"DYYYHideTemplatePlaylet" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鍔ㄥ浘鏍囩" key:@"DYYYHideLiveGIF" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌绗旇鏍囩" key:@"DYYYHideItemTag" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌搴曢儴璇濋" key:@"DYYYHideTemplateGroup" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鐩告満瀹氫綅" key:@"DYYYHideCameraLocation" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌瑙嗛婊戞潯" key:@"DYYYHideStoryProgressSlide" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鍥剧墖婊戞潯" key:@"DYYYHideDotsIndicator" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鍒嗕韩绉佷俊" key:@"DYYYHidePrivateMessages" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鏄电О鍙充晶" key:@"DYYYHideRightLabel" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌缇よ亰鍟嗗簵" key:@"DYYYHideGroupShop" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鐩存挱鑳跺泭" key:@"DYYYHideLiveCapsuleView" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鍏虫敞椤剁" key:@"DYYYHidenLiveView" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鍚屽煄椤剁" key:@"DYYYHideMenuView" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌缇ょ洿鎾腑" key:@"DYYYGroupLiving" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌缇ゅ伐鍏锋爮" key:@"DYYYHideGroupInputActionBar" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鐩存挱骞垮満" key:@"DYYYHideLivePlayground" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌绀肩墿灞曢" key:@"DYYYHideGiftPavilion" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌椤舵爮绾㈢偣" key:@"DYYYHideTopBarBadge" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌閫€鍑烘竻灞? key:@"DYYYHideLiveRoomClear" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鎶曞睆鎸夐挳" key:@"DYYYHideLiveRoomMirroring" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鐩存挱鍙戠幇" key:@"DYYYHideLiveDiscovery" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鐩存挱鐐规瓕" key:@"DYYYHideKTVSongIndicator" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌娴侀噺鎻愰啋" key:@"DYYYHideCellularAlert" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"鑱婂ぉ璇勮閫忔槑" key:@"DYYYHideChatCommentBg" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌璇勮鑳屾櫙" key:@"DYYYHideComment" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌杩斿洖鎸夐挳" key:@"DYYYHideBack" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鍥炲妗? key:@"DYYYHideReply" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鎼滅储姘旀场" key:@"DYYYHideSearchBubble" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌绔犺妭杩涘害鏉? key:@"DYYYHideChapterProgress" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鐩存挱闂磋缃? key:@"DYYYHideLiveRoomClose" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鐩存挱闂存í灞? key:@"DYYYHideLiveRoomFullscreen" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鐩存挱鍟嗗搧淇℃伅" key:@"DYYYHideLiveGoodsMsg" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鐩存挱鐐硅禐鍔ㄧ敾" key:@"DYYYHideLiveLikeAnimation" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌婵€鍔辩孩鍖呮寕浠? key:@"DYYYHidePendantGroup" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鍙屾爮鍏ュ彛" key:@"DYYYHideDoubleColumnEntry" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌涓婃鐪嬪埌鎻愮ず" key:@"DYYYHidePopover" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌瑙嗛鎼滅储闀挎" key:@"DYYYHideSearchEntrance" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鏈嬪弸鍏虫敞鎸夐挳" key:@"DYYYHideFamiliar" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌娣诲姞鏈嬪弸" key:@"DYYYHideButton" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鎷嶇収鎼滃悓娆炬壂涓€鎵? key:@"DYYYHideScancode" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鎼滅储鎸囩ず鏉? key:@"DYYYHideSearchEntranceIndicator" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌璇勮鎼滅储" key:@"DYYYHideCommentDiscover" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌璇勮鎻愮ず" key:@"DYYYHideCommentTips" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鍏虫敞鎻愮ず瑙嗗浘" key:@"DYYYHideFollowPromptView" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鎴戠殑鎸夐挳" key:@"DYYYHideMyButton" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鏆傚仠鍏抽敭璇? key:@"DYYYHidePauseVideoRelatedWord" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鎼滅储寮曞鎻愮ず妗? key:@"DYYYHideGuideTipView" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌椤舵爮寮曞鎻愮ず" key:@"DYYYHideFeedTabJumpGuide" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌澶у閮藉湪鎼? key:@"DYYYHideWords" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌瑙傜湅鍘嗗彶鎼滅储" key:@"DYYYHideDiscoverFeedEntry" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌鐭墽鍏嶈垂鍘荤湅" key:@"DYYYHideShowPlayletComment" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌璇勮闊充箰" key:@"DYYYHideCommentMusicAnchor" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌璇勮瀹氫綅" key:@"DYYYHidePOIEntryAnchor" type:DYYYSettingItemTypeSwitch]
+                [DYYYSettingItem itemWithTitle:@"隐藏全屏观看" key:@"DYYYHideEntry" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏底栏商城" key:@"DYYYHideShopButton" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏底栏消息" key:@"DYYYHideMessageButton" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏底栏朋友" key:@"DYYYHideFriendsButton" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏底栏加号" key:@"DYYYisHiddenJia" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏底栏红点" key:@"DYYYHideBottomDot" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏底栏背景" key:@"DYYYHideBottomBg" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏侧栏红点" key:@"DYYYHideSidebarDot" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏发作品框" key:@"DYYYHidePostView" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏头像加号" key:@"DYYYHideLOTAnimationView" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏点赞数值" key:@"DYYYHideLikeLabel" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏评论数值" key:@"DYYYHideCommentLabel" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏收藏数值" key:@"DYYYHideCollectLabel" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏分享数值" key:@"DYYYHideShareLabel" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏点赞按钮" key:@"DYYYHideLikeButton" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏评论按钮" key:@"DYYYHideCommentButton" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏收藏按钮" key:@"DYYYHideCollectButton" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏头像按钮" key:@"DYYYHideAvatarButton" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏音乐按钮" key:@"DYYYHideMusicButton" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏分享按钮" key:@"DYYYHideShareButton" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏视频定位" key:@"DYYYHideLocation" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏右上搜索" key:@"DYYYHideDiscover" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏相关搜索" key:@"DYYYHideInteractionSearch" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏进入直播" key:@"DYYYHideEnterLive" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏评论视图" key:@"DYYYHideCommentViews" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏通知提示" key:@"DYYYHidePushBanner" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏头像列表" key:@"DYYYHideAvatarList" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏头像气泡" key:@"DYYYHideAvatarBubble" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏左侧边栏" key:@"DYYYHideLeftSideBar" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏吃喝玩乐" key:@"DYYYHideNearbyCapsuleView" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏弹幕按钮" key:@"DYYYHideDanmuButton" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏取消静音" key:@"DYYYHideCancelMute" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏去汽水听" key:@"DYYYHideQuqishuiting" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏共创头像" key:@"DYYYHideGongChuang" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏热点提示" key:@"DYYYHideHotspot" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏推荐提示" key:@"DYYYHideRecommendTips" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏分享提示" key:@"DYYYHideShareContentView" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏作者声明" key:@"DYYYHideAntiAddictedNotice" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏底部相关" key:@"DYYYHideBottomRelated" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏拍摄同款" key:@"DYYYHideFeedAnchorContainer" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏挑战贴纸" key:@"DYYYHideChallengeStickers" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏校园提示" key:@"DYYYHideTemplateTags" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏作者店铺" key:@"DYYYHideHisShop" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏关注直播" key:@"DYYYHideConcernCapsuleView" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏顶栏横线" key:@"DYYYHidentopbarprompt" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏视频合集" key:@"DYYYHideTemplateVideo" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏短剧合集" key:@"DYYYHideTemplatePlaylet" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏动图标签" key:@"DYYYHideLiveGIF" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏笔记标签" key:@"DYYYHideItemTag" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏底部话题" key:@"DYYYHideTemplateGroup" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏相机定位" key:@"DYYYHideCameraLocation" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏视频滑条" key:@"DYYYHideStoryProgressSlide" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏图片滑条" key:@"DYYYHideDotsIndicator" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏分享私信" key:@"DYYYHidePrivateMessages" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏昵称右侧" key:@"DYYYHideRightLabel" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏群聊商店" key:@"DYYYHideGroupShop" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏直播胶囊" key:@"DYYYHideLiveCapsuleView" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏关注顶端" key:@"DYYYHidenLiveView" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏同城顶端" key:@"DYYYHideMenuView" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏群直播中" key:@"DYYYGroupLiving" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏群工具栏" key:@"DYYYHideGroupInputActionBar" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏直播广场" key:@"DYYYHideLivePlayground" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏礼物展馆" key:@"DYYYHideGiftPavilion" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏顶栏红点" key:@"DYYYHideTopBarBadge" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏退出清屏" key:@"DYYYHideLiveRoomClear" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏投屏按钮" key:@"DYYYHideLiveRoomMirroring" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏直播发现" key:@"DYYYHideLiveDiscovery" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏直播点歌" key:@"DYYYHideKTVSongIndicator" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏流量提醒" key:@"DYYYHideCellularAlert" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"聊天评论透明" key:@"DYYYHideChatCommentBg" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏评论背景" key:@"DYYYHideComment" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏返回按钮" key:@"DYYYHideBack" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏回复框" key:@"DYYYHideReply" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏搜索气泡" key:@"DYYYHideSearchBubble" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏章节进度条" key:@"DYYYHideChapterProgress" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏直播间设置" key:@"DYYYHideLiveRoomClose" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏直播间横屏" key:@"DYYYHideLiveRoomFullscreen" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏直播商品信息" key:@"DYYYHideLiveGoodsMsg" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏直播点赞动画" key:@"DYYYHideLiveLikeAnimation" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏激励红包挂件" key:@"DYYYHidePendantGroup" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏双栏入口" key:@"DYYYHideDoubleColumnEntry" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏上次看到提示" key:@"DYYYHidePopover" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏视频搜索长框" key:@"DYYYHideSearchEntrance" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏朋友关注按钮" key:@"DYYYHideFamiliar" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏添加朋友" key:@"DYYYHideButton" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏拍照搜同款扫一扫" key:@"DYYYHideScancode" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏搜索指示条" key:@"DYYYHideSearchEntranceIndicator" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏评论搜索" key:@"DYYYHideCommentDiscover" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏评论提示" key:@"DYYYHideCommentTips" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏关注提示视图" key:@"DYYYHideFollowPromptView" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏我的按钮" key:@"DYYYHideMyButton" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏暂停关键词" key:@"DYYYHidePauseVideoRelatedWord" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏搜索引导提示框" key:@"DYYYHideGuideTipView" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏顶栏引导提示" key:@"DYYYHideFeedTabJumpGuide" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏大家都在搜" key:@"DYYYHideWords" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏观看历史搜索" key:@"DYYYHideDiscoverFeedEntry" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏短剧免费去看" key:@"DYYYHideShowPlayletComment" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏评论音乐" key:@"DYYYHideCommentMusicAnchor" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏评论定位" key:@"DYYYHidePOIEntryAnchor" type:DYYYSettingItemTypeSwitch]
             ],
             
-            // 绗洓閮ㄥ垎 - 绉婚櫎璁剧疆
+            // 第四部分 - 移除设置
             @[
-                [DYYYSettingItem itemWithTitle:@"绉婚櫎鎺ㄨ崘" key:@"DYYYHideHotContainer" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"绉婚櫎鍏虫敞" key:@"DYYYHideFollow" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"绉婚櫎绮鹃€? key:@"DYYYHideMediumVideo" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"绉婚櫎鍟嗗煄" key:@"DYYYHideMall" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"绉婚櫎鏈嬪弸" key:@"DYYYHideFriend" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"绉婚櫎鍚屽煄" key:@"DYYYHideNearby" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"绉婚櫎鍥㈣喘" key:@"DYYYHideGroupon" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"绉婚櫎鐩存挱" key:@"DYYYHideTabLive" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"绉婚櫎鐑偣" key:@"DYYYHidePadHot" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"绉婚櫎缁忛獙" key:@"DYYYHideHangout" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"绉婚櫎鐭墽" key:@"DYYYHideTemplatePlaylet" type:DYYYSettingItemTypeSwitch]
+                [DYYYSettingItem itemWithTitle:@"移除推荐" key:@"DYYYHideHotContainer" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"移除关注" key:@"DYYYHideFollow" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"移除精选" key:@"DYYYHideMediumVideo" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"移除商城" key:@"DYYYHideMall" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"移除朋友" key:@"DYYYHideFriend" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"移除同城" key:@"DYYYHideNearby" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"移除团购" key:@"DYYYHideGroupon" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"移除直播" key:@"DYYYHideTabLive" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"移除热点" key:@"DYYYHidePadHot" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"移除经验" key:@"DYYYHideHangout" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"移除短剧" key:@"DYYYHideTemplatePlaylet" type:DYYYSettingItemTypeSwitch]
             ],
             
-                // 绗簲閮ㄥ垎 - 澧炲己鍔熻兘
+                // 第五部分 - 增强功能
                 @[
-                [DYYYSettingItem itemWithTitle:@"鍚敤鏂扮増鐜荤拑闈㈡澘" key:@"DYYYisEnableModern" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"灞忚斀-HDR瑙嗛" key:@"DYYYFilterFeedHDR" type:DYYYSettingItemTypeSwitch],            
-                [DYYYSettingItem itemWithTitle:@"鍚敤淇濆瓨浠栦汉澶村儚" key:@"DYYYEnableSaveAvatar" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"绂佺敤鐐瑰嚮棣栭〉鍒锋柊" key:@"DYYYDisableHomeRefresh" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"绂佺敤鍙屽嚮瑙嗛鐐硅禐" key:@"DYYYDouble" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"璇勮鍖?鍙屽嚮瑙﹀彂" key:@"DYYYEnableDoubleOpenComment" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"璇勮鏂囨湰澶嶅埗" key:@"DYYYCommentCopyText" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"璇勮鍖?闀挎寜澶嶅埗鏂囨湰" key:@"DYYYEnableCommentCopyText" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"璇勮鍖?淇濆瓨鍔ㄦ€佸浘" key:@"DYYYCommentLivePhotoNotWaterMark" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"璇勮鍖?淇濆瓨鍥剧墖" key:@"DYYYCommentNotWaterMark" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"璇勮鍖?淇濆瓨琛ㄦ儏鍖? key:@"DYYYFourceDownloadEmotion" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"琛ㄦ儏棰勮淇濆瓨" key:@"DYYYForceDownloadPreviewEmotion" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"绉佷俊琛ㄦ儏淇濆瓨" key:@"DYYYForceDownloadIMEmotion" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"瑙嗛-鏄剧ず鏃ユ湡鏃堕棿" key:@"DYYYShowDateTime" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -骞?鏈?鏃?鏃?鍒? key:@"DYYYDateTimeFormat_YMDHM" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -鏈?鏃?鏃?鍒? key:@"DYYYDateTimeFormat_MDHM" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -鏃?鍒?绉? key:@"DYYYDateTimeFormat_HMS" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -鏃?鍒? key:@"DYYYDateTimeFormat_HM" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -骞?鏈?鏃? key:@"DYYYDateTimeFormat_YMD" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"灞炲湴鍓嶇紑" key:@"DYYYLocationPrefix" type:DYYYSettingItemTypeTextField placeholder:@"鍙互鑷畾涔変慨鏀?"],
-                [DYYYSettingItem itemWithTitle:@"鏃堕棿灞炲湴鏄剧ず-寮€鍏? key:@"DYYYEnableArea" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -鐪佺骇" key:@"DYYYEnableAreaProvince" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -鍩庡競" key:@"DYYYEnableAreaCity" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -甯傚尯鎴栧幙鍩? key:@"DYYYEnableAreaDistrict" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -琛楅亾鎴栧皬鍖? key:@"DYYYEnableAreaStreet" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"閾炬帴瑙ｆ瀽API" key:@"DYYYInterfaceDownload" type:DYYYSettingItemTypeTextField placeholder:@"涓嶈缃紝榛樿"],
-                [DYYYSettingItem itemWithTitle:@"寮瑰嚭-娓呮櫚搴﹂€夐」" key:@"DYYYShowAllVideoQuality" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"鎷︽埅骞垮憡锛堝紑灞忋€佷俊鎭祦銆佸惎鍔ㄨ棰戯級"  key:@"DYYYNoAds" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"澶村儚鏂囨湰-淇敼" key:@"DYYYAvatarTapText" type:DYYYSettingItemTypeTextField placeholder:@"鍙互鑷畾涔変慨鏀?],
-                [DYYYSettingItem itemWithTitle:@"鑿滃崟鑳屾櫙棰滆壊" key:@"DYYYBackgroundColor" type:DYYYSettingItemTypeColorPicker],
-                [DYYYSettingItem itemWithTitle:@"榛樿鍊嶉€燂紙濡傛灉娌℃湁鍊嶆暟璁剧疆锛? key:@"DYYYDefaultSpeed" type:DYYYSettingItemTypeSpeedPicker placeholder:@"鐐瑰嚮閫夋嫨"],
-                [DYYYSettingItem itemWithTitle:@"闀挎寜鍊嶉€? key:@"DYYYLongPressSpeed" type:DYYYSettingItemTypeSpeedPicker placeholder:@"鐐瑰嚮閫夋嫨"],
-                [DYYYSettingItem itemWithTitle:@"涓婁笅鎵嬪娍鎺у埗鍊嶉€? key:@"DYYYEnableLongPressSpeedGesture" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"鍊嶉€熸寜閽姛鑳?寮€鍏? key:@"DYYYEnableFloatSpeedButton" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"鍊嶉€熸暟鍊硷紙寮哄埗鍊嶆暟锛? key:@"DYYYSpeedSettings" type:DYYYSettingItemTypeTextField placeholder:@"鑻辨枃閫楀彿鍒嗛殧"],
-                [DYYYSettingItem itemWithTitle:@"涓嬩竴涓棰戜細鑷姩鎭㈠榛樿鍊嶉€? key:@"DYYYAutoRestoreSpeed" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"鍊嶉€熸寜閽樉绀哄悗缂€" key:@"DYYYSpeedButtonShowX" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"鍊嶉€熸寜閽ぇ灏? key:@"DYYYSpeedButtonSize" type:DYYYSettingItemTypeTextField placeholder:@"榛樿40"],
-                [DYYYSettingItem itemWithTitle:@"瑙嗛娓呭睆闅愯棌-寮€鍏? key:@"DYYYEnableFloatClearButton" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -鎸夐挳澶? key:@"DYYYCustomAlbumSizeLarge" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -鎸夐挳涓? key:@"DYYYCustomAlbumSizeMedium" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -鎸夐挳灏? key:@"DYYYCustomAlbumSizeSmall" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -鎸夐挳鑷畾涔? key:@"DYYYEnableFloatClearButtonSize" type:DYYYSettingItemTypeTextField placeholder:@"榛樿40"],
-                [DYYYSettingItem itemWithTitle:@"鍥炬爣鏇存崲-寮€鍏? key:@"DYYYEnableCustomAlbum" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -鏈湴鐩稿唽" key:@"DYYYCustomAlbumImage" type:DYYYSettingItemTypeTextField placeholder:@"鐐瑰嚮閫夋嫨鍥剧墖"],
-                [DYYYSettingItem itemWithTitle:@"  -娓呭睆闅愯棌寮瑰箷" key:@"DYYYHideDanmaku" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -娓呭睆绉婚櫎杩涘害" key:@"DYYYEnabshijianjindu" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -娓呭睆闅愯棌杩涘害" key:@"DYYYHideTimeProgress" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -娓呭睆闅愯棌绔犺妭" key:@"DYYYHideChapter" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -娓呭睆闅愯棌婊戞潯" key:@"DYYYHideSlider" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -娓呭睆闅愯棌搴曟爮" key:@"DYYYHideTabBar" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -娓呭睆闅愯棌鍊嶉€? key:@"DYYYHideSpeed" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闀挎寜鍔熻兘-寮€鍏? key:@"DYYYLongPressDownload" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -淇濆瓨瑙嗛" key:@"DYYYLongPressSaveVideo" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -鍒嗕韩闊抽" key:@"DYYYLongPressSaveAudio" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -鍚敤FLEX" key:@"DYYYEnableFLEX" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -PIP灏忕獥鎾斁" key:@"DYYYLongPressPip" type:DYYYSettingItemTypeSwitch],                
-                [DYYYSettingItem itemWithTitle:@"  -淇濆瓨褰撳墠鍥剧墖" key:@"DYYYLongPressSaveCurrentImage" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -淇濆瓨鎵€鏈夊浘鐗? key:@"DYYYLongPressSaveAllImages" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -澶嶅埗閾炬帴" key:@"DYYYLongPressCopyLink" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -鎺ュ彛瑙ｆ瀽" key:@"DYYYLongPressApiDownload" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -杩囨护鐢ㄦ埛" key:@"DYYYLongPressFilterUser" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -杩囨护鏂囨" key:@"DYYYLongPressFilterTitle" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -瀹氭椂鍏抽棴" key:@"DYYYLongPressTimerClose" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -鍒朵綔瑙嗛" key:@"DYYYLongPressCreateVideo" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌闀挎寜-杞彂鏃ュ父" key:@"DYYYHideDaily" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌闀挎寜-鎺ㄨ崘" key:@"DYYYHideRecommend" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌闀挎寜-涓嶆劅鍏磋叮" key:@"DYYYHideNotInterested" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌闀挎寜-涓炬姤" key:@"DYYYHideReport" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌闀挎寜-鍊嶉€? key:@"DYYYHideSpeed" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌闀挎寜-娓呭睆鎾斁" key:@"DYYYHideClearScreen" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌闀挎寜-缂撳瓨瑙嗛" key:@"DYYYHideFavorite" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌闀挎寜-绋嶅悗鍐嶇湅" key:@"DYYYHideLater" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌闀挎寜-鎶曞睆" key:@"DYYYHideCast" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌闀挎寜-PC鎵撳紑" key:@"DYYYHideOpenInPC" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌闀挎寜-寮瑰箷" key:@"DYYYHideSubtitle" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌闀挎寜-鑷姩杩炴挱" key:@"DYYYHideAutoPlay" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌闀挎寜-璇嗗埆鍥剧墖" key:@"DYYYHideSearchImage" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌闀挎寜-鍚姈闊? key:@"DYYYHideListenDouyin" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌闀挎寜-鍚庡彴鎾斁" key:@"DYYYHideBackgroundPlay" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌闀挎寜-鍙屽垪鍏ュ彛" key:@"DYYYHideBiserial" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌闀挎寜-瀹氭椂鍏抽棴" key:@"DYYYHideTimerclose" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌闀挎寜-淇濆瓨鑷崇浉鍐? key:@"DYYYHideSaveToAlbum" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闅愯棌闀挎寜-璇嗗浘鎼滃悓娆? key:@"DYYYHideImageSearch" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闀挎寜闈㈡澘-澶嶅埗鍔熻兘" key:@"DYYYCopyText" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -澶嶅埗鍘熸枃鏈? key:@"DYYYCopyOriginalText" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -澶嶅埗鍒嗕韩閾炬帴" key:@"DYYYCopyShareLink" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"鍙屽嚮鎿嶄綔-寮€鍏? key:@"DYYYEnableDoubleOpenAlertController" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -淇濆瓨瑙嗛/鍥剧墖/瀹炲喌鍔ㄥ浘" key:@"DYYYDoubleTapDownload" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -闊抽寮瑰嚭鍒嗕韩" key:@"DYYYDoubleTapDownloadAudio" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -澶嶅埗鏂囨" key:@"DYYYDoubleTapCopyDesc" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -鎵撳紑璇勮" key:@"DYYYDoubleTapComment" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -鐐硅禐瑙嗛" key:@"DYYYDoubleTapLike" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -鍒嗕韩瑙嗛" key:@"DYYYDoubleTapshowSharePanel" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -闀挎寜闈㈡澘" key:@"DYYYDoubleTapshowDislikeOnVideo" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -鎺ュ彛瑙ｆ瀽" key:@"DYYYDoubleInterfaceDownload" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -PIP灏忕獥鎾斁" key:@"DYYYEnablePipPlayer" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"榛樿鏈€楂樼敾璐? key:@"DYYYEnableVideoHighestQuality" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"瑙嗛闄嶅櫔澧炲己" key:@"DYYYEnableNoiseFilter" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"榛樿娓呮櫚搴?鏈€楂? key:@"DYYYDefaultQualityBest" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"榛樿娓呮櫚搴?鍘熺敾" key:@"DYYYDefaultQualityOriginal" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"榛樿娓呮櫚搴?1080P" key:@"DYYYDefaultQuality1080p" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"榛樿娓呮櫚搴?720P" key:@"DYYYDefaultQuality720p" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"鐩存挱瑙嗛-鏈€楂樼敾璐? key:@"DYYYEnableLiveHighestQuality" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"绂佺敤鐩存挱PCDN鍔熻兘" key:@"DYYYDisableLivePCDN" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"鑷姩鍕鹃€夊師鍥? key:@"DYYYAutoSelectOriginalPhoto" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"瑙嗛闄嶅櫔-浜哄０澧炲己" key:@"DYYYEnableNoiseFilter" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"鏃犵棔妯″紡" key:@"DYYYEnableIncognitoMode" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"涓婚〉-鑷畾涔夋€诲紑鍏? key:@"DYYYEnableSocialStatsCustom" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -绮変笣鏁伴噺" key:@"DYYYCustomFollowers" type:DYYYSettingItemTypeTextField placeholder:@"濉啓鏁板瓧"],
-                [DYYYSettingItem itemWithTitle:@"  -鑾疯禐鏁伴噺" key:@"DYYYCustomLikes" type:DYYYSettingItemTypeTextField placeholder:@"濉啓鏁板瓧"],
-                [DYYYSettingItem itemWithTitle:@"  -鍏虫敞鏁伴噺" key:@"DYYYCustomFollowing" type:DYYYSettingItemTypeTextField placeholder:@"濉啓鏁板瓧"],
-                [DYYYSettingItem itemWithTitle:@"  -浜掑叧鏁伴噺" key:@"DYYYCustomMutual" type:DYYYSettingItemTypeTextField placeholder:@"濉啓鏁板瓧"],
-                [DYYYSettingItem itemWithTitle:@"瑙嗛-鑷畾涔夋€诲紑鍏? key:@"DYYYEnableVideoStatsCustom" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"  -鐐硅禐鏁伴噺" key:@"DYYYVideoCustomLikes" type:DYYYSettingItemTypeTextField placeholder:@"濉啓鏁板瓧"],
-                [DYYYSettingItem itemWithTitle:@"  -璇勮鏁伴噺" key:@"DYYYVideoCustomComments" type:DYYYSettingItemTypeTextField placeholder:@"濉啓鏁板瓧"],
-                [DYYYSettingItem itemWithTitle:@"  -鏀惰棌鏁伴噺" key:@"DYYYVideoCustomCollects" type:DYYYSettingItemTypeTextField placeholder:@"濉啓鏁板瓧"],
-                [DYYYSettingItem itemWithTitle:@"  -鍒嗕韩鏁伴噺" key:@"DYYYVideoCustomShares" type:DYYYSettingItemTypeTextField placeholder:@"濉啓鏁板瓧"],
-                [DYYYSettingItem itemWithTitle:@"寮哄埗鑷姩鎾斁锛堜笉鑳藉叧闂級" key:@"DYYYEnableAutoPlay" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"鍚敤娣辫壊閿洏" key:@"DYYYisDarkKeyBoard" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"闀挎寜-澶嶅埗瑙嗛鏂囨" key:@"DYYYLongPressCopyTextEnabled" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"鍚敤闊充箰鏂囨湰澶嶅埗" key:@"DYYYMusicCopyText" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"绠€鍖栦晶杈规爮" key:@"DYYYStreamlinethesidebar" type:DYYYSettingItemTypeSwitch]
+                [DYYYSettingItem itemWithTitle:@"启用新版玻璃面板" key:@"DYYYisEnableModern" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"屏蔽-HDR视频" key:@"DYYYFilterFeedHDR" type:DYYYSettingItemTypeSwitch],            
+                [DYYYSettingItem itemWithTitle:@"启用保存他人头像" key:@"DYYYEnableSaveAvatar" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"禁用点击首页刷新" key:@"DYYYDisableHomeRefresh" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"禁用双击视频点赞" key:@"DYYYDouble" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"评论区-双击触发" key:@"DYYYEnableDoubleOpenComment" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"评论文本复制" key:@"DYYYCommentCopyText" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"评论区-长按复制文本" key:@"DYYYEnableCommentCopyText" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"评论区-保存动态图" key:@"DYYYCommentLivePhotoNotWaterMark" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"评论区-保存图片" key:@"DYYYCommentNotWaterMark" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"评论区-保存表情包" key:@"DYYYFourceDownloadEmotion" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"表情预览保存" key:@"DYYYForceDownloadPreviewEmotion" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"私信表情保存" key:@"DYYYForceDownloadIMEmotion" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"视频-显示日期时间" key:@"DYYYShowDateTime" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -年-月-日 时:分" key:@"DYYYDateTimeFormat_YMDHM" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -月-日 时:分" key:@"DYYYDateTimeFormat_MDHM" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -时:分:秒" key:@"DYYYDateTimeFormat_HMS" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -时:分" key:@"DYYYDateTimeFormat_HM" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -年-月-日" key:@"DYYYDateTimeFormat_YMD" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"属地前缀" key:@"DYYYLocationPrefix" type:DYYYSettingItemTypeTextField placeholder:@"可以自定义修改 "],
+                [DYYYSettingItem itemWithTitle:@"时间属地显示-开关" key:@"DYYYEnableArea" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -省级" key:@"DYYYEnableAreaProvince" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -城市" key:@"DYYYEnableAreaCity" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -市区或县城" key:@"DYYYEnableAreaDistrict" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -街道或小区" key:@"DYYYEnableAreaStreet" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"链接解析API" key:@"DYYYInterfaceDownload" type:DYYYSettingItemTypeTextField placeholder:@"不设置，默认"],
+                [DYYYSettingItem itemWithTitle:@"弹出-清晰度选项" key:@"DYYYShowAllVideoQuality" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"拦截广告（开屏、信息流、启动视频）"  key:@"DYYYNoAds" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"头像文本-修改" key:@"DYYYAvatarTapText" type:DYYYSettingItemTypeTextField placeholder:@"可以自定义修改"],
+                [DYYYSettingItem itemWithTitle:@"菜单背景颜色" key:@"DYYYBackgroundColor" type:DYYYSettingItemTypeColorPicker],
+                [DYYYSettingItem itemWithTitle:@"默认倍速（如果没有倍数设置）" key:@"DYYYDefaultSpeed" type:DYYYSettingItemTypeSpeedPicker placeholder:@"点击选择"],
+                [DYYYSettingItem itemWithTitle:@"长按倍速" key:@"DYYYLongPressSpeed" type:DYYYSettingItemTypeSpeedPicker placeholder:@"点击选择"],
+                [DYYYSettingItem itemWithTitle:@"上下手势控制倍速" key:@"DYYYEnableLongPressSpeedGesture" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"倍速按钮功能-开关" key:@"DYYYEnableFloatSpeedButton" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"倍速数值（强制倍数）" key:@"DYYYSpeedSettings" type:DYYYSettingItemTypeTextField placeholder:@"英文逗号分隔"],
+                [DYYYSettingItem itemWithTitle:@"下一个视频会自动恢复默认倍速" key:@"DYYYAutoRestoreSpeed" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"倍速按钮显示后缀" key:@"DYYYSpeedButtonShowX" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"倍速按钮大小" key:@"DYYYSpeedButtonSize" type:DYYYSettingItemTypeTextField placeholder:@"默认40"],
+                [DYYYSettingItem itemWithTitle:@"视频清屏隐藏-开关" key:@"DYYYEnableFloatClearButton" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -按钮大" key:@"DYYYCustomAlbumSizeLarge" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -按钮中" key:@"DYYYCustomAlbumSizeMedium" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -按钮小" key:@"DYYYCustomAlbumSizeSmall" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -按钮自定义" key:@"DYYYEnableFloatClearButtonSize" type:DYYYSettingItemTypeTextField placeholder:@"默认40"],
+                [DYYYSettingItem itemWithTitle:@"图标更换-开关" key:@"DYYYEnableCustomAlbum" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -本地相册" key:@"DYYYCustomAlbumImage" type:DYYYSettingItemTypeTextField placeholder:@"点击选择图片"],
+                [DYYYSettingItem itemWithTitle:@"  -清屏隐藏弹幕" key:@"DYYYHideDanmaku" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -清屏移除进度" key:@"DYYYEnabshijianjindu" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -清屏隐藏进度" key:@"DYYYHideTimeProgress" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -清屏隐藏章节" key:@"DYYYHideChapter" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -清屏隐藏滑条" key:@"DYYYHideSlider" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -清屏隐藏底栏" key:@"DYYYHideTabBar" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -清屏隐藏倍速" key:@"DYYYHideSpeed" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"长按功能-开关" key:@"DYYYLongPressDownload" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -保存视频" key:@"DYYYLongPressSaveVideo" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -分享音频" key:@"DYYYLongPressSaveAudio" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -启用FLEX" key:@"DYYYEnableFLEX" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -PIP小窗播放" key:@"DYYYLongPressPip" type:DYYYSettingItemTypeSwitch],                
+                [DYYYSettingItem itemWithTitle:@"  -保存当前图片" key:@"DYYYLongPressSaveCurrentImage" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -保存所有图片" key:@"DYYYLongPressSaveAllImages" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -复制链接" key:@"DYYYLongPressCopyLink" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -接口解析" key:@"DYYYLongPressApiDownload" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -过滤用户" key:@"DYYYLongPressFilterUser" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -过滤文案" key:@"DYYYLongPressFilterTitle" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -定时关闭" key:@"DYYYLongPressTimerClose" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -制作视频" key:@"DYYYLongPressCreateVideo" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏长按-转发日常" key:@"DYYYHideDaily" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏长按-推荐" key:@"DYYYHideRecommend" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏长按-不感兴趣" key:@"DYYYHideNotInterested" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏长按-举报" key:@"DYYYHideReport" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏长按-倍速" key:@"DYYYHideSpeed" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏长按-清屏播放" key:@"DYYYHideClearScreen" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏长按-缓存视频" key:@"DYYYHideFavorite" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏长按-稍后再看" key:@"DYYYHideLater" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏长按-投屏" key:@"DYYYHideCast" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏长按-PC打开" key:@"DYYYHideOpenInPC" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏长按-弹幕" key:@"DYYYHideSubtitle" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏长按-自动连播" key:@"DYYYHideAutoPlay" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏长按-识别图片" key:@"DYYYHideSearchImage" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏长按-听抖音" key:@"DYYYHideListenDouyin" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏长按-后台播放" key:@"DYYYHideBackgroundPlay" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏长按-双列入口" key:@"DYYYHideBiserial" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏长按-定时关闭" key:@"DYYYHideTimerclose" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏长按-保存至相册" key:@"DYYYHideSaveToAlbum" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"隐藏长按-识图搜同款" key:@"DYYYHideImageSearch" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"长按面板-复制功能" key:@"DYYYCopyText" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -复制原文本" key:@"DYYYCopyOriginalText" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -复制分享链接" key:@"DYYYCopyShareLink" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"双击操作-开关" key:@"DYYYEnableDoubleOpenAlertController" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -保存视频/图片/实况动图" key:@"DYYYDoubleTapDownload" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -音频弹出分享" key:@"DYYYDoubleTapDownloadAudio" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -复制文案" key:@"DYYYDoubleTapCopyDesc" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -打开评论" key:@"DYYYDoubleTapComment" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -点赞视频" key:@"DYYYDoubleTapLike" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -分享视频" key:@"DYYYDoubleTapshowSharePanel" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -长按面板" key:@"DYYYDoubleTapshowDislikeOnVideo" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -接口解析" key:@"DYYYDoubleInterfaceDownload" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -PIP小窗播放" key:@"DYYYEnablePipPlayer" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"默认最高画质" key:@"DYYYEnableVideoHighestQuality" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"视频降噪增强" key:@"DYYYEnableNoiseFilter" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"默认清晰度-最高" key:@"DYYYDefaultQualityBest" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"默认清晰度-原画" key:@"DYYYDefaultQualityOriginal" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"默认清晰度-1080P" key:@"DYYYDefaultQuality1080p" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"默认清晰度-720P" key:@"DYYYDefaultQuality720p" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"直播视频-最高画质" key:@"DYYYEnableLiveHighestQuality" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"禁用直播PCDN功能" key:@"DYYYDisableLivePCDN" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"自动勾选原图" key:@"DYYYAutoSelectOriginalPhoto" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"视频降噪-人声增强" key:@"DYYYEnableNoiseFilter" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"无痕模式" key:@"DYYYEnableIncognitoMode" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"主页-自定义总开关" key:@"DYYYEnableSocialStatsCustom" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -粉丝数量" key:@"DYYYCustomFollowers" type:DYYYSettingItemTypeTextField placeholder:@"填写数字"],
+                [DYYYSettingItem itemWithTitle:@"  -获赞数量" key:@"DYYYCustomLikes" type:DYYYSettingItemTypeTextField placeholder:@"填写数字"],
+                [DYYYSettingItem itemWithTitle:@"  -关注数量" key:@"DYYYCustomFollowing" type:DYYYSettingItemTypeTextField placeholder:@"填写数字"],
+                [DYYYSettingItem itemWithTitle:@"  -互关数量" key:@"DYYYCustomMutual" type:DYYYSettingItemTypeTextField placeholder:@"填写数字"],
+                [DYYYSettingItem itemWithTitle:@"视频-自定义总开关" key:@"DYYYEnableVideoStatsCustom" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"  -点赞数量" key:@"DYYYVideoCustomLikes" type:DYYYSettingItemTypeTextField placeholder:@"填写数字"],
+                [DYYYSettingItem itemWithTitle:@"  -评论数量" key:@"DYYYVideoCustomComments" type:DYYYSettingItemTypeTextField placeholder:@"填写数字"],
+                [DYYYSettingItem itemWithTitle:@"  -收藏数量" key:@"DYYYVideoCustomCollects" type:DYYYSettingItemTypeTextField placeholder:@"填写数字"],
+                [DYYYSettingItem itemWithTitle:@"  -分享数量" key:@"DYYYVideoCustomShares" type:DYYYSettingItemTypeTextField placeholder:@"填写数字"],
+                [DYYYSettingItem itemWithTitle:@"强制自动播放（不能关闭）" key:@"DYYYEnableAutoPlay" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"启用深色键盘" key:@"DYYYisDarkKeyBoard" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"长按-复制视频文案" key:@"DYYYLongPressCopyTextEnabled" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"启用音乐文本复制" key:@"DYYYMusicCopyText" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"简化侧边栏" key:@"DYYYStreamlinethesidebar" type:DYYYSettingItemTypeSwitch]
             ],
 
-            // 绗叚閮ㄥ垎 - 鍥炬爣鑷畾涔夊姛鑳?
+            // 第六部分 - 图标自定义功能
             @[
-                [DYYYSettingItem itemWithTitle:@"鏈偣璧炲浘鏍? key:@"DYYYIconLikeBefore" type:DYYYSettingItemTypeTextField placeholder:@"鐐瑰嚮閫夋嫨鍥剧墖"],
-                [DYYYSettingItem itemWithTitle:@"宸茬偣璧炲浘鏍? key:@"DYYYIconLikeAfter" type:DYYYSettingItemTypeTextField placeholder:@"鐐瑰嚮閫夋嫨鍥剧墖"],
-                [DYYYSettingItem itemWithTitle:@"璇勮鐨勫浘鏍? key:@"DYYYIconComment" type:DYYYSettingItemTypeTextField placeholder:@"鐐瑰嚮閫夋嫨鍥剧墖"],
-                [DYYYSettingItem itemWithTitle:@"鏈敹钘忓浘鏍? key:@"DYYYIconUnfavorite" type:DYYYSettingItemTypeTextField placeholder:@"鐐瑰嚮閫夋嫨鍥剧墖"],
-                [DYYYSettingItem itemWithTitle:@"宸叉敹钘忓浘鏍? key:@"DYYYIconFavorite" type:DYYYSettingItemTypeTextField placeholder:@"鐐瑰嚮閫夋嫨鍥剧墖"],
-                [DYYYSettingItem itemWithTitle:@"鍒嗕韩鐨勫浘鏍? key:@"DYYYIconShare" type:DYYYSettingItemTypeTextField placeholder:@"鐐瑰嚮閫夋嫨鍥剧墖"]
+                [DYYYSettingItem itemWithTitle:@"未点赞图标" key:@"DYYYIconLikeBefore" type:DYYYSettingItemTypeTextField placeholder:@"点击选择图片"],
+                [DYYYSettingItem itemWithTitle:@"已点赞图标" key:@"DYYYIconLikeAfter" type:DYYYSettingItemTypeTextField placeholder:@"点击选择图片"],
+                [DYYYSettingItem itemWithTitle:@"评论的图标" key:@"DYYYIconComment" type:DYYYSettingItemTypeTextField placeholder:@"点击选择图片"],
+                [DYYYSettingItem itemWithTitle:@"未收藏图标" key:@"DYYYIconUnfavorite" type:DYYYSettingItemTypeTextField placeholder:@"点击选择图片"],
+                [DYYYSettingItem itemWithTitle:@"已收藏图标" key:@"DYYYIconFavorite" type:DYYYSettingItemTypeTextField placeholder:@"点击选择图片"],
+                [DYYYSettingItem itemWithTitle:@"分享的图标" key:@"DYYYIconShare" type:DYYYSettingItemTypeTextField placeholder:@"点击选择图片"]
             ],
             
-            // 绗竷閮ㄥ垎 - 娓呯悊鍔熻兘
+            // 第七部分 - 清理功能
             @[
-                [DYYYSettingItem itemWithTitle:@"娓呴櫎璁剧疆" key:@"DYYYCleanSettings" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"娓呯悊缂撳瓨" key:@"DYYYCleanCache" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"澶囦唤璁剧疆" key:@"DYYYBackupSettings" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"鎭㈠璁剧疆" key:@"DYYYRestoreSettings" type:DYYYSettingItemTypeSwitch]
+                [DYYYSettingItem itemWithTitle:@"清除设置" key:@"DYYYCleanSettings" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"清理缓存" key:@"DYYYCleanCache" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"备份设置" key:@"DYYYBackupSettings" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"恢复设置" key:@"DYYYRestoreSettings" type:DYYYSettingItemTypeSwitch]
             ],
             
-            // 绗叓閮ㄥ垎 - 鐑洿鏂板姛鑳?
+            // 第八部分 - 热更新功能
             @[
-                [DYYYSettingItem itemWithTitle:@"绂佺敤涓嬪彂閰嶇疆" key:@"DYYYABTestBlockEnabled" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"鍚敤琛ヤ竵妯″紡" key:@"DYYYABTestPatchEnabled" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"淇濆瓨褰撳墠閰嶇疆" key:@"SaveCurrentABTestData" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"鏈湴閫夋嫨閰嶇疆" key:@"LoadABTestConfigFile" type:DYYYSettingItemTypeSwitch],
-                [DYYYSettingItem itemWithTitle:@"鍒犻櫎鏈湴閰嶇疆" key:@"DeleteABTestConfigFile" type:DYYYSettingItemTypeSwitch]
+                [DYYYSettingItem itemWithTitle:@"禁用下发配置" key:@"DYYYABTestBlockEnabled" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"启用补丁模式" key:@"DYYYABTestPatchEnabled" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"保存当前配置" key:@"SaveCurrentABTestData" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"本地选择配置" key:@"LoadABTestConfigFile" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"删除本地配置" key:@"DeleteABTestConfigFile" type:DYYYSettingItemTypeSwitch]
             ]
         ];
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -1013,17 +1013,17 @@ NSDictionary *getCurrentABTestData(void) {
                 [self.tableView reloadData];
             }
             
-            // 璁剧疆澶囦唤鍔熻兘
+            // 设置备份功能
             [self setupBackupFunctions];
         });
     });
 }
 
 - (void)setupBackupFunctions {
-    // 纭繚琛ㄦ牸宸茬粡鍔犺浇
+    // 确保表格已经加载
     if (!self.tableView) return;
     
-    // 鎵惧埌澶囦唤璁剧疆椤瑰苟娣诲姞鐐瑰嚮浜嬩欢
+    // 找到备份设置项并添加点击事件
     for (NSInteger section = 0; section < self.settingSections.count; section++) {
         NSArray<DYYYSettingItem *> *items = self.settingSections[section];
         for (NSInteger row = 0; row < items.count; row++) {
@@ -1034,14 +1034,14 @@ NSDictionary *getCurrentABTestData(void) {
                 UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:indexPath];
                 
                 if (cell) {
-                    // 绉婚櫎鐜版湁鐨勫紑鍏?
+                    // 移除现有的开关
                     if ([cell.accessoryView isKindOfClass:[UISwitch class]]) {
                         [cell.accessoryView removeFromSuperview];
                     }
                     
-                    // 鍒涘缓鏂扮殑鎸夐挳
+                    // 创建新的按钮
                     UIButton *backupButton = [UIButton buttonWithType:UIButtonTypeSystem];
-                    [backupButton setTitle:@"澶囦唤" forState:UIControlStateNormal];
+                    [backupButton setTitle:@"备份" forState:UIControlStateNormal];
                     backupButton.frame = CGRectMake(0, 0, 60, 30);
                     backupButton.layer.cornerRadius = 8;
                     backupButton.backgroundColor = [UIColor systemBlueColor];
@@ -1055,14 +1055,14 @@ NSDictionary *getCurrentABTestData(void) {
                 UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:indexPath];
                 
                 if (cell) {
-                    // 绉婚櫎鐜版湁鐨勫紑鍏?
+                    // 移除现有的开关
                     if ([cell.accessoryView isKindOfClass:[UISwitch class]]) {
                         [cell.accessoryView removeFromSuperview];
                     }
                     
-                    // 鍒涘缓鏂扮殑鎸夐挳
+                    // 创建新的按钮
                     UIButton *restoreButton = [UIButton buttonWithType:UIButtonTypeSystem];
-                    [restoreButton setTitle:@"鎭㈠" forState:UIControlStateNormal];
+                    [restoreButton setTitle:@"恢复" forState:UIControlStateNormal];
                     restoreButton.frame = CGRectMake(0, 0, 60, 30);
                     restoreButton.layer.cornerRadius = 8;
                     restoreButton.backgroundColor = [UIColor systemBlueColor];
@@ -1076,7 +1076,7 @@ NSDictionary *getCurrentABTestData(void) {
 }
 
 - (void)backupSettings {
-    // 鑾峰彇鎵€鏈変互DYYY寮€澶寸殑NSUserDefaults閿€?
+    // 获取所有以DYYY开头的NSUserDefaults键值
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     NSDictionary *allDefaults = [defaults dictionaryRepresentation];
     NSMutableDictionary *dyyySettings = [NSMutableDictionary dictionary];
@@ -1087,7 +1087,7 @@ NSDictionary *getCurrentABTestData(void) {
         }
     }
 
-    // 澶囦唤鍥炬爣鏂囦欢
+    // 备份图标文件
     NSString *documentsPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
     NSString *dyyyFolderPath = [documentsPath stringByAppendingPathComponent:@"DYYY"];
 
@@ -1098,7 +1098,7 @@ NSDictionary *getCurrentABTestData(void) {
     for (NSString *iconFileName in iconFileNames) {
         NSString *iconPath = [dyyyFolderPath stringByAppendingPathComponent:iconFileName];
         if ([[NSFileManager defaultManager] fileExistsAtPath:iconPath]) {
-            // 璇诲彇鍥剧墖鏁版嵁骞惰浆鎹负Base64
+            // 读取图片数据并转换为Base64
             NSData *imageData = [NSData dataWithContentsOfFile:iconPath];
             if (imageData) {
                 NSString *base64String = [imageData base64EncodedStringWithOptions:0];
@@ -1107,21 +1107,21 @@ NSDictionary *getCurrentABTestData(void) {
         }
     }
 
-    // 灏嗗浘鏍嘊ase64鏁版嵁娣诲姞鍒板浠借缃腑
+    // 将图标Base64数据添加到备份设置中
     if (iconBase64Dict.count > 0) {
         dyyySettings[@"DYYYIconsBase64"] = iconBase64Dict;
     }
 
-    // 杞崲涓篔SON鏁版嵁
+    // 转换为JSON数据
     NSError *error;
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject:dyyySettings options:NSJSONWritingPrettyPrinted error:&error];
 
     if (error) {
-        [DYYYManager showToast:@"澶囦唤澶辫触锛氭棤娉曞簭鍒楀寲璁剧疆鏁版嵁"];
+        [DYYYManager showToast:@"备份失败：无法序列化设置数据"];
         return;
     }
 
-    // 纭繚鐩綍瀛樺湪
+    // 确保目录存在
     if (![[NSFileManager defaultManager] fileExistsAtPath:dyyyFolderPath]) {
         [[NSFileManager defaultManager] createDirectoryAtPath:dyyyFolderPath withIntermediateDirectories:YES attributes:nil error:nil];
     }
@@ -1136,14 +1136,14 @@ NSDictionary *getCurrentABTestData(void) {
     BOOL success = [jsonData writeToFile:tempFilePath atomically:YES];
 
     if (!success) {
-        [DYYYManager showToast:@"澶囦唤澶辫触锛氭棤娉曞垱寤轰复鏃舵枃浠?];
+        [DYYYManager showToast:@"备份失败：无法创建临时文件"];
         return;
     }
 
-    // 鍒涘缓鏂囨。閫夋嫨鍣ㄨ鐢ㄦ埛閫夋嫨淇濆瓨浣嶇疆
+    // 创建文档选择器让用户选择保存位置
     NSURL *tempFileURL = [NSURL fileURLWithPath:tempFilePath];
     
-    // 浣跨敤姝ｇ‘鐨勬ā寮忓拰鏂囨。绫诲瀷
+    // 使用正确的模式和文档类型
     UIDocumentPickerViewController *documentPicker;
     if (@available(iOS 11.0, *)) {
         documentPicker = [[UIDocumentPickerViewController alloc] initWithURLs:@[tempFileURL] inMode:UIDocumentPickerModeExportToService];
@@ -1151,20 +1151,20 @@ NSDictionary *getCurrentABTestData(void) {
         documentPicker = [[UIDocumentPickerViewController alloc] initWithURL:tempFileURL inMode:UIDocumentPickerModeExportToService];
     }
 
-    // 寮哄紩鐢ㄤ唬鐞嗗璞?
+    // 强引用代理对象
     self.backupPickerDelegate = [[DYYYBackupPickerDelegate alloc] init];
     self.backupPickerDelegate.tempFilePath = tempFilePath;
     self.backupPickerDelegate.completionBlock = ^(NSURL *url) {
-        // 澶囦唤鎴愬姛
+        // 备份成功
         dispatch_async(dispatch_get_main_queue(), ^{
-            [DYYYManager showToast:@"澶囦唤鎴愬姛"];
+            [DYYYManager showToast:@"备份成功"];
         });
     };
 
-    // 浣跨敤瀹炰緥鍙橀噺鑰岄潪鍏宠仈瀵硅薄
+    // 使用实例变量而非关联对象
     documentPicker.delegate = self.backupPickerDelegate;
 
-    // iPad涓婄殑灞曠ず鏂瑰紡
+    // iPad上的展示方式
     if (UIDevice.currentDevice.userInterfaceIdiom == UIUserInterfaceIdiomPad) {
         documentPicker.popoverPresentationController.sourceView = self.view;
         documentPicker.popoverPresentationController.sourceRect = CGRectMake(self.view.bounds.size.width / 2, 
@@ -1172,7 +1172,7 @@ NSDictionary *getCurrentABTestData(void) {
                                                                            0, 0);
     }
 
-    // 淇锛氬畨鍏ㄥ湴鍛堢幇瑙嗗浘鎺у埗鍣?
+    // 修复：安全地呈现视图控制器
     dispatch_async(dispatch_get_main_queue(), ^{
         [self presentViewController:documentPicker animated:YES completion:nil];
     });
@@ -1182,39 +1182,39 @@ NSDictionary *getCurrentABTestData(void) {
     UIDocumentPickerViewController *documentPicker = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[@"public.json", @"public.text"] inMode:UIDocumentPickerModeImport];
     documentPicker.allowsMultipleSelection = NO;
 
-    // 寮哄紩鐢ㄤ唬鐞嗗璞?
+    // 强引用代理对象
     self.restorePickerDelegate = [[DYYYBackupPickerDelegate alloc] init];
     self.restorePickerDelegate.completionBlock = ^(NSURL *url) {
         if (!url) {
-            [DYYYManager showToast:@"鏈€夋嫨澶囦唤鏂囦欢"];
+            [DYYYManager showToast:@"未选择备份文件"];
             return;
         }
         
         NSData *jsonData = [NSData dataWithContentsOfURL:url];
         if (!jsonData) {
-            [DYYYManager showToast:@"鏃犳硶璇诲彇澶囦唤鏂囦欢"];
+            [DYYYManager showToast:@"无法读取备份文件"];
             return;
         }
 
         NSError *jsonError;
         NSDictionary *dyyySettings = [NSJSONSerialization JSONObjectWithData:jsonData options:0 error:&jsonError];
         if (jsonError || ![dyyySettings isKindOfClass:[NSDictionary class]]) {
-            [DYYYManager showToast:@"澶囦唤鏂囦欢鏍煎紡閿欒"];
+            [DYYYManager showToast:@"备份文件格式错误"];
             return;
         }
 
-        // 鎭㈠鍥炬爣鏂囦欢
+        // 恢复图标文件
         NSDictionary *iconBase64Dict = dyyySettings[@"DYYYIconsBase64"];
         if (iconBase64Dict && [iconBase64Dict isKindOfClass:[NSDictionary class]]) {
             NSString *documentsPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
             NSString *dyyyFolderPath = [documentsPath stringByAppendingPathComponent:@"DYYY"];
 
-            // 纭繚DYYY鏂囦欢澶瑰瓨鍦?
+            // 确保DYYY文件夹存在
             if (![[NSFileManager defaultManager] fileExistsAtPath:dyyyFolderPath]) {
                 [[NSFileManager defaultManager] createDirectoryAtPath:dyyyFolderPath withIntermediateDirectories:YES attributes:nil error:nil];
             }
 
-            // 浠嶣ase64杩樺師鍥炬爣鏂囦欢
+            // 从Base64还原图标文件
             for (NSString *iconFileName in iconBase64Dict) {
                 NSString *base64String = iconBase64Dict[iconFileName];
                 if ([base64String isKindOfClass:[NSString class]]) {
@@ -1231,25 +1231,25 @@ NSDictionary *getCurrentABTestData(void) {
             dyyySettings = cleanSettings;
         }
 
-        // 鎭㈠璁剧疆
+        // 恢复设置
         NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
         for (NSString *key in dyyySettings) {
             [defaults setObject:dyyySettings[key] forKey:key];
         }
         [defaults synchronize];
 
-        // 鍦ㄤ富绾跨▼鏇存柊UI
+        // 在主线程更新UI
         dispatch_async(dispatch_get_main_queue(), ^{
-            [DYYYManager showToast:@"璁剧疆宸叉仮澶嶏紝璇烽噸鍚簲鐢ㄤ互搴旂敤鎵€鏈夋洿鏀?];
+            [DYYYManager showToast:@"设置已恢复，请重启应用以应用所有更改"];
             
-            // 鍒锋柊璁剧疆鐣岄潰
+            // 刷新设置界面
             [self.tableView reloadData];
         });
     };
 
     documentPicker.delegate = self.restorePickerDelegate;
 
-    // iPad涓婄殑灞曠ず鏂瑰紡
+    // iPad上的展示方式
     if (UIDevice.currentDevice.userInterfaceIdiom == UIUserInterfaceIdiomPad) {
         documentPicker.popoverPresentationController.sourceView = self.view;
         documentPicker.popoverPresentationController.sourceRect = CGRectMake(self.view.bounds.size.width / 2, 
@@ -1257,14 +1257,14 @@ NSDictionary *getCurrentABTestData(void) {
                                                                            0, 0);
     }
 
-    // 瀹夊叏鍦板憟鐜拌鍥炬帶鍒跺櫒
+    // 安全地呈现视图控制器
     dispatch_async(dispatch_get_main_queue(), ^{
         [self presentViewController:documentPicker animated:YES completion:nil];
     });
 }
 
 - (void)setupFooterLabel {
-    // 鍒涘缓搴曢儴鏍囪瘑鏍囩
+    // 创建底部标识标签
     UIView *footerContainer = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, 60)];
     
     self.footerLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, 50)];
@@ -1275,20 +1275,18 @@ NSDictionary *getCurrentABTestData(void) {
     self.footerLabel.numberOfLines = 2;
     [footerContainer addSubview:self.footerLabel];
     
-    // 璁剧疆瀹瑰櫒涓鸿〃鏍煎簳閮ㄨ鍥?
+    // 设置容器为表格底部视图
     self.tableView.tableFooterView = footerContainer;
-}
-
-- (void)setupSectionTitles {
+} {
     self.sectionTitles = [NSMutableArray arrayWithObjects:
-                          @"鍩烘湰璁剧疆",
-                          @"鐣岄潰璁剧疆",
-                          @"闅愯棌璁剧疆",
-                          @"绉婚櫎璁剧疆",
-                          @"澧炲己鍔熻兘",
-                          @"鍥炬爣",
-                          @"娓呯悊&澶囦唤",
-                          @"鐑洿鏂?,
+                          @"基本设置",
+                          @"界面设置",
+                          @"隐藏设置",
+                          @"移除设置",
+                          @"增强功能",
+                          @"图标",
+                          @"清理&备份",
+                          @"热更新",
                           nil];
 }
 
@@ -1304,10 +1302,10 @@ NSDictionary *getCurrentABTestData(void) {
                 picker.allowsEditing = YES;
                 [self presentViewController:picker animated:YES completion:nil];
             } else {
-                UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"鏃犳硶璁块棶鐩稿唽"
-                                                                               message:@"璇峰湪璁剧疆涓厑璁歌闂浉鍐?
+                UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"无法访问相册"
+                                                                               message:@"请在设置中允许访问相册"
                                                                         preferredStyle:UIAlertControllerStyleAlert];
-                [alert addAction:[UIAlertAction actionWithTitle:@"纭畾" style:UIAlertActionStyleDefault handler:nil]];
+                [alert addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil]];
                 [self presentViewController:alert animated:YES completion:nil];
             }
         });
@@ -1319,7 +1317,7 @@ NSDictionary *getCurrentABTestData(void) {
     
     UIImage *selectedImage = info[UIImagePickerControllerEditedImage] ?: info[UIImagePickerControllerOriginalImage];
     if (!selectedImage) {
-        [DYYYManager showToast:@"鏃犳硶鑾峰彇鎵€閫夊浘鐗?];
+        [DYYYManager showToast:@"无法获取所选图片"];
         return;
     }
     
@@ -1329,11 +1327,11 @@ NSDictionary *getCurrentABTestData(void) {
         if (customAlbumImagePath) {
             [[NSUserDefaults standardUserDefaults] setObject:customAlbumImagePath forKey:@"DYYYCustomAlbumImagePath"];
             [[NSUserDefaults standardUserDefaults] synchronize];
-            [DYYYManager showToast:@"鑷畾涔夌浉鍐屽浘鐗囧凡璁剧疆"];
+            [DYYYManager showToast:@"自定义相册图片已设置"];
             [self.tableView reloadData];
             [[NSNotificationCenter defaultCenter] postNotificationName:@"DYYYCustomAlbumSettingChanged" object:nil];
         } else {
-            [DYYYManager showToast:@"淇濆瓨鑷畾涔夌浉鍐屽浘鐗囧け璐?];
+            [DYYYManager showToast:@"保存自定义相册图片失败"];
         }
     } else {
         NSString *avatarPath = [self avatarImagePath];
@@ -1385,20 +1383,20 @@ NSDictionary *getCurrentABTestData(void) {
         picker.delegate = (id)self;
         [self presentViewController:picker animated:YES completion:nil];
     } else {
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"閫夋嫨鑳屾櫙棰滆壊"
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"选择背景颜色"
                                                                        message:nil
                                                                 preferredStyle:UIAlertControllerStyleActionSheet];
         NSArray<NSDictionary *> *colors = @[
-            @{@"name": @"绮夌孩", @"color": [UIColor systemRedColor]},
-            @{@"name": @"钃濊壊", @"color": [UIColor systemBlueColor]},
-            @{@"name": @"缁胯壊", @"color": [UIColor systemGreenColor]},
-            @{@"name": @"榛勮壊", @"color": [UIColor systemYellowColor]},
-            @{@"name": @"绱壊", @"color": [UIColor systemPurpleColor]},
-            @{@"name": @"姗欒壊", @"color": [UIColor systemOrangeColor]},
-            @{@"name": @"绮夎壊", @"color": [UIColor systemPinkColor]},
-            @{@"name": @"鐏拌壊", @"color": [UIColor systemGrayColor]},
-            @{@"name": @"鐧借壊", @"color": [UIColor whiteColor]},
-            @{@"name": @"榛戣壊", @"color": [UIColor blackColor]}
+            @{@"name": @"粉红", @"color": [UIColor systemRedColor]},
+            @{@"name": @"蓝色", @"color": [UIColor systemBlueColor]},
+            @{@"name": @"绿色", @"color": [UIColor systemGreenColor]},
+            @{@"name": @"黄色", @"color": [UIColor systemYellowColor]},
+            @{@"name": @"紫色", @"color": [UIColor systemPurpleColor]},
+            @{@"name": @"橙色", @"color": [UIColor systemOrangeColor]},
+            @{@"name": @"粉色", @"color": [UIColor systemPinkColor]},
+            @{@"name": @"灰色", @"color": [UIColor systemGrayColor]},
+            @{@"name": @"白色", @"color": [UIColor whiteColor]},
+            @{@"name": @"黑色", @"color": [UIColor blackColor]}
         ];
         for (NSDictionary *colorInfo in colors) {
             NSString *name = colorInfo[@"name"];
@@ -1426,7 +1424,7 @@ NSDictionary *getCurrentABTestData(void) {
             [action setValue:colorImage forKey:@"image"];
             [alert addAction:action];
         }
-        UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"鍙栨秷" style:UIAlertActionStyleCancel handler:nil];
+        UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil];
         [alert addAction:cancelAction];
         if (UIDevice.currentDevice.userInterfaceIdiom == UIUserInterfaceIdiomPad) {
             alert.popoverPresentationController.sourceView = self.tableView;
@@ -1437,7 +1435,7 @@ NSDictionary *getCurrentABTestData(void) {
 }
 
 
-// 鏀寔 UIColorPickerViewController 鍥炶皟
+// 支持 UIColorPickerViewController 回调
 #if __IPHONE_OS_VERSION_MAX_ALLOWED >= 140000
 - (void)colorPickerViewControllerDidSelectColor:(UIColorPickerViewController *)viewController API_AVAILABLE(ios(14.0)){
     UIColor *color = viewController.selectedColor;
@@ -1445,7 +1443,7 @@ NSDictionary *getCurrentABTestData(void) {
     NSData *colorData = [NSKeyedArchiver archivedDataWithRootObject:color];
     [[NSUserDefaults standardUserDefaults] setObject:colorData forKey:@"DYYYBackgroundColor"];
     [[NSUserDefaults standardUserDefaults] synchronize];
-    // 閫氱煡寮圭獥鍒锋柊
+    // 通知弹窗刷新
     [[NSNotificationCenter defaultCenter] postNotificationName:@"DYYYBackgroundColorChanged" object:nil];
     for (NSInteger section = 0; section < self.settingSections.count; section++) {
         NSArray *items = self.settingSections[section];
@@ -1503,7 +1501,7 @@ NSDictionary *getCurrentABTestData(void) {
         NSMutableArray *filteredSection = [NSMutableArray array];
         
         for (DYYYSettingItem *item in section) {
-            // 鎼滅储鏍囬鎴杒ey
+            // 搜索标题或key
             if ([item.title.lowercaseString containsString:searchText.lowercaseString] ||
                 [item.key.lowercaseString containsString:searchText.lowercaseString]) {
                 [filteredSection addObject:item];
@@ -1532,24 +1530,24 @@ NSDictionary *getCurrentABTestData(void) {
 }
 
 - (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
-    // 纭繚澶撮儴瑙嗗浘楂樺害涓庤繑鍥炵殑楂樺害涓€鑷?35)
+    // 确保头部视图高度与返回的高度一致(35)
     UIView *headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, tableView.bounds.size.width, 45)];
     headerView.backgroundColor = [UIColor clearColor];
     
-    // 淇澶撮儴鎸夐挳鐨勫搴﹀拰浣嶇疆锛屼娇鍏跺眳涓笖瀹藉害閫傚綋
+    // 修正头部按钮的宽度和位置，使其居中且宽度适当
     UIButton *headerButton = [UIButton buttonWithType:UIButtonTypeCustom];
     
-    // 璁剧疆鎸夐挳姘村钩灞呬腑锛屽苟璁剧疆鍚堥€傜殑瀹藉害
+    // 设置按钮水平居中，并设置合适的宽度
     CGFloat buttonWidth = tableView.bounds.size.width - 55;
-    CGFloat buttonX = (tableView.bounds.size.width - buttonWidth) / 5; // 璁＄畻浣挎寜閽按骞冲眳涓殑X鍧愭爣
+    CGFloat buttonX = (tableView.bounds.size.width - buttonWidth) / 5; // 计算使按钮水平居中的X坐标
     headerButton.frame = CGRectMake(buttonX, 2, buttonWidth, 41);
     
-    // 浣跨敤绯荤粺鑳屾櫙鑹插苟娣诲姞鍦嗚
-    headerButton.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.9]; // 鍗婇€忔槑鐧借壊鑳屾櫙
+    // 使用系统背景色并添加圆角
+    headerButton.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.9]; // 半透明白色背景
     headerButton.layer.cornerRadius = 10;
-    headerButton.layer.masksToBounds = YES; // 纭繚鍐呭涓嶈秴鍑哄渾瑙掕寖鍥?
+    headerButton.layer.masksToBounds = YES; // 确保内容不超出圆角范围
     
-    // 璁剧疆鏍囬鎸夐挳灞炴€?
+    // 设置标题按钮属性
     headerButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
     headerButton.titleLabel.font = [UIFont boldSystemFontOfSize:17];
     [headerButton setTitle:self.isSearching ? self.filteredSectionTitles[section] : self.sectionTitles[section] forState:UIControlStateNormal];
@@ -1557,13 +1555,13 @@ NSDictionary *getCurrentABTestData(void) {
     headerButton.tag = section;
     [headerButton addTarget:self action:@selector(headerTapped:) forControlEvents:UIControlEventTouchUpInside];
     
-    // 娣诲姞宸︿晶鍥炬爣 - 浣跨敤iPhone鍘熺敓鐣岄潰澶у皬
+    // 添加左侧图标 - 使用iPhone原生界面大小
     UIImageView *leftIconImageView = [[UIImageView alloc] init];
     if (@available(iOS 13.0, *)) {
         NSString *iconName = [self iconNameForSection:section];
         UIColor *iconColor = [self iconColorForSection:section];
         
-        // 浣跨敤鏇村ぇ鐨勫浘鏍囧昂瀵革紝妯′豢iPhone鍘熺敓璁剧疆鐣岄潰
+        // 使用更大的图标尺寸，模仿iPhone原生设置界面
         UIImageSymbolConfiguration *config = [UIImageSymbolConfiguration configurationWithPointSize:22 weight:UIImageSymbolWeightMedium];
         UIImage *iconImage = [[UIImage systemImageNamed:iconName] imageWithConfiguration:config];
         leftIconImageView.image = iconImage;
@@ -1573,22 +1571,22 @@ NSDictionary *getCurrentABTestData(void) {
         leftIconImageView.tintColor = [UIColor systemBlueColor];
     }
     
-    // 璁剧疆宸︿晶鍥炬爣浣嶇疆 - 璋冩暣涓烘洿澶х殑灏哄鍜屼綅缃?
+    // 设置左侧图标位置 - 调整为更大的尺寸和位置
     CGFloat leftIconMargin = 15;
-    CGFloat iconSize = 24; // 澧炲ぇ鍥炬爣灏哄锛屾ā浠垮師鐢熺晫闈?
-    CGFloat iconY = (41 - iconSize) / 2; // 鍨傜洿灞呬腑
+    CGFloat iconSize = 24; // 增大图标尺寸，模仿原生界面
+    CGFloat iconY = (41 - iconSize) / 2; // 垂直居中
     leftIconImageView.frame = CGRectMake(leftIconMargin, iconY, iconSize, iconSize);
     leftIconImageView.contentMode = UIViewContentModeScaleAspectFit;
     
-    // 璋冩暣鏍囬鎸夐挳鐨勫唴瀹硅竟璺濓紝涓哄乏渚у浘鏍囩暀鍑虹┖闂?
-    headerButton.contentEdgeInsets = UIEdgeInsetsMake(0, leftIconMargin + iconSize + 10, 0, 35); // 宸﹁竟璺?= 鍥炬爣宸﹁竟璺?+ 鍥炬爣瀹藉害 + 闂磋窛
+    // 调整标题按钮的内容边距，为左侧图标留出空间
+    headerButton.contentEdgeInsets = UIEdgeInsetsMake(0, leftIconMargin + iconSize + 10, 0, 35); // 左边距 = 图标左边距 + 图标宽度 + 间距
     
-    // 娣诲姞鍙充晶绠ご鎸囩ず鍣?
+    // 添加右侧箭头指示器
     UIImageView *arrowImageView = [[UIImageView alloc] init];
     if (@available(iOS 13.0, *)) {
         UIImage *arrowImage = [UIImage systemImageNamed:[self.expandedSections containsObject:@(section)] ? @"chevron.down" : @"chevron.right"];
         
-        // 绠ご涔熶娇鐢ㄦ洿澶х殑灏哄
+        // 箭头也使用更大的尺寸
         UIImageSymbolConfiguration *config = [UIImageSymbolConfiguration configurationWithPointSize:18 weight:UIImageSymbolWeightSemibold];
         arrowImage = [arrowImage imageWithConfiguration:config];
         arrowImageView.image = arrowImage;
@@ -1598,10 +1596,10 @@ NSDictionary *getCurrentABTestData(void) {
         arrowImageView.tintColor = [UIColor systemGrayColor];
     }
     
-    // 璋冩暣绠ご浣嶇疆鍒板彸渚?- 浣跨敤鏇村ぇ鐨勫昂瀵?
+    // 调整箭头位置到右侧 - 使用更大的尺寸
     CGFloat arrowRightMargin = 15;
-    CGFloat arrowSize = 18; // 澧炲ぇ绠ご灏哄
-    CGFloat arrowY = (41 - arrowSize) / 2; // 鍨傜洿灞呬腑
+    CGFloat arrowSize = 18; // 增大箭头尺寸
+    CGFloat arrowY = (41 - arrowSize) / 2; // 垂直居中
     arrowImageView.frame = CGRectMake(buttonWidth - arrowSize - arrowRightMargin, arrowY, arrowSize, arrowSize);
     arrowImageView.contentMode = UIViewContentModeScaleAspectFit;
     
@@ -1620,17 +1618,17 @@ NSDictionary *getCurrentABTestData(void) {
 
 - (NSString *)iconNameForSection:(NSInteger)section {
     NSArray *iconNames = @[
-        @"slider.horizontal.3",        // 鍩烘湰璁剧疆 - 鏇寸洿瑙傜殑鎺у埗闈㈡澘鍥炬爣
-        @"paintpalette.fill",          // 鐣岄潰璁剧疆 - 璋冭壊鏉挎洿绗﹀悎鐣岄潰瀹氬埗
-        @"eye.slash.circle.fill",      // 闅愯棌璁剧疆 - 鍦嗗舰鐗堟湰鏇寸幇浠?
-        @"minus.circle.fill",          // 绉婚櫎璁剧疆 - 鍑忓彿鏇村噯纭〃杈剧Щ闄?
-        @"wand.and.stars",             // 澧炲己鍔熻兘 - 榄旀硶妫掕〃绀哄寮?浼樺寲
-        @"app.badge.fill",             // 鍥炬爣 - 搴旂敤寰界珷鏇磋创鍒囧浘鏍囧畾鍒?
-        @"archivebox.fill",            // 娓呯悊&澶囦唤 - 褰掓。鐩掑瓙鏇翠笓涓?
-        @"arrow.clockwise.icloud.fill" // 鐑洿鏂?- 浜戠鏇存柊鍥炬爣鏇村噯纭?
+        @"slider.horizontal.3",        // 基本设置 - 更直观的控制面板图标
+        @"paintpalette.fill",          // 界面设置 - 调色板更符合界面定制
+        @"eye.slash.circle.fill",      // 隐藏设置 - 圆形版本更现代
+        @"minus.circle.fill",          // 移除设置 - 减号更准确表达移除
+        @"wand.and.stars",             // 增强功能 - 魔法棒表示增强/优化
+        @"app.badge.fill",             // 图标 - 应用徽章更贴切图标定制
+        @"archivebox.fill",            // 清理&备份 - 归档盒子更专业
+        @"arrow.clockwise.icloud.fill" // 热更新 - 云端更新图标更准确
     ];
     
-    // 鑾峰彇鎼滅储鏃剁殑鍘熷鍒嗙粍绱㈠紩
+    // 获取搜索时的原始分组索引
     NSInteger originalSection = section;
     if (self.isSearching && section < self.filteredSectionTitles.count) {
         NSString *sectionTitle = self.filteredSectionTitles[section];
@@ -1648,17 +1646,17 @@ NSDictionary *getCurrentABTestData(void) {
 
 - (UIColor *)iconColorForSection:(NSInteger)section {
     NSArray *colors = @[
-        [UIColor systemBlueColor],      // 鍩烘湰璁剧疆
-        [UIColor systemPurpleColor],    // 鐣岄潰璁剧疆  
-        [UIColor systemRedColor],       // 闅愯棌璁剧疆
-        [UIColor systemOrangeColor],    // 绉婚櫎璁剧疆
-        [UIColor systemGreenColor],     // 澧炲己鍔熻兘
-        [UIColor systemPinkColor],      // 鍥炬爣
-        [UIColor systemTealColor],      // 娓呯悊&澶囦唤
-        [UIColor systemIndigoColor]     // 鐑洿鏂?
+        [UIColor systemBlueColor],      // 基本设置
+        [UIColor systemPurpleColor],    // 界面设置  
+        [UIColor systemRedColor],       // 隐藏设置
+        [UIColor systemOrangeColor],    // 移除设置
+        [UIColor systemGreenColor],     // 增强功能
+        [UIColor systemPinkColor],      // 图标
+        [UIColor systemTealColor],      // 清理&备份
+        [UIColor systemIndigoColor]     // 热更新
     ];
     
-    // 鑾峰彇鎼滅储鏃剁殑鍘熷鍒嗙粍绱㈠紩
+    // 获取搜索时的原始分组索引
     NSInteger originalSection = section;
     if (self.isSearching && section < self.filteredSectionTitles.count) {
         NSString *sectionTitle = self.filteredSectionTitles[section];
@@ -1675,11 +1673,11 @@ NSDictionary *getCurrentABTestData(void) {
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-    return 44.0; // 浣跨敤鏍囧噯琛岄珮
+    return 44.0; // 使用标准行高
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
-    return 35.0; // 淇濇寔涓€鑷寸殑鍒嗙粍澶撮儴楂樺害
+    return 35.0; // 保持一致的分组头部高度
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
@@ -1701,14 +1699,14 @@ NSDictionary *getCurrentABTestData(void) {
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
     }
     
-    // 绉婚櫎鏃х殑閲嶇疆鎸夐挳鍜屽叾浠栬嚜瀹氫箟瑙嗗浘
+    // 移除旧的重置按钮和其他自定义视图
     for (UIView *view in cell.contentView.subviews) {
         if (view.tag == 555) {
             [view removeFromSuperview];
         }
     }
     
-    // 璋冩暣鏂囧瓧闂磋窛
+    // 调整文字间距
     NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
     paragraphStyle.lineSpacing = 2;
     paragraphStyle.paragraphSpacing = 0;
@@ -1724,19 +1722,19 @@ NSDictionary *getCurrentABTestData(void) {
     cell.backgroundColor = [UIColor clearColor];
     cell.detailTextLabel.text = nil;
     
-    // 鐗规畩澶勭悊澶囦唤鍜屾仮澶嶅姛鑳?
+    // 特殊处理备份和恢复功能
     if ([item.key isEqualToString:@"DYYYBackupSettings"] || [item.key isEqualToString:@"DYYYRestoreSettings"]) {
         cell.accessoryView = nil;
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
         return cell;
     }
-    // 鐗规畩澶勭悊娓呯悊鍔熻兘
+    // 特殊处理清理功能
     if ([item.key isEqualToString:@"DYYYCleanCache"] || [item.key isEqualToString:@"DYYYCleanSettings"]) {
         cell.accessoryView = nil;
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
         return cell;
     }
-    // 鐗规畩澶勭悊鐑洿鏂板姛鑳?
+    // 特殊处理热更新功能
     if ([item.key isEqualToString:@"SaveCurrentABTestData"] ||
         [item.key isEqualToString:@"LoadABTestConfigFile"] ||
         [item.key isEqualToString:@"DeleteABTestConfigFile"]) {
@@ -1744,7 +1742,7 @@ NSDictionary *getCurrentABTestData(void) {
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
         return cell;
     }
-    // 鐗规畩澶勭悊鍥炬爣鑷畾涔夊姛鑳?
+    // 特殊处理图标自定义功能
     if ([item.key hasPrefix:@"DYYYIcon"]) {
         NSString *saveFilename = nil;
         if ([item.key isEqualToString:@"DYYYIconLikeBefore"]) {
@@ -1791,10 +1789,10 @@ NSDictionary *getCurrentABTestData(void) {
             return cell;
         }
     }
-    // 鏆楅粦鏋佺畝椋庢牸锛氱Щ闄ゅ乏渚у浘鏍?
+    // 暗黑极简风格：移除左侧图标
     cell.imageView.image = nil;
     cell.imageView.contentMode = UIViewContentModeCenter;
-    // 寰蒋椋庢牸鍗＄墖鑳屾櫙
+    // 微软风格卡片背景
     UIView *card = [cell.contentView viewWithTag:8888];
     if (!card) {
         card = [[UIView alloc] initWithFrame:CGRectInset(cell.contentView.bounds, 8, 4)];
@@ -1808,16 +1806,16 @@ NSDictionary *getCurrentABTestData(void) {
         card.tag = 8888;
         [cell.contentView insertSubview:card atIndex:0];
     }
-    // 鍒涘缓鍗曞厓鏍肩殑閰嶄欢瑙嗗浘
+    // 创建单元格的配件视图
     UIView *accessoryView = nil;
-    // 閽堝scheduleStyle鐨勭壒娈婂鐞?
+    // 针对scheduleStyle的特殊处理
     if ([item.key isEqualToString:@"DYYYScheduleStyle"]) {
         UIButton *styleButton = [UIButton buttonWithType:UIButtonTypeSystem];
         styleButton.frame = CGRectMake(0, 0, 120, 30);
         NSString *currentStyle = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYScheduleStyle"];
         BOOL displayEnabled = [[NSUserDefaults standardUserDefaults] boolForKey:@"DYYYShowScheduleDisplay"];
         if (currentStyle.length == 0) {
-            [styleButton setTitle:@"榛樿" forState:UIControlStateNormal];
+            [styleButton setTitle:@"默认" forState:UIControlStateNormal];
         } else {
             NSString *displayValue = currentStyle;
             if ([currentStyle containsString:@"-"]) {
@@ -1828,7 +1826,7 @@ NSDictionary *getCurrentABTestData(void) {
         styleButton.enabled = displayEnabled;
         styleButton.alpha = displayEnabled ? 1.0 : 0.5;
         if (!displayEnabled) {
-            cell.detailTextLabel.text = @"闇€鍏堝紑鍚樉绀鸿繘搴︽椂闀?;
+            cell.detailTextLabel.text = @"需先开启显示进度时长";
             cell.detailTextLabel.textColor = [UIColor systemRedColor];
         } else {
             cell.detailTextLabel.text = nil;
@@ -1869,7 +1867,7 @@ NSDictionary *getCurrentABTestData(void) {
                 accessoryView = previewButton;
             } else {
                 UIButton *chooseButton = [UIButton buttonWithType:UIButtonTypeSystem];
-                [chooseButton setTitle:@"閫夋嫨鍥剧墖" forState:UIControlStateNormal];
+                [chooseButton setTitle:@"选择图片" forState:UIControlStateNormal];
                 [chooseButton addTarget:self action:@selector(showImagePickerForCustomAlbum) forControlEvents:UIControlEventTouchUpInside];
                 chooseButton.frame = CGRectMake(0, 0, 80, 30);
                 accessoryView = chooseButton;
@@ -1944,7 +1942,7 @@ NSDictionary *getCurrentABTestData(void) {
     return cell;
 }
 
-// 娣诲姞鍥炬爣鎸夐挳鐐瑰嚮澶勭悊鏂规硶
+// 添加图标按钮点击处理方法
 - (void)iconButtonTapped:(UIButton *)sender {
     NSInteger tag = sender.tag;
     NSInteger section = tag / 1000;
@@ -1980,20 +1978,20 @@ NSDictionary *getCurrentABTestData(void) {
         BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:imagePath];
         UIImage *previewImage = fileExists ? [UIImage imageWithContentsOfFile:imagePath] : nil;
         
-        // 鏄剧ず鍥炬爣閫夋嫨寮圭獥
+        // 显示图标选择弹窗
         [self showIconOptionsDialogWithTitle:item.title previewImage:previewImage saveFilename:saveFilename];
     }
 }
 
-// 娣诲姞鐑洿鏂板姛鑳藉疄鐜版柟娉?
+// 添加热更新功能实现方法
 - (void)saveCurrentABTestData {
     NSDictionary *currentData = getCurrentABTestData();
     if (!currentData) {
-        [DYYYManager showToast:@"鑾峰彇ABTest鏁版嵁澶辫触"];
+        [DYYYManager showToast:@"获取ABTest数据失败"];
         return;
     }
     
-    // 淇濆瓨鍒版枃妗ｇ洰褰?
+    // 保存到文档目录
     NSString *documentsPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
     NSString *dyyyFolderPath = [documentsPath stringByAppendingPathComponent:@"DYYY"];
     NSString *configPath = [dyyyFolderPath stringByAppendingPathComponent:@"abtest_config.json"];
@@ -2002,17 +2000,17 @@ NSDictionary *getCurrentABTestData(void) {
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject:currentData options:NSJSONWritingPrettyPrinted error:&error];
     
     if (error) {
-        [DYYYManager showToast:@"搴忓垪鍖栨暟鎹け璐?];
+        [DYYYManager showToast:@"序列化数据失败"];
         return;
     }
     
-    // 纭繚鐩綍瀛樺湪
+    // 确保目录存在
     [[NSFileManager defaultManager] createDirectoryAtPath:dyyyFolderPath withIntermediateDirectories:YES attributes:nil error:nil];
     
     if ([jsonData writeToFile:configPath atomically:YES]) {
-        [DYYYManager showToast:@"ABTest閰嶇疆宸蹭繚瀛?];
+        [DYYYManager showToast:@"ABTest配置已保存"];
     } else {
-        [DYYYManager showToast:@"淇濆瓨澶辫触"];
+        [DYYYManager showToast:@"保存失败"];
     }
 }
 
@@ -2033,24 +2031,24 @@ NSDictionary *getCurrentABTestData(void) {
     NSData *data = [NSData dataWithContentsOfURL:url options:0 error:&error];
     
     if (error) {
-        [DYYYManager showToast:@"璇诲彇鏂囦欢澶辫触"];
+        [DYYYManager showToast:@"读取文件失败"];
         return;
     }
     
     NSDictionary *configData = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
     
     if (error) {
-        [DYYYManager showToast:@"瑙ｆ瀽JSON澶辫触"];
+        [DYYYManager showToast:@"解析JSON失败"];
         return;
     }
     
-    // 搴旂敤ABTest閰嶇疆
+    // 应用ABTest配置
     Class AWEABTestManagerClass = NSClassFromString(@"AWEABTestManager");
     if (AWEABTestManagerClass) {
         id manager = [AWEABTestManagerClass performSelector:@selector(sharedManager)];
         if ([manager respondsToSelector:@selector(setAbTestData:)]) {
             [manager performSelector:@selector(setAbTestData:) withObject:configData];
-            [DYYYManager showToast:@"ABTest閰嶇疆宸插簲鐢?];
+            [DYYYManager showToast:@"ABTest配置已应用"];
         }
     }
 }
@@ -2070,20 +2068,20 @@ NSDictionary *getCurrentABTestData(void) {
             gFileExists = NO;
             gFixedABTestData = nil;
             gDataLoaded = NO;
-            [DYYYManager showToast:@"ABTest閰嶇疆鏂囦欢宸插垹闄?];
+            [DYYYManager showToast:@"ABTest配置文件已删除"];
         } else {
-            [DYYYManager showToast:[NSString stringWithFormat:@"鍒犻櫎閰嶇疆鏂囦欢澶辫触: %@", error.localizedDescription]];
+            [DYYYManager showToast:[NSString stringWithFormat:@"删除配置文件失败: %@", error.localizedDescription]];
         }
     } else {
-        [DYYYManager showToast:@"娌℃湁鎵惧埌ABTest閰嶇疆鏂囦欢"];
+        [DYYYManager showToast:@"没有找到ABTest配置文件"];
     }
 }
 
-// 鏍规嵁璁剧疆椤硅繑鍥炲浘鏍囧悕绉?
+// 根据设置项返回图标名称
 - (UIImage *)iconImageForSettingItem:(DYYYSettingItem *)item {
     NSString *iconName;
     
-    // 涓烘柊澧炲姛鑳芥坊鍔犲浘鏍?
+    // 为新增功能添加图标
     if ([item.key isEqualToString:@"DYYYEnableVideoHighestQuality"]) {
         iconName = @"4k.tv.fill";
     } else if ([item.key isEqualToString:@"DYYYEnableNoiseFilter"]) {
@@ -2099,115 +2097,115 @@ NSDictionary *getCurrentABTestData(void) {
     } else if ([item.key isEqualToString:@"DYYYFourceDownloadEmotion"]) {
         iconName = @"face.smiling.inverse";
     } 
-    // 涓哄僵鑹插彇鑹插櫒娣诲姞鐗规畩澶勭悊
+    // 为彩色取色器添加特殊处理
     else if ([item.key isEqualToString:@"DYYYBackgroundColor"]) {
         iconName = @"paintpalette.fill";
     } 
-    // 涓轰晶鏍忕畝鍖栧姛鑳芥坊鍔犵壒娈婂鐞?
+    // 为侧栏简化功能添加特殊处理
     else if ([item.key isEqualToString:@"DYYYStreamlinethesidebar"]) {
         iconName = @"sidebar.left";
     }
-    // 涓烘繁鑹查敭鐩樺姛鑳芥坊鍔犵壒娈婂鐞?
+    // 为深色键盘功能添加特殊处理
     else if ([item.key isEqualToString:@"DYYYisDarkKeyBoard"]) {
         iconName = @"keyboard";
     }
-    // 鍏朵粬鏍规嵁璁剧疆椤圭殑key閫夋嫨鍚堥€傜殑鍥炬爣...
-    else if ([item.key containsString:@"Danmu"] || [item.key containsString:@"寮瑰箷"]) {
+    // 其他根据设置项的key选择合适的图标...
+    else if ([item.key containsString:@"Danmu"] || [item.key containsString:@"弹幕"]) {
         iconName = @"text.bubble.fill";
-    } else if ([item.key containsString:@"Color"] || [item.key containsString:@"棰滆壊"]) {
+    } else if ([item.key containsString:@"Color"] || [item.key containsString:@"颜色"]) {
         iconName = @"paintbrush.fill";
     } else if ([item.key containsString:@"Hide"] || [item.key containsString:@"hidden"]) {
         iconName = @"eye.slash.fill";
-    } else if ([item.key containsString:@"Download"] || [item.key containsString:@"涓嬭浇"]) {
+    } else if ([item.key containsString:@"Download"] || [item.key containsString:@"下载"]) {
         iconName = @"arrow.down.circle.fill";
-    } else if ([item.key containsString:@"Video"] || [item.key containsString:@"瑙嗛"]) {
+    } else if ([item.key containsString:@"Video"] || [item.key containsString:@"视频"]) {
         iconName = @"video.fill";
-    } else if ([item.key containsString:@"Audio"] || [item.key containsString:@"闊抽"]) {
+    } else if ([item.key containsString:@"Audio"] || [item.key containsString:@"音频"]) {
         iconName = @"speaker.wave.2.fill";
-    } else if ([item.key containsString:@"Image"] || [item.key containsString:@"鍥剧墖"]) {
+    } else if ([item.key containsString:@"Image"] || [item.key containsString:@"图片"]) {
         iconName = @"photo.fill";
-    } else if ([item.key containsString:@"Speed"] || [item.key containsString:@"鍊嶉€?]) {
+    } else if ([item.key containsString:@"Speed"] || [item.key containsString:@"倍速"]) {
         iconName = @"speedometer";
-    } else if ([item.key containsString:@"Enable"] || [item.key containsString:@"鍚敤"]) {
+    } else if ([item.key containsString:@"Enable"] || [item.key containsString:@"启用"]) {
         iconName = @"checkmark.circle.fill";
-    } else if ([item.key containsString:@"Disable"] || [item.key containsString:@"绂佺敤"]) {
+    } else if ([item.key containsString:@"Disable"] || [item.key containsString:@"禁用"]) {
         iconName = @"xmark.circle.fill";
-    } else if ([item.key containsString:@"Time"] || [item.key containsString:@"鏃堕棿"]) {
+    } else if ([item.key containsString:@"Time"] || [item.key containsString:@"时间"]) {
         iconName = @"clock.fill";
-    } else if ([item.key containsString:@"Date"] || [item.key containsString:@"鏃ユ湡"]) {
+    } else if ([item.key containsString:@"Date"] || [item.key containsString:@"日期"]) {
         iconName = @"calendar";
-    } else if ([item.key containsString:@"Button"] || [item.key containsString:@"鎸夐挳"]) {
+    } else if ([item.key containsString:@"Button"] || [item.key containsString:@"按钮"]) {
         iconName = @"hand.tap.fill";
-    } else if ([item.key containsString:@"Avatar"] || [item.key containsString:@"澶村儚"]) {
+    } else if ([item.key containsString:@"Avatar"] || [item.key containsString:@"头像"]) {
         iconName = @"person.crop.circle.fill";
-    } else if ([item.key containsString:@"Comment"] || [item.key containsString:@"璇勮"]) {
+    } else if ([item.key containsString:@"Comment"] || [item.key containsString:@"评论"]) {
         iconName = @"message.fill";
-    } else if ([item.key containsString:@"Clean"] || [item.key containsString:@"娓呯悊"] || [item.key containsString:@"娓呭睆"]) {
+    } else if ([item.key containsString:@"Clean"] || [item.key containsString:@"清理"] || [item.key containsString:@"清屏"]) {
         iconName = @"trash.fill";
-    } else if ([item.key containsString:@"Share"] || [item.key containsString:@"鍒嗕韩"]) {
+    } else if ([item.key containsString:@"Share"] || [item.key containsString:@"分享"]) {
         iconName = @"square.and.arrow.up.fill";
-    } else if ([item.key containsString:@"Background"] || [item.key containsString:@"鑳屾櫙"]) {
+    } else if ([item.key containsString:@"Background"] || [item.key containsString:@"背景"]) {
         iconName = @"rectangle.fill.on.rectangle.fill";
-    } else if ([item.key containsString:@"Like"] || [item.key containsString:@"鐐硅禐"]) {
+    } else if ([item.key containsString:@"Like"] || [item.key containsString:@"点赞"]) {
         iconName = @"heart.fill";
-    } else if ([item.key containsString:@"Notification"] || [item.key containsString:@"閫氱煡"]) {
+    } else if ([item.key containsString:@"Notification"] || [item.key containsString:@"通知"]) {
         iconName = @"bell.fill";
-    } else if ([item.key containsString:@"Copy"] || [item.key containsString:@"澶嶅埗"]) {
+    } else if ([item.key containsString:@"Copy"] || [item.key containsString:@"复制"]) {
         iconName = @"doc.on.doc.fill";
-    } else if ([item.key containsString:@"Emotion"] || [item.key containsString:@"琛ㄦ儏"]) {
+    } else if ([item.key containsString:@"Emotion"] || [item.key containsString:@"表情"]) {
         iconName = @"face.smiling.fill";
-    } else if ([item.key containsString:@"Text"] || [item.key containsString:@"鏂囨湰"]) {
+    } else if ([item.key containsString:@"Text"] || [item.key containsString:@"文本"]) {
         iconName = @"text.alignleft";
-    } else if ([item.key containsString:@"Location"] || [item.key containsString:@"浣嶇疆"] || [item.key containsString:@"灞炲湴"]) {
+    } else if ([item.key containsString:@"Location"] || [item.key containsString:@"位置"] || [item.key containsString:@"属地"]) {
         iconName = @"location.fill";
-    } else if ([item.key containsString:@"Area"] || [item.key containsString:@"鍦板尯"]) {
+    } else if ([item.key containsString:@"Area"] || [item.key containsString:@"地区"]) {
         iconName = @"mappin.and.ellipse";
-    } else if ([item.key containsString:@"Layout"] || [item.key containsString:@"甯冨眬"]) {
+    } else if ([item.key containsString:@"Layout"] || [item.key containsString:@"布局"]) {
         iconName = @"square.grid.2x2.fill";
-    } else if ([item.key containsString:@"Transparent"] || [item.key containsString:@"閫忔槑"]) {
+    } else if ([item.key containsString:@"Transparent"] || [item.key containsString:@"透明"]) {
         iconName = @"square.on.circle.fill";
-    } else if ([item.key containsString:@"Live"] || [item.key containsString:@"鐩存挱"]) {
+    } else if ([item.key containsString:@"Live"] || [item.key containsString:@"直播"]) {
         iconName = @"antenna.radiowaves.left.and.right";
-    } else if ([item.key containsString:@"Double"] || [item.key containsString:@"鍙屽嚮"]) {
+    } else if ([item.key containsString:@"Double"] || [item.key containsString:@"双击"]) {
         iconName = @"hand.tap.fill";
-    } else if ([item.key containsString:@"Long"] || [item.key containsString:@"闀挎寜"]) {
+    } else if ([item.key containsString:@"Long"] || [item.key containsString:@"长按"]) {
         iconName = @"hand.draw.fill";
-    } else if ([item.key containsString:@"ScreenDisplay"] || [item.key containsString:@"鍏ㄥ睆"]) {
+    } else if ([item.key containsString:@"ScreenDisplay"] || [item.key containsString:@"全屏"]) {
         iconName = @"rectangle.expand.vertical";
-    } else if ([item.key containsString:@"Index"] || [item.key containsString:@"棣栭〉"]) {
+    } else if ([item.key containsString:@"Index"] || [item.key containsString:@"首页"]) {
         iconName = @"house.fill";
-    } else if ([item.key containsString:@"Friends"] || [item.key containsString:@"鏈嬪弸"]) {
+    } else if ([item.key containsString:@"Friends"] || [item.key containsString:@"朋友"]) {
         iconName = @"person.2.fill";
-    } else if ([item.key containsString:@"Msg"] || [item.key containsString:@"娑堟伅"]) {
+    } else if ([item.key containsString:@"Msg"] || [item.key containsString:@"消息"]) {
         iconName = @"envelope.fill";
-    } else if ([item.key containsString:@"Self"] || [item.key containsString:@"鎴戠殑"]) {
+    } else if ([item.key containsString:@"Self"] || [item.key containsString:@"我的"]) {
         iconName = @"person.crop.square.fill";
-    } else if ([item.key containsString:@"NoAds"] || [item.key containsString:@"骞垮憡"]) {
+    } else if ([item.key containsString:@"NoAds"] || [item.key containsString:@"广告"]) {
         iconName = @"xmark.octagon.fill";
-    } else if ([item.key containsString:@"NoUpdates"] || [item.key containsString:@"鏇存柊"]) {
+    } else if ([item.key containsString:@"NoUpdates"] || [item.key containsString:@"更新"]) {
         iconName = @"arrow.triangle.2.circlepath";
-    } else if ([item.key containsString:@"InterfaceDownload"] || [item.key containsString:@"鎺ュ彛"]) {
+    } else if ([item.key containsString:@"InterfaceDownload"] || [item.key containsString:@"接口"]) {
         iconName = @"link.circle.fill";
-    } else if ([item.key containsString:@"Scale"] || [item.key containsString:@"缂╂斁"]) {
+    } else if ([item.key containsString:@"Scale"] || [item.key containsString:@"缩放"]) {
         iconName = @"arrow.up.left.and.down.right.magnifyingglass";
-    } else if ([item.key containsString:@"Blur"] || [item.key containsString:@"妯＄硦"] || [item.key containsString:@"鐜荤拑"]) {
+    } else if ([item.key containsString:@"Blur"] || [item.key containsString:@"模糊"] || [item.key containsString:@"玻璃"]) {
         iconName = @"drop.fill";
-    } else if ([item.key containsString:@"Shop"] || [item.key containsString:@"鍟嗗煄"]) {
+    } else if ([item.key containsString:@"Shop"] || [item.key containsString:@"商城"]) {
         iconName = @"cart.fill";
-    } else if ([item.key containsString:@"Tips"] || [item.key containsString:@"鎻愮ず"]) {
+    } else if ([item.key containsString:@"Tips"] || [item.key containsString:@"提示"]) {
         iconName = @"exclamationmark.bubble.fill";
-    } else if ([item.key containsString:@"Format"] || [item.key containsString:@"鏍煎紡"]) {
+    } else if ([item.key containsString:@"Format"] || [item.key containsString:@"格式"]) {
         iconName = @"textformat";
-    } else if ([item.key containsString:@"Filter"] || [item.key containsString:@"杩囨护"]) {
+    } else if ([item.key containsString:@"Filter"] || [item.key containsString:@"过滤"]) {
         iconName = @"line.horizontal.3.decrease.circle.fill";
     } else {
-        // 榛樿鍥炬爣
+        // 默认图标
         iconName = @"gearshape.fill";
     }
     
     UIImage *icon = [UIImage systemImageNamed:iconName];
     if (@available(iOS 15.0, *)) {
-        // 涓洪鑹茶儗鏅壒娈婂鐞?
+        // 为颜色背景特殊处理
         if ([item.key isEqualToString:@"DYYYBackgroundColor"]) {
             return [icon imageWithConfiguration:[UIImageSymbolConfiguration configurationWithHierarchicalColor:[UIColor systemPinkColor]]];
         }
@@ -2217,9 +2215,9 @@ NSDictionary *getCurrentABTestData(void) {
     }
 }
 
-// 鏍规嵁璁剧疆椤硅繑鍥為鑹?
+// 根据设置项返回颜色
 - (UIColor *)colorForSettingItem:(DYYYSettingItem *)item {
-    // 涓哄彇鑹插櫒鍜岀壒瀹氬姛鑳借缃壒娈婇鑹?
+    // 为取色器和特定功能设置特殊颜色
     if ([item.key isEqualToString:@"DYYYBackgroundColor"]) {
         return [UIColor systemPinkColor];
     } else if ([item.key isEqualToString:@"DYYYStreamlinethesidebar"]) {
@@ -2228,42 +2226,42 @@ NSDictionary *getCurrentABTestData(void) {
         return [UIColor systemGrayColor];
     }
     
-    // 鏍规嵁璁剧疆椤圭被鍨嬭繑鍥炰笉鍚岄鑹?
+    // 根据设置项类型返回不同颜色
     if ([item.key containsString:@"Hide"] || [item.key containsString:@"hidden"]) {
         return [UIColor systemRedColor];
-    } else if ([item.key containsString:@"Enable"] || [item.key containsString:@"鍚敤"]) {
+    } else if ([item.key containsString:@"Enable"] || [item.key containsString:@"启用"]) {
         return [UIColor systemGreenColor];
-    } else if ([item.key containsString:@"Color"] || [item.key containsString:@"棰滆壊"]) {
+    } else if ([item.key containsString:@"Color"] || [item.key containsString:@"颜色"]) {
         return [UIColor systemPurpleColor];
-    } else if ([item.key containsString:@"Copy"] || [item.key containsString:@"澶嶅埗"]) {
+    } else if ([item.key containsString:@"Copy"] || [item.key containsString:@"复制"]) {
         return [UIColor systemTealColor];
-    } else if ([item.key containsString:@"Emotion"] || [item.key containsString:@"琛ㄦ儏"]) {
+    } else if ([item.key containsString:@"Emotion"] || [item.key containsString:@"表情"]) {
         return [UIColor systemYellowColor];
-    } else if ([item.key containsString:@"Double"] || [item.key containsString:@"鍙屽嚮"]) {
+    } else if ([item.key containsString:@"Double"] || [item.key containsString:@"双击"]) {
         return [UIColor systemOrangeColor];
-    } else if ([item.key containsString:@"Download"] || [item.key containsString:@"涓嬭浇"]) {
+    } else if ([item.key containsString:@"Download"] || [item.key containsString:@"下载"]) {
         return [UIColor systemBlueColor];
-    } else if ([item.key containsString:@"Video"] || [item.key containsString:@"瑙嗛"]) {
+    } else if ([item.key containsString:@"Video"] || [item.key containsString:@"视频"]) {
         return [UIColor systemIndigoColor];
-    } else if ([item.key containsString:@"Audio"] || [item.key containsString:@"闊抽"]) {
+    } else if ([item.key containsString:@"Audio"] || [item.key containsString:@"音频"]) {
         return [UIColor systemTealColor];
-    } else if ([item.key containsString:@"Speed"] || [item.key containsString:@"鍊嶉€?]) {
+    } else if ([item.key containsString:@"Speed"] || [item.key containsString:@"倍速"]) {
         return [UIColor systemYellowColor];
-    } else if ([item.key containsString:@"Time"] || [item.key containsString:@"鏃堕棿"]) {
+    } else if ([item.key containsString:@"Time"] || [item.key containsString:@"时间"]) {
         return [UIColor systemOrangeColor];
     }
     
-    // 榛樿棰滆壊
+    // 默认颜色
     return [UIColor systemBlueColor];
 }
 
-// 寰蒋椋庢牸UISwitch鍔ㄧ敾锛岃仈鍔ㄥ崱鐗?
+// 微软风格UISwitch动画，联动卡片
 - (void)animatedSwitchToggled:(UISwitch *)sender {
     [sender applyFuturisticEffects];
     [sender updateFuturisticEffectsWithState:sender.isOn animated:YES];
     UITableViewCell *cell = (UITableViewCell *)sender.superview.superview;
     UIView *card = [cell.contentView viewWithTag:8888];
-    // 鍗＄墖鍜宻witch鑱斿姩寮硅烦+楂樺厜
+    // 卡片和switch联动弹跳+高光
     [UIView animateWithDuration:0.10 animations:^{
         sender.transform = CGAffineTransformMakeScale(0.90, 0.90);
         sender.alpha = 0.7;
@@ -2307,19 +2305,19 @@ NSDictionary *getCurrentABTestData(void) {
     
     DYYYSettingItem *item = sections[indexPath.section][indexPath.row];
     
-    // 娣诲姞娓呯悊缂撳瓨鍔熻兘澶勭悊
+    // 添加清理缓存功能处理
     if ([item.key isEqualToString:@"DYYYCleanCache"]) {
         [self handleCleanCache];
         [tableView deselectRowAtIndexPath:indexPath animated:YES];
         return;
     }
     
-    // 娣诲姞娓呴櫎璁剧疆鍔熻兘
+    // 添加清除设置功能
     if ([item.key isEqualToString:@"DYYYCleanSettings"]) {
-        [DYYYBottomAlertView showAlertWithTitle:@"娓呴櫎鎶栭煶璁剧疆"
-                message:@"纭畾瑕佹竻闄ゆ姈闊虫墍鏈夎缃悧锛焅n杩欏皢鏃犳硶鎭㈠锛屽簲鐢ㄤ細鑷姩閫€鍑猴紒"
-                cancelButtonText:@"鍙栨秷"
-                confirmButtonText:@"纭畾"
+        [DYYYBottomAlertView showAlertWithTitle:@"清除抖音设置"
+                message:@"确定要清除抖音所有设置吗？\n这将无法恢复，应用会自动退出！"
+                cancelButtonText:@"取消"
+                confirmButtonText:@"确定"
                 cancelAction:nil
                 confirmAction:^{
                     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES);
@@ -2332,12 +2330,12 @@ NSDictionary *getCurrentABTestData(void) {
                         [[NSFileManager defaultManager] removeItemAtPath:plistPath error:&error];
 
                         if (!error) {
-                            [DYYYManager showToast:@"鎶栭煶璁剧疆宸叉竻闄わ紝搴旂敤鍗冲皢閫€鍑?];
+                            [DYYYManager showToast:@"抖音设置已清除，应用即将退出"];
                             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
                               exit(0);
                             });
                         } else {
-                            [DYYYManager showToast:[NSString stringWithFormat:@"娓呴櫎澶辫触: %@", error.localizedDescription]];
+                            [DYYYManager showToast:[NSString stringWithFormat:@"清除失败: %@", error.localizedDescription]];
                         }
                     }
                 }];
@@ -2345,28 +2343,28 @@ NSDictionary *getCurrentABTestData(void) {
         return;
     }
     
-    // 娣诲姞澶囦唤璁剧疆鍔熻兘澶勭悊
+    // 添加备份设置功能处理
     if ([item.key isEqualToString:@"DYYYBackupSettings"]) {
         [self backupSettings];
         [tableView deselectRowAtIndexPath:indexPath animated:YES];
         return;
     }
     
-    // 娣诲姞鎭㈠璁剧疆鍔熻兘澶勭悊
+    // 添加恢复设置功能处理
     if ([item.key isEqualToString:@"DYYYRestoreSettings"]) {
         [self restoreSettings];
         [tableView deselectRowAtIndexPath:indexPath animated:YES];
         return;
     }
     
-    // 澶勭悊鍥炬爣鑷畾涔夐」
+    // 处理图标自定义项
     if ([item.key hasPrefix:@"DYYYIcon"]) {
         [self handleIconSelection:item];
         [tableView deselectRowAtIndexPath:indexPath animated:YES];
         return;
     }
     
-    // 鐑洿鏂板姛鑳藉鐞?
+    // 热更新功能处理
     if ([item.key isEqualToString:@"SaveCurrentABTestData"]) {
         [self saveCurrentABTestData];
         [tableView deselectRowAtIndexPath:indexPath animated:YES];
@@ -2383,18 +2381,18 @@ NSDictionary *getCurrentABTestData(void) {
     
     if (item.type == DYYYSettingItemTypeCustomPicker && [item.key isEqualToString:@"DYYYScheduleStyle"]) {
         if (![[NSUserDefaults standardUserDefaults] boolForKey:@"DYYYShowScheduleDisplay"]) {
-            [DYYYManager showToast:@"璇峰厛寮€鍚痋"鏄剧ず杩涘害鏃堕暱\"閫夐」"];
+            [DYYYManager showToast:@"请先开启\"显示进度时长\"选项"];
             return;
         }
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"閫夋嫨杩涘害鏉℃牱寮?
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"选择进度条样式"
                                                                        message:nil
                                                                 preferredStyle:UIAlertControllerStyleActionSheet];
         NSArray *styles = @[
-            @{@"title": @"杩涘害鏉″彸渚у墿浣?, @"value": @"杩涘害鏉″彸渚у墿浣?},
-            @{@"title": @"杩涘害鏉″彸渚у畬鏁?, @"value": @"杩涘害鏉″彸渚у畬鏁?},
-            @{@"title": @"杩涘害鏉″乏渚у墿浣?, @"value": @"杩涘害鏉″乏渚у墿浣?},
-            @{@"title": @"杩涘害鏉″乏渚у畬鏁?, @"value": @"杩涘害鏉″乏渚у畬鏁?},
-            @{@"title": @"杩涘害鏉′袱渚у乏鍙?, @"value": @"杩涘害鏉′袱渚у乏鍙?}
+            @{@"title": @"进度条右侧剩余", @"value": @"进度条右侧剩余"},
+            @{@"title": @"进度条右侧完整", @"value": @"进度条右侧完整"},
+            @{@"title": @"进度条左侧剩余", @"value": @"进度条左侧剩余"},
+            @{@"title": @"进度条左侧完整", @"value": @"进度条左侧完整"},
+            @{@"title": @"进度条两侧左右", @"value": @"进度条两侧左右"}
         ];
         for (NSDictionary *style in styles) {
             UIAlertAction *action = [UIAlertAction actionWithTitle:style[@"title"]
@@ -2406,7 +2404,7 @@ NSDictionary *getCurrentABTestData(void) {
             }];
             [alert addAction:action];
         }
-        UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"鍙栨秷" style:UIAlertActionStyleCancel handler:nil];
+        UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil];
         [alert addAction:cancelAction];
         if (UIDevice.currentDevice.userInterfaceIdiom == UIUserInterfaceIdiomPad) {
             UITableViewCell *selectedCell = [self.tableView cellForRowAtIndexPath:indexPath];
@@ -2423,11 +2421,11 @@ NSDictionary *getCurrentABTestData(void) {
     } else if (item.type == DYYYSettingItemTypeColorPicker) {
         [self showColorPicker];
     } else if ([item.key isEqualToString:@"DYYYFilterKeywords"]) {
-        // 鑾峰彇褰撳墠宸蹭繚瀛樼殑鍏抽敭璇?
+        // 获取当前已保存的关键词
         NSString *currentKeywords = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYFilterKeywords"];
         
-        // 鍒涘缓骞舵樉绀鸿繃婊よ缃鍥?
-        DYYYFilterSettingsView *filterView = [[DYYYFilterSettingsView alloc] initWithTitle:@"璁剧疆杩囨护鍏抽敭璇? text:currentKeywords];
+        // 创建并显示过滤设置视图
+        DYYYFilterSettingsView *filterView = [[DYYYFilterSettingsView alloc] initWithTitle:@"设置过滤关键词" text:currentKeywords];
         [filterView showWithConfirmBlock:^(NSString *selectedText) {
             [[NSUserDefaults standardUserDefaults] setObject:selectedText forKey:@"DYYYFilterKeywords"];
             [[NSUserDefaults standardUserDefaults] synchronize];
@@ -2440,7 +2438,7 @@ NSDictionary *getCurrentABTestData(void) {
 - (void)handleIconSelection:(DYYYSettingItem *)item {
     NSString *saveFilename = nil;
     
-    // 鏄犲皠鍥炬爣绫诲瀷鍒版枃浠跺悕
+    // 映射图标类型到文件名
     if ([item.key isEqualToString:@"DYYYIconLikeBefore"]) {
         saveFilename = @"like_before.png";
     } else if ([item.key isEqualToString:@"DYYYIconLikeAfter"]) {
@@ -2456,25 +2454,25 @@ NSDictionary *getCurrentABTestData(void) {
     }
     
     if (saveFilename) {
-        // 鑾峰彇鍥炬爣璺緞
+        // 获取图标路径
         NSString *documentsPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
         NSString *dyyyFolderPath = [documentsPath stringByAppendingPathComponent:@"DYYY"];
         NSString *imagePath = [dyyyFolderPath stringByAppendingPathComponent:saveFilename];
         
-        // 妫€鏌ユ槸鍚﹀凡鏈夎嚜瀹氫箟鍥炬爣
+        // 检查是否已有自定义图标
         BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:imagePath];
         UIImage *previewImage = fileExists ? [UIImage imageWithContentsOfFile:imagePath] : nil;
         
-        // 鏄剧ず鍥炬爣閫夐」瀵硅瘽妗?
+        // 显示图标选项对话框
         [self showIconOptionsDialogWithTitle:item.title previewImage:previewImage saveFilename:saveFilename];
     }
 }
 
-// 娣诲姞杩欎釜杈呭姪鏂规硶
+// 添加这个辅助方法
 - (void)showIconOptionsDialogWithTitle:(NSString *)title previewImage:(UIImage *)previewImage saveFilename:(NSString *)saveFilename {
     DYYYIconOptionsDialogView *optionsDialog = [[DYYYIconOptionsDialogView alloc] initWithTitle:title previewImage:previewImage];
     
-    // 纭繚DYYY鏂囦欢澶瑰瓨鍦?
+    // 确保DYYY文件夹存在
     NSString *documentsPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
     NSString *dyyyFolderPath = [documentsPath stringByAppendingPathComponent:@"DYYY"];
     NSString *imagePath = [dyyyFolderPath stringByAppendingPathComponent:saveFilename];
@@ -2485,19 +2483,19 @@ NSDictionary *getCurrentABTestData(void) {
     
     __weak typeof(self) weakSelf = self;
     
-    // 璁剧疆娓呴櫎鎸夐挳鍥炶皟
+    // 设置清除按钮回调
     optionsDialog.onClear = ^{
         if ([[NSFileManager defaultManager] fileExistsAtPath:imagePath]) {
             NSError *error = nil;
             [[NSFileManager defaultManager] removeItemAtPath:imagePath error:&error];
             if (!error) {
-                [DYYYManager showToast:@"宸叉仮澶嶉粯璁ゅ浘鏍?];
+                [DYYYManager showToast:@"已恢复默认图标"];
                 [weakSelf.tableView reloadData];
             }
         }
     };
     
-    // 璁剧疆閫夋嫨鎸夐挳鍥炶皟
+    // 设置选择按钮回调
     optionsDialog.onSelect = ^{
         UIImagePickerController *picker = [[UIImagePickerController alloc] init];
         picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
@@ -2513,7 +2511,7 @@ NSDictionary *getCurrentABTestData(void) {
             if (imageURL) {
                 NSData *imageData = [NSData dataWithContentsOfURL:imageURL];
                 if (imageData) {
-                    // 妫€娴嬫槸鍚︿负GIF
+                    // 检测是否为GIF
                     const char *bytes = (const char *)imageData.bytes;
                     BOOL isGIF = (imageData.length >= 6 && (memcmp(bytes, "GIF87a", 6) == 0 || memcmp(bytes, "GIF89a", 6) == 0));
                     
@@ -2525,7 +2523,7 @@ NSDictionary *getCurrentABTestData(void) {
                         [pngData writeToFile:imagePath atomically:YES];
                     }
                     
-                    [DYYYManager showToast:@"鍥炬爣宸茶缃紝閲嶅惎搴旂敤鐢熸晥"];
+                    [DYYYManager showToast:@"图标已设置，重启应用生效"];
                     [weakSelf.tableView reloadData];
                 }
             }
@@ -2541,7 +2539,7 @@ NSDictionary *getCurrentABTestData(void) {
 }
 
 - (void)showSpeedPicker {
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"閫夋嫨鍊嶉€?
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"选择倍速"
                                                                    message:nil
                                                             preferredStyle:UIAlertControllerStyleActionSheet];
     
@@ -2572,7 +2570,7 @@ NSDictionary *getCurrentABTestData(void) {
         [alert addAction:action];
     }
     
-    UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"鍙栨秷" style:UIAlertActionStyleCancel handler:nil];
+    UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil];
     [alert addAction:cancelAction];
     
     if (UIDevice.currentDevice.userInterfaceIdiom == UIUserInterfaceIdiomPad) {
@@ -2587,7 +2585,7 @@ NSDictionary *getCurrentABTestData(void) {
 #pragma mark - Actions
 
 - (void)switchToggled:(UISwitch *)sender {
-    // 娣诲姞闃插穿婧冩鏌?
+    // 添加防崩溃检查
     if (!sender) {
         return;
     }
@@ -2610,7 +2608,7 @@ NSDictionary *getCurrentABTestData(void) {
         return;
     }
 
-    // 浣跨敤寮€鍏崇鐞嗗櫒澶勭悊鍒囨崲閫昏緫
+    // 使用开关管理器处理切换逻辑
     [[DYYYSwitchManager sharedManager] handleSwitchToggled:sender 
                                                   withItem:item 
                                                    section:section 
@@ -2618,16 +2616,16 @@ NSDictionary *getCurrentABTestData(void) {
                                                  tableView:self.tableView
                                           settingSections:self.settingSections];
 
-    // 瑙﹁鍙嶉
+    // 触觉反馈
     [self.feedbackGenerator impactOccurred];
 
-    // 杩涘害鏃堕暱渚濊禆澶勭悊
+    // 进度时长依赖处理
     if ([item.key isEqualToString:@"DYYYShowScheduleDisplay"]) {
-        // 鍏抽棴鏃讹紝娓呯┖鏍峰紡璁剧疆
+        // 关闭时，清空样式设置
         if (!sender.isOn) {
             [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"DYYYScheduleStyle"];
         }
-        // 鍒锋柊鐩稿叧cell
+        // 刷新相关cell
         for (NSInteger s = 0; s < self.settingSections.count; s++) {
             NSArray *items = self.settingSections[s];
             for (NSInteger r = 0; r < items.count; r++) {
@@ -2640,7 +2638,7 @@ NSDictionary *getCurrentABTestData(void) {
         }
     }
 
-    // 瀹夊叏鍦板悓姝ヨ缃?
+    // 安全地同步设置
     dispatch_async(dispatch_get_main_queue(), ^{
         [[NSUserDefaults standardUserDefaults] synchronize];
     });
@@ -2656,7 +2654,7 @@ NSDictionary *getCurrentABTestData(void) {
         @"DYYYHideSpeed"
     ];
     
-    // 浣跨敤 DYYYSwitchManager 鐨勬柟娉?
+    // 使用 DYYYSwitchManager 的方法
     [[DYYYSwitchManager sharedManager] updateSubSwitchesInSection:section 
                                                          withKeys:subKeys 
                                                           enabled:enabled 
@@ -2679,7 +2677,7 @@ NSDictionary *getCurrentABTestData(void) {
         @"DYYYLongPressCreateVideo"
     ];
     
-    // 浣跨敤 DYYYSwitchManager 鐨勬柟娉?
+    // 使用 DYYYSwitchManager 的方法
     [[DYYYSwitchManager sharedManager] updateSubSwitchesInSection:section 
                                                          withKeys:subKeys 
                                                           enabled:enabled 
@@ -2696,7 +2694,7 @@ NSDictionary *getCurrentABTestData(void) {
     
     DYYYSettingItem *item = sections[indexPath.section][indexPath.row];
     
-    // 娣诲姞瀵归摼鎺ヨВ鏋愭帴鍙ｇ殑鐗规畩澶勭悊
+    // 添加对链接解析接口的特殊处理
     if ([item.key isEqualToString:@"DYYYInterfaceDownload"]) {
         NSString *text = [textField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
         if (text.length == 0) {
@@ -2706,7 +2704,7 @@ NSDictionary *getCurrentABTestData(void) {
             [[NSUserDefaults standardUserDefaults] setObject:textField.text forKey:item.key];
         }
     } 
-    // 鍊嶉€熸暟鍊艰缃殑鐗规畩澶勭悊
+    // 倍速数值设置的特殊处理
     else if ([item.key isEqualToString:@"DYYYSpeedSettings"]) {
         NSString *speedConfig = textField.text;
         if (speedConfig.length == 0) {
@@ -2714,9 +2712,9 @@ NSDictionary *getCurrentABTestData(void) {
             textField.text = speedConfig;
         }
         [[NSUserDefaults standardUserDefaults] setObject:speedConfig forKey:item.key];
-        [DYYYManager showToast:@"鍊嶉€熼€夐」宸叉洿鏂?];
+        [DYYYManager showToast:@"倍速选项已更新"];
     }
-    // 鍊嶉€熸寜閽ぇ灏忕殑鐗规畩澶勭悊
+    // 倍速按钮大小的特殊处理
     else if ([item.key isEqualToString:@"DYYYSpeedButtonSize"]) {
         NSString *sizeStr = textField.text;
         if (sizeStr.length == 0 || [sizeStr floatValue] <= 0) {
@@ -2724,7 +2722,7 @@ NSDictionary *getCurrentABTestData(void) {
             textField.text = sizeStr;
         }
         [[NSUserDefaults standardUserDefaults] setObject:sizeStr forKey:item.key];
-        [DYYYManager showToast:@"鍊嶉€熸寜閽ぇ灏忓凡鏇存柊"];
+        [DYYYManager showToast:@"倍速按钮大小已更新"];
     } 
     else {
         [[NSUserDefaults standardUserDefaults] setObject:textField.text forKey:item.key];
@@ -2732,13 +2730,13 @@ NSDictionary *getCurrentABTestData(void) {
     
     [[NSUserDefaults standardUserDefaults] synchronize];
     
-    // 鍦ㄨ缃€间繚瀛樺悗娣诲姞锛?
+    // 在设置值保存后添加：
     [[NSNotificationCenter defaultCenter] postNotificationName:@"DYYYSettingChanged" object:nil userInfo:@{
         @"key": item.key,
         @"value": textField.text ?: [NSNull null]
     }];
     
-    // 澶勭悊鐗规畩閿?
+    // 处理特殊键
     if ([item.key isEqualToString:@"DYYYCustomAlbumImage"]) {
         [self showImagePickerForCustomAlbum];
     }
@@ -2749,7 +2747,7 @@ NSDictionary *getCurrentABTestData(void) {
 }
 
 - (void)headerTapped:(UIButton *)sender {
-    // 瑙﹀彂瑙﹁鍙嶉
+    // 触发触觉反馈
     [self.feedbackGenerator impactOccurred];
     [self.feedbackGenerator prepare];
     
@@ -2761,16 +2759,16 @@ NSDictionary *getCurrentABTestData(void) {
     
     BOOL isCurrentExpanded = [self.expandedSections containsObject:@(section)];
     
-    // 鑾峰彇鎵€鏈夐渶瑕佹洿鏂扮殑琛屼俊鎭?- 鍦ㄤ慨鏀筫xpandedSections涔嬪墠
+    // 获取所有需要更新的行信息 - 在修改expandedSections之前
     NSMutableArray<NSIndexPath *> *allRowsToUpdate = [NSMutableArray array];
     NSMutableArray<NSNumber *> *sectionsToUpdate = [NSMutableArray array];
     
-    // 鏀堕泦褰撳墠瑕佺偣鍑荤殑section鐨勬墍鏈夎
+    // 收集当前要点击的section的所有行
     NSArray<NSIndexPath *> *currentSectionRows = [self rowsForSection:section];
     [allRowsToUpdate addObjectsFromArray:currentSectionRows];
     [sectionsToUpdate addObject:@(section)];
     
-    // 濡傛灉褰撳墠section涓嶆槸灞曞紑鐨勶紝闇€瑕佹敹闆嗗叾浠栧凡灞曞紑section鐨勬墍鏈夎
+    // 如果当前section不是展开的，需要收集其他已展开section的所有行
     if (!isCurrentExpanded) {
         for (NSNumber *expandedSection in [self.expandedSections copy]) {
             if (![expandedSection isEqualToNumber:@(section)]) {
@@ -2780,15 +2778,15 @@ NSDictionary *getCurrentABTestData(void) {
             }
         }
         
-        // 娓呯┖宸插睍寮€sections锛屽彧淇濈暀褰撳墠section
+        // 清空已展开sections，只保留当前section
         [self.expandedSections removeAllObjects];
         [self.expandedSections addObject:@(section)];
     } else {
-        // 褰撳墠section宸插睍寮€锛岄渶瑕佸皢鍏跺叧闂?
+        // 当前section已展开，需要将其关闭
         [self.expandedSections removeObject:@(section)];
     }
     
-    // 鏇存柊鎵€鏈夋秹鍙婄殑section澶撮儴绠ご
+    // 更新所有涉及的section头部箭头
     for (NSNumber *sectionNumber in sectionsToUpdate) {
         NSInteger sectionIndex = [sectionNumber integerValue];
         UIView *headerView = [self.tableView headerViewForSection:sectionIndex];
@@ -2804,16 +2802,16 @@ NSDictionary *getCurrentABTestData(void) {
             arrow.image = [UIImage systemImageNamed:shouldBeExpanded ? @"chevron.down" : @"chevron.right"];
         }
         
-        // 鍔ㄧ敾杩囨浮鏁堟灉
+        // 动画过渡效果
         [UIView animateWithDuration:0.3 animations:^{
             arrow.transform = shouldBeExpanded ? CGAffineTransformMakeRotation(M_PI/2) : CGAffineTransformIdentity;
         }];
     }
     
-    // 绠€鍗曟柟寮忥細鐩存帴鍒锋柊琛ㄦ牸鑰屼笉鏄瘯鍥捐拷韪崟鐙殑琛屾搷浣?
+    // 简单方式：直接刷新表格而不是试图追踪单独的行操作
     [self.tableView reloadData];
     
-    // 濡傛灉灞曞紑浜嗘煇涓猻ection锛岃琛ㄦ牸瑙嗗浘婊氬姩鍒拌section鐨勪綅缃?
+    // 如果展开了某个section，让表格视图滚动到该section的位置
     if (!isCurrentExpanded) {
         NSIndexPath *firstRowPath = [NSIndexPath indexPathForRow:0 inSection:section];
         if ([self.tableView numberOfRowsInSection:section] > 0) {
@@ -2824,12 +2822,12 @@ NSDictionary *getCurrentABTestData(void) {
     }
 }
 
-// 娣诲姞涓绘爣棰樻枃瀛楅棿璺濊皟鏁?
+// 添加主标题文字间距调整
 - (void)tableView:(UITableView *)tableView willDisplayHeaderView:(UIView *)view forSection:(NSInteger)section {
     if ([view isKindOfClass:[UIView class]]) {
         UIButton *headerButton = [view viewWithTag:section];
         if ([headerButton isKindOfClass:[UIButton class]]) {
-            // 璋冩暣鏍囬鏂囧瓧鐨勫睘鎬?
+            // 调整标题文字的属性
             UIColor *textColor;
             if (@available(iOS 13.0, *)) {
                 textColor = [UIColor labelColor];
@@ -2842,7 +2840,7 @@ NSDictionary *getCurrentABTestData(void) {
                                                  attributes:@{
                                                      NSFontAttributeName: [UIFont boldSystemFontOfSize:17],
                                                      NSForegroundColorAttributeName: textColor,
-                                                     NSKernAttributeName: @(-0.8) // 鍑忓皬瀛楃闂磋窛
+                                                     NSKernAttributeName: @(-0.8) // 减小字符间距
                                                  }];
             [headerButton setAttributedTitle:attributedTitle forState:UIControlStateNormal];
         }
@@ -2876,42 +2874,42 @@ NSDictionary *getCurrentABTestData(void) {
         }
         
         DYYYSettingItem *item = sections[indexPath.section][indexPath.row];
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"閫夐」"
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"选项"
                                                                       message:item.title
                                                                preferredStyle:UIAlertControllerStyleActionSheet];
         
         if ([item.key isEqualToString:@"DYYYCustomAlbumImage"]) {
-            [alert addAction:[UIAlertAction actionWithTitle:@"浠庣浉鍐岄€夋嫨"
+            [alert addAction:[UIAlertAction actionWithTitle:@"从相册选择"
                                                      style:UIAlertActionStyleDefault
                                                    handler:^(UIAlertAction * _Nonnull action) {
                 [self showImagePickerWithSourceType:UIImagePickerControllerSourceTypePhotoLibrary forCustomAlbum:YES];
             }]];
             
-            [alert addAction:[UIAlertAction actionWithTitle:@"浣跨敤鐩告満"
+            [alert addAction:[UIAlertAction actionWithTitle:@"使用相机"
                                                      style:UIAlertActionStyleDefault
                                                    handler:^(UIAlertAction * _Nonnull action) {
                 [self showImagePickerWithSourceType:UIImagePickerControllerSourceTypeCamera forCustomAlbum:YES];
             }]];
             
-            [alert addAction:[UIAlertAction actionWithTitle:@"鎭㈠榛樿鍥剧墖"
+            [alert addAction:[UIAlertAction actionWithTitle:@"恢复默认图片"
                                                      style:UIAlertActionStyleDefault
                                                    handler:^(UIAlertAction * _Nonnull action) {
                 [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"DYYYCustomAlbumImagePath"];
                 [[NSUserDefaults standardUserDefaults] synchronize];
-                [DYYYManager showToast:@"鑷畾涔夌浉鍐屽浘鐗囧凡璁剧疆"];
+                [DYYYManager showToast:@"自定义相册图片已设置"];
                 [self.tableView reloadData];
                 [[NSNotificationCenter defaultCenter] postNotificationName:@"DYYYCustomAlbumSettingChanged" object:nil];
             }]];
         }
         
-        // 榛樿閲嶇疆閫夐」
-        UIAlertAction *resetAction = [UIAlertAction actionWithTitle:@"閲嶇疆"
+        // 默认重置选项
+        UIAlertAction *resetAction = [UIAlertAction actionWithTitle:@"重置"
                                                               style:UIAlertActionStyleDefault
                                                             handler:^(UIAlertAction *action) {
             [[NSUserDefaults standardUserDefaults] removeObjectForKey:item.key];
             [[NSUserDefaults standardUserDefaults] synchronize];
             
-            // 鐗规畩澶勭悊娓呭睆鎸夐挳灏哄閲嶇疆
+            // 特殊处理清屏按钮尺寸重置
             if ([item.key isEqualToString:@"DYYYEnableFloatClearButton"] || 
                 [item.key isEqualToString:@"DYYYFloatClearButtonSizePreference"]) {
                 [[NSUserDefaults standardUserDefaults] setInteger:DYYYButtonSizeMedium 
@@ -2919,9 +2917,9 @@ NSDictionary *getCurrentABTestData(void) {
                 [[NSUserDefaults standardUserDefaults] synchronize];
             }
             
-            // 鐗规畩澶勭悊鏃ユ湡鏃堕棿鏍煎紡鐩稿叧璁剧疆
+            // 特殊处理日期时间格式相关设置
             if ([item.key isEqualToString:@"DYYYShowDateTime"]) {
-                // 閲嶇疆涓诲紑鍏充篃閲嶇疆鎵€鏈夊瓙寮€鍏冲拰鏍煎紡璁剧疆
+                // 重置主开关也重置所有子开关和格式设置
                 [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"DYYYDateTimeFormat_YMDHM"];
                 [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"DYYYDateTimeFormat_MDHM"];
                 [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"DYYYDateTimeFormat_HMS"];
@@ -2929,7 +2927,7 @@ NSDictionary *getCurrentABTestData(void) {
                 [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"DYYYDateTimeFormat_YMD"];
                 [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"DYYYDateTimeFormat"];
                 
-                // 浣跨敤 DYYYSwitchManager 鐨勬柟娉曟洿鏂癠I涓瓙寮€鍏崇殑鐘舵€?
+                // 使用 DYYYSwitchManager 的方法更新UI中子开关的状态
                 for (NSInteger section = 0; section < [self.tableView numberOfSections]; section++) {
                     [[DYYYSwitchManager sharedManager] updateDateTimeFormatSubSwitchesUI:section 
                                                                                  enabled:NO 
@@ -2938,7 +2936,7 @@ NSDictionary *getCurrentABTestData(void) {
                 }
             }
             else if ([item.key hasPrefix:@"DYYYDateTimeFormat_"]) {
-                // 閲嶇疆涓€涓瓙寮€鍏虫椂妫€鏌ユ槸鍚︽湁鍏朵粬瀛愬紑鍏冲惎鐢?
+                // 重置一个子开关时检查是否有其他子开关启用
                 BOOL anyEnabled = NO;
                 for (NSString *checkKey in @[@"DYYYDateTimeFormat_YMDHM", @"DYYYDateTimeFormat_MDHM", 
                                              @"DYYYDateTimeFormat_HMS", @"DYYYDateTimeFormat_HM", 
@@ -2949,7 +2947,7 @@ NSDictionary *getCurrentABTestData(void) {
                     }
                 }
                 
-                // 濡傛灉鎵€鏈夊瓙寮€鍏抽兘鍏抽棴锛屼篃鍏抽棴涓诲紑鍏冲苟娓呴櫎鏍煎紡
+                // 如果所有子开关都关闭，也关闭主开关并清除格式
                 if (!anyEnabled) {
                     [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"DYYYShowDateTime"];
                     [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"DYYYDateTimeFormat"];
@@ -2961,15 +2959,15 @@ NSDictionary *getCurrentABTestData(void) {
                 }
             }
             
-            // 鐗规畩澶勭悊鏃堕棿灞炲湴鏄剧ず寮€鍏崇粍
+            // 特殊处理时间属地显示开关组
             if ([item.key isEqualToString:@"DYYYEnableArea"]) {
-                // 閲嶇疆涓诲紑鍏充篃閲嶇疆鎵€鏈夊瓙寮€鍏?
+                // 重置主开关也重置所有子开关
                 [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"DYYYEnableAreaProvince"];
                 [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"DYYYEnableAreaCity"];
                 [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"DYYYEnableAreaDistrict"];
                 [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"DYYYEnableAreaStreet"];
                 
-                // 浣跨敤 DYYYSwitchManager 鐨勬柟娉曟洿鏂癠I
+                // 使用 DYYYSwitchManager 的方法更新UI
                 for (NSInteger section = 0; section < [self.tableView numberOfSections]; section++) {
                     [[DYYYSwitchManager sharedManager] updateAreaSubSwitchesUI:section 
                                                                        enabled:NO 
@@ -2978,7 +2976,7 @@ NSDictionary *getCurrentABTestData(void) {
                 }
             }
             
-            // 閽堝鑷畾涔夌浉鍐屽浘鐗囧拰澶у皬锛岄噸缃悗鍒锋柊鎸夐挳
+            // 针对自定义相册图片和大小，重置后刷新按钮
             if ([item.key isEqualToString:@"DYYYCustomAlbumImagePath"] ||
                 [item.key isEqualToString:@"DYYYCustomAlbumSizeSmall"] ||
                 [item.key isEqualToString:@"DYYYCustomAlbumSizeMedium"] ||
@@ -2987,23 +2985,23 @@ NSDictionary *getCurrentABTestData(void) {
                 [[NSNotificationCenter defaultCenter] postNotificationName:@"DYYYCustomAlbumSettingChanged" object:nil];
             }
             
-            // 澶勭悊澶村儚鏂囨湰
+            // 处理头像文本
             if ([item.key isEqualToString:@"DYYYAvatarTapText"]) {
                 self.avatarTapLabel.text = @"pxx917144686";
             }
             
-            // 鍒锋柊UI
+            // 刷新UI
             [self.tableView reloadData];
             
-            // 鏄剧ず鎻愮ず
-            [DYYYManager showToast:[NSString stringWithFormat:@"宸查噸缃? %@", item.title]];
+            // 显示提示
+            [DYYYManager showToast:[NSString stringWithFormat:@"已重置: %@", item.title]];
             NSLog(@"DYYY: Reset %@", item.key);
         }];
         
-        // 閲嶇疆鎿嶄綔鍒板脊鍑鸿彍鍗?
+        // 重置操作到弹出菜单
         [alert addAction:resetAction];
         
-        UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"鍙栨秷" style:UIAlertActionStyleCancel handler:nil];
+        UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil];
         [alert addAction:cancelAction];
         
         if (UIDevice.currentDevice.userInterfaceIdiom == UIUserInterfaceIdiomPad) {
@@ -3016,39 +3014,39 @@ NSDictionary *getCurrentABTestData(void) {
 }
 
 - (void)showImagePickerForCustomAlbum {
-    // 妫€鏌ヨ嚜瀹氫箟閫夋嫨鐩稿唽鍥剧墖鍔熻兘鏄惁鍚敤
+    // 检查自定义选择相册图片功能是否启用
     if (![[NSUserDefaults standardUserDefaults] boolForKey:@"DYYYEnableCustomAlbum"]) {
-        [DYYYManager showToast:@"璇峰厛寮€鍚€岃嚜瀹氫箟閫夋嫨鐩稿唽鍥剧墖銆?];
+        [DYYYManager showToast:@"请先开启「自定义选择相册图片」"];
         return;
     }
     
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"閫夋嫨鍥剧墖鏉ユ簮" 
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"选择图片来源" 
                                                                   message:nil 
                                                            preferredStyle:UIAlertControllerStyleActionSheet];
     
-    [alert addAction:[UIAlertAction actionWithTitle:@"鐩稿唽" 
+    [alert addAction:[UIAlertAction actionWithTitle:@"相册" 
                                              style:UIAlertActionStyleDefault 
                                            handler:^(UIAlertAction * _Nonnull action) {
         [self showImagePickerWithSourceType:UIImagePickerControllerSourceTypePhotoLibrary forCustomAlbum:YES];
     }]];
     
-    [alert addAction:[UIAlertAction actionWithTitle:@"鐩告満" 
+    [alert addAction:[UIAlertAction actionWithTitle:@"相机" 
                                              style:UIAlertActionStyleDefault 
                                            handler:^(UIAlertAction * _Nonnull action) {
         [self showImagePickerWithSourceType:UIImagePickerControllerSourceTypeCamera forCustomAlbum:YES];
     }]];
     
-    [alert addAction:[UIAlertAction actionWithTitle:@"鎭㈠榛樿" 
+    [alert addAction:[UIAlertAction actionWithTitle:@"恢复默认" 
                                              style:UIAlertActionStyleDefault 
                                            handler:^(UIAlertAction * _Nonnull action) {
         [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"DYYYCustomAlbumImagePath"];
         [[NSUserDefaults standardUserDefaults] synchronize];
-        [DYYYManager showToast:@"宸叉仮澶嶉粯璁ょ浉鍐屽浘鐗?];
+        [DYYYManager showToast:@"已恢复默认相册图片"];
         [self.tableView reloadData];
         [[NSNotificationCenter defaultCenter] postNotificationName:@"DYYYCustomAlbumSettingChanged" object:nil];
     }]];
     
-    [alert addAction:[UIAlertAction actionWithTitle:@"鍙栨秷" 
+    [alert addAction:[UIAlertAction actionWithTitle:@"取消" 
                                              style:UIAlertActionStyleCancel 
                                            handler:nil]];
     
@@ -3064,7 +3062,7 @@ NSDictionary *getCurrentABTestData(void) {
 
 - (void)showImagePickerWithSourceType:(UIImagePickerControllerSourceType)sourceType forCustomAlbum:(BOOL)isCustomAlbum {
     if (![UIImagePickerController isSourceTypeAvailable:sourceType]) {
-        [DYYYManager showToast:@"璁惧涓嶆敮鎸佽鍥剧墖鏉ユ簮"];
+        [DYYYManager showToast:@"设备不支持该图片来源"];
         return;
     }
     
@@ -3085,7 +3083,7 @@ NSDictionary *getCurrentABTestData(void) {
     [[NSUserDefaults standardUserDefaults] removeObjectForKey:key];
     [[NSUserDefaults standardUserDefaults] synchronize];
     
-    // 鐗规畩澶勭悊娓呭睆鎸夐挳灏哄閲嶇疆
+    // 特殊处理清屏按钮尺寸重置
     if ([key isEqualToString:@"DYYYEnableFloatClearButton"] || 
         [key isEqualToString:@"DYYYFloatClearButtonSizePreference"]) {
         [[NSUserDefaults standardUserDefaults] setInteger:DYYYButtonSizeMedium 
@@ -3093,9 +3091,9 @@ NSDictionary *getCurrentABTestData(void) {
         [[NSUserDefaults standardUserDefaults] synchronize];
     }
     
-    // 鐗规畩澶勭悊鏃ユ湡鏃堕棿鏍煎紡鐩稿叧璁剧疆
+    // 特殊处理日期时间格式相关设置
     if ([key isEqualToString:@"DYYYShowDateTime"]) {
-        // 閲嶇疆涓诲紑鍏充篃閲嶇疆鎵€鏈夊瓙寮€鍏冲拰鏍煎紡璁剧疆
+        // 重置主开关也重置所有子开关和格式设置
         [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"DYYYDateTimeFormat_YMDHM"];
         [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"DYYYDateTimeFormat_MDHM"];
         [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"DYYYDateTimeFormat_HMS"];
@@ -3103,7 +3101,7 @@ NSDictionary *getCurrentABTestData(void) {
         [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"DYYYDateTimeFormat_YMD"];
         [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"DYYYDateTimeFormat"];
         
-        // 浣跨敤 DYYYSwitchManager 鐨勬柟娉曟洿鏂癠I涓瓙寮€鍏崇殑鐘舵€?
+        // 使用 DYYYSwitchManager 的方法更新UI中子开关的状态
         for (NSInteger section = 0; section < [self.tableView numberOfSections]; section++) {
             [[DYYYSwitchManager sharedManager] updateDateTimeFormatSubSwitchesUI:section 
                                                                          enabled:NO 
@@ -3112,7 +3110,7 @@ NSDictionary *getCurrentABTestData(void) {
         }
     }
     else if ([key hasPrefix:@"DYYYDateTimeFormat_"]) {
-        // 閲嶇疆涓€涓瓙寮€鍏虫椂妫€鏌ユ槸鍚︽湁鍏朵粬瀛愬紑鍏冲惎鐢?
+        // 重置一个子开关时检查是否有其他子开关启用
         BOOL anyEnabled = NO;
         for (NSString *checkKey in @[@"DYYYDateTimeFormat_YMDHM", @"DYYYDateTimeFormat_MDHM", 
                                      @"DYYYDateTimeFormat_HMS", @"DYYYDateTimeFormat_HM", 
@@ -3123,7 +3121,7 @@ NSDictionary *getCurrentABTestData(void) {
             }
         }
         
-        // 濡傛灉鎵€鏈夊瓙寮€鍏抽兘鍏抽棴锛屼篃鍏抽棴涓诲紑鍏冲苟娓呴櫎鏍煎紡
+        // 如果所有子开关都关闭，也关闭主开关并清除格式
         if (!anyEnabled) {
             [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"DYYYShowDateTime"];
             [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"DYYYDateTimeFormat"];
@@ -3135,15 +3133,15 @@ NSDictionary *getCurrentABTestData(void) {
         }
     }
     
-    // 鐗规畩澶勭悊鏃堕棿灞炲湴鏄剧ず寮€鍏崇粍
+    // 特殊处理时间属地显示开关组
     if ([key isEqualToString:@"DYYYEnableArea"]) {
-        // 閲嶇疆涓诲紑鍏充篃閲嶇疆鎵€鏈夊瓙寮€鍏?
+        // 重置主开关也重置所有子开关
         [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"DYYYEnableAreaProvince"];
         [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"DYYYEnableAreaCity"];
         [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"DYYYEnableAreaDistrict"];
         [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"DYYYEnableAreaStreet"];
         
-        // 浣跨敤 DYYYSwitchManager 鐨勬柟娉曟洿鏂癠I
+        // 使用 DYYYSwitchManager 的方法更新UI
         for (NSInteger section = 0; section < [self.tableView numberOfSections]; section++) {
             [[DYYYSwitchManager sharedManager] updateAreaSubSwitchesUI:section 
                                                                enabled:NO 
@@ -3152,7 +3150,7 @@ NSDictionary *getCurrentABTestData(void) {
         }
     }
     
-    // 閽堝鑷畾涔夌浉鍐屽浘鐗囧拰澶у皬锛岄噸缃悗鍒锋柊鎸夐挳
+    // 针对自定义相册图片和大小，重置后刷新按钮
     if ([key isEqualToString:@"DYYYCustomAlbumImagePath"] ||
         [key isEqualToString:@"DYYYCustomAlbumSizeSmall"] ||
         [key isEqualToString:@"DYYYCustomAlbumSizeMedium"] ||
@@ -3161,22 +3159,22 @@ NSDictionary *getCurrentABTestData(void) {
         [[NSNotificationCenter defaultCenter] postNotificationName:@"DYYYCustomAlbumSettingChanged" object:nil];
     }
     
-    // 澶勭悊澶村儚鏂囨湰
+    // 处理头像文本
     if ([key isEqualToString:@"DYYYAvatarTapText"]) {
         self.avatarTapLabel.text = @"pxx917144686";
     }
     
-    // 鍒锋柊UI
+    // 刷新UI
     [self.tableView reloadData];
     
-    // 鏄剧ず鎻愮ず
-    [DYYYManager showToast:[NSString stringWithFormat:@"宸查噸缃? %@", key]];
+    // 显示提示
+    [DYYYManager showToast:[NSString stringWithFormat:@"已重置: %@", key]];
 }
 
 - (void)showSourceCodePopup {
     NSString *githubURL = @"https://github.com/pxx917144686/DYYY";
     
-    // 娣诲姞璺宠浆鍓嶇殑鍔ㄧ敾鏁堟灉
+    // 添加跳转前的动画效果
     CAKeyframeAnimation *pulseAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
     pulseAnimation.values = @[@1.0, @1.08, @1.0];
     pulseAnimation.keyTimes = @[@0, @0.5, @1.0];
@@ -3187,7 +3185,7 @@ NSDictionary *getCurrentABTestData(void) {
     UIButton *sourceCodeButton = (UIButton *)[self.tableView.tableFooterView viewWithTag:101];
     [sourceCodeButton.layer addAnimation:pulseAnimation forKey:@"pulse"];
     
-    // 璺宠浆鍒癎itHub椤甸潰
+    // 跳转到GitHub页面
     [[UIApplication sharedApplication] openURL:[NSURL URLWithString:githubURL] options:@{} completionHandler:nil];
 }
 
@@ -3198,16 +3196,16 @@ NSDictionary *getCurrentABTestData(void) {
 }
 
 - (void)showScheduleStylePicker {
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"閫夋嫨杩涘害鏉℃牱寮?
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"选择进度条样式"
                                                                    message:nil
                                                             preferredStyle:UIAlertControllerStyleActionSheet];
     
     NSArray *styles = @[
-        @{@"title": @"杩涘害鏉″彸渚у墿浣?, @"value": @"杩涘害鏉″彸渚у墿浣?},
-        @{@"title": @"杩涘害鏉″彸渚у畬鏁?, @"value": @"杩涘害鏉″彸渚у畬鏁?},
-        @{@"title": @"杩涘害鏉″乏渚у墿浣?, @"value": @"杩涘害鏉″乏渚у墿浣?},
-        @{@"title": @"杩涘害鏉″乏渚у畬鏁?, @"value": @"杩涘害鏉″乏渚у畬鏁?},
-        @{@"title": @"杩涘害鏉′袱渚у乏鍙?, @"value": @"杩涘害鏉′袱渚у乏鍙?}
+        @{@"title": @"进度条右侧剩余", @"value": @"进度条右侧剩余"},
+        @{@"title": @"进度条右侧完整", @"value": @"进度条右侧完整"},
+        @{@"title": @"进度条左侧剩余", @"value": @"进度条左侧剩余"},
+        @{@"title": @"进度条左侧完整", @"value": @"进度条左侧完整"},
+        @{@"title": @"进度条两侧左右", @"value": @"进度条两侧左右"}
     ];
     
     for (NSDictionary *style in styles) {
@@ -3221,19 +3219,19 @@ NSDictionary *getCurrentABTestData(void) {
         [alert addAction:action];
     }
     
-    UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"鍙栨秷" style:UIAlertActionStyleCancel handler:nil];
+    UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil];
     [alert addAction:cancelAction];
     
     [self presentViewController:alert animated:YES completion:nil];
 }
 
-// 杈呭姪鏂规硶鐢ㄤ簬鏄剧ず鏇寸畝鐭殑鏍峰紡鍚嶇О
+// 辅助方法用于显示更简短的样式名称
 - (NSString *)getShortNameForStyleValue:(NSString *)styleValue {
-    if ([styleValue isEqualToString:@"杩涘害鏉″彸渚у墿浣?]) return @"鍙充晶鍓╀綑";
-    if ([styleValue isEqualToString:@"杩涘害鏉″彸渚у畬鏁?]) return @"鍙充晶瀹屾暣";
-    if ([styleValue isEqualToString:@"杩涘害鏉″乏渚у墿浣?]) return @"宸︿晶鍓╀綑";
-    if ([styleValue isEqualToString:@"杩涘害鏉″乏渚у畬鏁?]) return @"宸︿晶瀹屾暣";
-    if ([styleValue isEqualToString:@"杩涘害鏉′袱渚у乏鍙?]) return @"涓や晶宸﹀彸";
+    if ([styleValue isEqualToString:@"进度条右侧剩余"]) return @"右侧剩余";
+    if ([styleValue isEqualToString:@"进度条右侧完整"]) return @"右侧完整";
+    if ([styleValue isEqualToString:@"进度条左侧剩余"]) return @"左侧剩余";
+    if ([styleValue isEqualToString:@"进度条左侧完整"]) return @"左侧完整";
+    if ([styleValue isEqualToString:@"进度条两侧左右"]) return @"两侧左右";
     return styleValue;
 }
 

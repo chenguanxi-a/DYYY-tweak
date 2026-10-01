@@ -1,9 +1,10 @@
-﻿#ifndef DYYYSettingViewController_h
+#ifndef DYYYSettingViewController_h
 #define DYYYSettingViewController_h
 
 #import <UIKit/UIKit.h>
 
-// 娣诲姞缂哄け鐨勬灇涓惧畾涔?typedef NS_ENUM(NSInteger, DYYYSettingItemType) {
+// 添加缺失的枚举定义
+typedef NS_ENUM(NSInteger, DYYYSettingItemType) {
     DYYYSettingItemTypeSwitch,
     DYYYSettingItemTypeTextField,
     DYYYSettingItemTypeSpeedPicker,
@@ -12,7 +13,8 @@
     DYYYSettingItemTypeButton
 };
 
-// 涓烘寜閽ぇ灏忓畾涔夋灇涓?typedef NS_ENUM(NSInteger, DYYYButtonSize) {
+// 为按钮大小定义枚举
+typedef NS_ENUM(NSInteger, DYYYButtonSize) {
     DYYYButtonSizeSmall = 30,
     DYYYButtonSizeMedium = 40,
     DYYYButtonSizeLarge = 50
@@ -41,8 +43,7 @@
 @property (nonatomic, strong) UIImpactFeedbackGenerator *feedbackGenerator;
 @property (nonatomic, strong) NSArray *filteredSections;
 @property (nonatomic, strong) NSArray *filteredSectionTitles;
-
-- (void)setupSectionTitles;
+@property (nonatomic, strong) NSMutableArray *sectionTitles;
 @property (nonatomic, strong) NSArray *settingSections;
 @property (nonatomic, strong) UILabel *footerLabel;
 @property (nonatomic, strong) UIView *backgroundColorView;
@@ -52,7 +53,8 @@
 @property (nonatomic, strong) DYYYBackupPickerDelegate *backupPickerDelegate;
 @property (nonatomic, strong) DYYYBackupPickerDelegate *restorePickerDelegate;
 
-// 娣诲姞鐑洿鏂板姛鑳界浉鍏虫柟娉?- (void)saveCurrentABTestData;
+// 添加热更新功能相关方法
+- (void)saveCurrentABTestData;
 - (void)loadABTestConfigFile;
 - (void)deleteABTestConfigFile;
 - (void)handleABTestBlockEnabled:(BOOL)enabled;
@@ -61,4 +63,3 @@
 @end
 
 #endif /* DYYYSettingViewController_h */
-
