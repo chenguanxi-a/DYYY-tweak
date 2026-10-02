@@ -87,6 +87,10 @@ static CGFloat currentScale = 1.0;
 
 - (void)layoutSubviews {
     %orig;
+    // 液态玻璃效果（右侧互动栏）
+    if (DYYYGetBool(@"dyyy_enable_liquid_glass")) {
+        dyyyApplyLiquidGlassToElementStackView(self);
+    }
     UIViewController *vc = [self firstAvailableUIViewController];
     if ([vc isKindOfClass:%c(AWECommentInputViewController)]) {
         NSString *transparentValue = [[NSUserDefaults standardUserDefaults] stringForKey:@"DYYYGlobalTransparency"];
@@ -298,12 +302,3 @@ static void dyyyApplyLiquidGlassToElementStackView(UIView *v) {
     v.layer.shadowOffset = CGSizeMake(0, 2);
     v.layer.shadowRadius = 6.0;
 }
-
-%hook AWEElementStackView
-- (void)layoutSubviews {
-    %orig;
-    if (DYYYGetBool(@"dyyy_enable_liquid_glass")) {
-        dyyyApplyLiquidGlassToElementStackView(self);
-    }
-}
-%end
