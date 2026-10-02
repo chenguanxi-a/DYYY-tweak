@@ -67,6 +67,9 @@ static BOOL containsSubviewOfClass(UIView *view, Class targetClass) {
     return NO;
 }
 
+// 前置声明：液态玻璃效果函数（定义在下方）
+static void dyyyApplyLiquidGlassToElementStackView(UIView *v);
+
 %hook AWEElementStackView
 static CGFloat stream_frame_y = 0;
 static CGFloat right_tx = 0;
