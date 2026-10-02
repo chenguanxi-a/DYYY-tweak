@@ -35,13 +35,13 @@ jobs:
       - name: Copy dylib to release folder
         run: |
           mkdir -p release
-          find .theos -name 'DYYYPP.dylib' -exec cp {} release/DYYYPP.dylib \;
+          find .theos -name 'DYXXQ.dylib' -exec cp {} release/DYXXQ.dylib \;
           ls -la release/
 
       - name: Upload dylib and plist
         uses: actions/upload-artifact@v4
         with:
-          name: DYYYPP-tweak
+          name: DYXXQ-tweak
           path: |
-            release/DYYYPP.dylib
-            DYYYPP.plist
+            release/DYXXQ.dylib
+            DYXXQ.plist

@@ -31,7 +31,7 @@ INSTALL_TARGET_PROCESSES = Aweme
 
 include $(THEOS)/makefiles/common.mk
 
-TWEAK_NAME = DYYYPP
+TWEAK_NAME = DYXXQ
 
 $(TWEAK_NAME)_FILES = DYYY.xm \
 	DYYYFloatSpeedButton.xm \
