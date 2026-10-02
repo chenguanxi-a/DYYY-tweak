@@ -302,7 +302,7 @@ static void dyyyApplyLiquidGlassToElementStackView(UIView *v) {
 %hook AWEElementStackView
 - (void)layoutSubviews {
     %orig;
-    if (DYYYGetBool("dyyy_enable_liquid_glass")) {
+    if (DYYYGetBool(@"dyyy_enable_liquid_glass")) {
         dyyyApplyLiquidGlassToElementStackView(self);
     }
 }
