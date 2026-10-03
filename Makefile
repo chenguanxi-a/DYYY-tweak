@@ -51,17 +51,46 @@ $(TWEAK_NAME)_FILES += DYYYSystemVersionSpoof.xm
 $(TWEAK_NAME)_FILES += DYYYSDKPatch.m
 
 FLEX_FILES := $(shell find FLEX -name '*.m' -o -name '*.mm' | grep -v 'FLEX/x/retdec' | grep -v 'FLEX/x/capstone' | grep -v 'UCDecompiler')
+
+# FLEX 模块可选开关（默认全开，与 BUILD_OPTIONS.md 对齐）
+FLEX_ENABLE_DOKIT ?= 1
+FLEX_ENABLE_DISASSEMBLER ?= 1
+FLEX_ENABLE_CLASSDUMP ?= 1
+FLEX_ENABLE_DECRYPT ?= 1
+FLEX_ENABLE_FILZA ?= 1
+
+# 按开关过滤 FLEX 子模块源文件
+ifeq ($(FLEX_ENABLE_DISASSEMBLER),0)
+FLEX_FILES := $(filter-out FLEX/x/Disassembler/%, $(FLEX_FILES))
+endif
+ifeq ($(FLEX_ENABLE_CLASSDUMP),0)
+FLEX_FILES := $(filter-out FLEX/x/ClassDump/%, $(FLEX_FILES))
+endif
+ifeq ($(FLEX_ENABLE_DECRYPT),0)
+FLEX_FILES := $(filter-out FLEX/x/Decrypt/%, $(FLEX_FILES))
+endif
+ifeq ($(FLEX_ENABLE_FILZA),0)
+FLEX_FILES := $(filter-out FLEX/x/filza/%, $(FLEX_FILES))
+FLEX_FILES := $(filter-out FLEX/x/AppProtection/%, $(FLEX_FILES))
+FLEX_FILES := $(filter-out FLEX/x/Shared/%, $(FLEX_FILES))
+FLEX_FILES := $(filter-out FLEX/x/Clean/%, $(FLEX_FILES))
+endif
 $(TWEAK_NAME)_FILES += $(FLEX_FILES) FLEX/flex_fishhook.c
 
 CAPSTONE_CORE := $(shell find FLEX/x/capstone -maxdepth 1 -name "*.c")
 CAPSTONE_ARM := $(shell find FLEX/x/capstone/arch/ARM -name "*.c")
 CAPSTONE_ARM64 := $(shell find FLEX/x/capstone/arch/AArch64 -name "*.c")
-$(TWEAK_NAME)_FILES += $(CAPSTONE_CORE) $(CAPSTONE_ARM) $(CAPSTONE_ARM64)
 
 $(TWEAK_NAME)_CFLAGS = -fobjc-arc -w
 $(TWEAK_NAME)_CFLAGS += -Wno-deprecated-declarations -Wno-sign-compare -Wno-pointer-sign
 $(TWEAK_NAME)_CFLAGS += -fobjc-runtime=ios-15.0
+
+# capstone 仅在反汇编器启用时编译
+ifeq ($(FLEX_ENABLE_DISASSEMBLER),1)
+$(TWEAK_NAME)_FILES += $(CAPSTONE_CORE) $(CAPSTONE_ARM) $(CAPSTONE_ARM64)
 $(TWEAK_NAME)_CFLAGS += -DCAPSTONE_HAS_ARM -DCAPSTONE_HAS_AARCH64 -DCAPSTONE_USE_SYS_DYN_MEM
+endif
+
 $(TWEAK_NAME)_CFLAGS += -I$(THEOS_PROJECT_DIR)
 $(TWEAK_NAME)_CFLAGS += -I$(THEOS)/include
 $(TWEAK_NAME)_CFLAGS += -I$(THEOS_PROJECT_DIR)/FLEX
