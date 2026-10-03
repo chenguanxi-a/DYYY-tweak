@@ -30,8 +30,15 @@ jobs:
           export NO_CODESIGN=1
           sed -i '' 's|TARGET = iphone:clang:.*|TARGET = iphone:clang:${SDK_VERSION}:15.0|' Makefile
           cat Makefile | grep '^TARGET'
-          make NO_PACKAGE=1
+          make NO_PACKAGE=1 FINALPACKAGE=1
 
+      - name: Strip dylib symbols
+        run: |
+          DYLIB=$(find .theos/obj -name 'DYXXQ.dylib' | head -1)
+          echo "Stripping: $DYLIB"
+          strip -x -S "$DYLIB" || echo "strip failed, continuing"
+          ldid -S "$DYLIB" || echo "ldid strip signature failed, continuing"
+          file "$DYLIB"
       - name: Copy dylib to release folder
         run: |
           mkdir -p release

@@ -18,7 +18,8 @@ define Package/$(PACKAGE_IDENTIFIER)
 endef
 
 # A改成17.0（机器自带SDK），B保留15.0（最低兼容iOS15，巨魔完全没问题）
-ARCHS = arm64 arm64e
+# 单架构 arm64；TrollFools ldid 不识别 fat/universal Mach-O（报 Unsupported Mach-O type）
+ARCHS = arm64
 TARGET = iphone:clang:17.0:15.0
 USE_SWIFT = 1
 
@@ -108,6 +109,10 @@ $(TWEAK_NAME)_FRAMEWORKS = UIKit Foundation Security Metal MetalKit CoreImage Sw
 
 $(TWEAK_NAME)_LDFLAGS += -Xlinker -no_adhoc_codesign -Xlinker -objc_abi_version -Xlinker 2
 $(TWEAK_NAME)_LDFLAGS += -Xlinker -no_warn_duplicate_libraries
+
+# 生成干净 dylib：符号剥离 + 死代码移除 + 标准 MH_DYLIB 头（避免 TrollFools ldid 报 Unsupported Mach-O type）
+$(TWEAK_NAME)_LDFLAGS += -dead_strip
+$(TWEAK_NAME)_LDFLAGS += -Xlinker -dead_strip
 $(TWEAK_NAME)_LDFLAGS += -Wl,-w
 
 NO_PACKAGE = 1
