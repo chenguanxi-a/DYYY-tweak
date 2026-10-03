@@ -30,6 +30,10 @@ jobs:
           export NO_CODESIGN=1
           sed -i '' 's|TARGET = iphone:clang:.*|TARGET = iphone:clang:${SDK_VERSION}:15.0|' Makefile
           cat Makefile | grep '^TARGET'
+          # 确保 Makefile 里的 ARCHS 被覆盖为单架构 arm64
+          sed -i '' 's|^ARCHS = .*|ARCHS = arm64|' Makefile
+          grep '^ARCHS' Makefile
+          make clean
           make NO_PACKAGE=1 FINALPACKAGE=1 ARCHS=arm64
 
       - name: Strip dylib symbols
@@ -46,6 +50,21 @@ jobs:
           mkdir -p release
           find .theos -name 'DYXXQ.dylib' -exec cp {} release/DYXXQ.dylib \;
           ls -la release/
+
+      - name: Verify single-arch Mach-O (not fat)
+        run: |
+          echo '=== file ==='
+          file release/DYXXQ.dylib
+          echo '=== vtool -show ==='
+          vtool -show release/DYXXQ.dylib 2>/dev/null || echo 'vtool unavailable'
+          # if fat binary, extract arm64 slice
+          if file release/DYXXQ.dylib | grep -q 'Mach-O universal binary'; then
+            echo 'Fat binary detected, extracting arm64 slice...'
+            vtool -arch arm64 -replace -output release/DYXXQ.dylib release/DYXXQ.dylib
+            echo '=== after extraction ==='
+            file release/DYXXQ.dylib
+            vtool -show release/DYXXQ.dylib
+          fi
 
       - name: Upload dylib and plist
         uses: actions/upload-artifact@v4
