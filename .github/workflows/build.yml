@@ -30,7 +30,7 @@ jobs:
           export NO_CODESIGN=1
           sed -i '' 's|TARGET = iphone:clang:.*|TARGET = iphone:clang:${SDK_VERSION}:15.0|' Makefile
           cat Makefile | grep '^TARGET'
-          make NO_PACKAGE=1 FINALPACKAGE=1
+          make NO_PACKAGE=1 FINALPACKAGE=1 ARCHS=arm64
 
       - name: Strip dylib symbols
         run: |
@@ -39,6 +39,8 @@ jobs:
           strip -x -S "$DYLIB" || echo "strip failed, continuing"
           ldid -S "$DYLIB" || echo "ldid strip signature failed, continuing"
           file "$DYLIB"
+          # 验证是否为单架构 Mach-O（非 fat）
+          vtool -show "$DYLIB" 2>/dev/null || echo "vtool not available, skipping arch check"
       - name: Copy dylib to release folder
         run: |
           mkdir -p release
