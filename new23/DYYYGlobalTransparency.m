@@ -1,4 +1,4 @@
-﻿#import "DYYYNew23.h"
+#import "DYYYNew23.h"
 #import <UIKit/UIKit.h>
 
 #pragma mark - 药丸按钮工厂

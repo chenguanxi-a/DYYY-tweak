@@ -1,4 +1,4 @@
-﻿#import "DYYYNew23.h"
+#import "DYYYNew23.h"
 #import "DYYYManager.h
 #import "AwemeHeaders.h
 #define DYYYMediaTypeVideo MediaTypeVideo

@@ -1,4 +1,4 @@
-﻿#import "DYYYNew23.h"
+#import "DYYYNew23.h"
 
 @implementation DYYYPrivacyRecordUploadGuard {
     BOOL _castVPNCheckDisabled;

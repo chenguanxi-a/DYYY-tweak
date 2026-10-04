@@ -1,4 +1,4 @@
-﻿#import "DYYYNew23.h"
+#import "DYYYNew23.h"
 
 // 登录绕过 C 函数声明（.xm hook 里直接调用）
 BOOL dyyy_isLoginBypassEnabled(void);
