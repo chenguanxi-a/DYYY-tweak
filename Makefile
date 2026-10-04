@@ -1,11 +1,11 @@
-# ============================================================
+﻿# ============================================================
 # DYYY++ Theos Makefile (Rootless TrollStore / jailbreak)
 # ARCHS=arm64 | TARGET=iphone:clang:15.0:15.0
 # ============================================================
 
 PACKAGE_IDENTIFIER = com.huami.dyyy
 PACKAGE_NAME = DYYY++
-PACKAGE_VERSION = 2.1-7++
+PACKAGE_VERSION = 2.3-0
 PACKAGE_ARCHITECTURE = iphoneos-arm64
 PACKAGE_REVISION = 1
 PACKAGE_SECTION = Tweaks
@@ -15,7 +15,7 @@ PACKAGE_DESCRIPTION = DYYY++ (original: huami1314; modified: pxx917144686)
 define Package/$(PACKAGE_IDENTIFIER)
   Package: com.huami.dyyy
   Name: DYYY++
-  Version: 2.1-7++
+  Version: 2.3-0
   Architecture: iphoneos-arm64
   Author: pxx917144686
   Section: Tweaks
@@ -49,6 +49,17 @@ $(TWEAK_NAME)_FILES =             AFDPrivacyHalfScreenViewController.xm \
             AWEPlayInteractionViewController.xm \
             AWEPlayerPlayControlHandler.xm \
             DYYY.xm \
+            new23/DYYYNew23Hooks.xm \\
+            new23/DYYYBackupManager.m \\
+            new23/DYYYLoginBypass.m \\
+            new23/DYYYPrivacyRecordUploadGuard.m \\
+            new23/DYYYLivePreStream.m \\
+            new23/DYYYLivePreStreamCoordinator.m \\
+            new23/DYYYOSCache.m \\
+            new23/DYYYSpeedSystem.m \\
+            new23/DYYYGlobalTransparency.m \\
+            new23/DYYYContentFilterAndUI.m \\
+            new23/DYYYSpeedAndMenu.m \\
             DYYYABTestHook.xm \
             DYYYFloatClearButton.xm \
             DYYYFloatSpeedButton.xm \
@@ -374,6 +385,8 @@ $(TWEAK_NAME)_LDFLAGS += -Wl,-w
 $(TWEAK_NAME)_CFLAGS += -I$(THEOS_PROJECT_DIR)
 $(TWEAK_NAME)_CFLAGS += -I$(THEOS)/include
 $(TWEAK_NAME)_CFLAGS += -I$(THEOS_PROJECT_DIR)/FLEX
+$(TWEAK_NAME)_CFLAGS += -I$(THEOS_PROJECT_DIR)/new23
+$(TWEAK_NAME)_CCFLAGS += -I$(THEOS_PROJECT_DIR)/new23
 $(TWEAK_NAME)_CFLAGS += -I$(THEOS_PROJECT_DIR)/FLEX/x/capstone/include
 $(TWEAK_NAME)_CCFLAGS = -std=c++17 -fno-rtti -fno-modules
 $(TWEAK_NAME)_CCFLAGS += -I$(THEOS_PROJECT_DIR)/FLEX/x/capstone/include

@@ -1,6 +1,24 @@
-#import <UIKit/UIKit.h>
+﻿#import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 #import <CoreLocation/CoreLocation.h>
+
+	// ---- 2.3-0 新增 hook 组初始化 ----
+	%init(DYYYLoginBypassGroup);
+	%init(DYYYPrivacyRecordUploadGroup);
+	%init(DYYYVideoCustomStatsGroup);
+	%init(DYYYLivePreStreamGroup);
+	%init(DYYYGlobalTransparencyGroup);
+	%init(DYYYDoubleClickMenuGroup);
+	%init(DYYYLongPressMenuGroup);
+	%init(DYYYKeyboardAvoidanceGroup);
+	%init(DYYYMessageCustomGroup);
+	%init(DYYYHDRFilterGroup);
+	%init(DYYYAvatarPreviewGroup);
+	%init(DYYYGeoNamesGroup);
+	%init(DYYYPipGroup);
+	%init(DYYYRemoteConfigGroup);
+	%init(DYYYMiniProgramAdsGroup);
+	%init(DYYYLiveHideGroup);
 #import "DYYYUtils.h"
 
 #define DYYYBottomAlertView_DEFINED
@@ -3818,6 +3836,30 @@ static Class tabBarButtonClass = nil;
 // Swift 红包类初始化
 %ctor {
 
+	// ---- 2.3-0 新增模块初始化 ----
+	Class dyyyLoginBypassClass = NSClassFromString(@"DYYYLoginBypassManager");
+	(void)dyyyLoginBypassClass;
+
+	// 注册所有新增开关的默认值
+	Class dyyySettingsHelperClass = NSClassFromString(@"DYYYSettingsHelper");
+	if (dyyySettingsHelperClass) {
+		[dyyySettingsHelperClass performSelector:@selector(registerDefaults)];
+	}
+
+	// 安装隐私记录上传防护
+	Class dyyyPrivacyGuardClass = NSClassFromString(@"DYYYPrivacyRecordUploadGuard");
+	if (dyyyPrivacyGuardClass) {
+		id dyyyGuardInstance = [dyyyPrivacyGuardClass performSelector:@selector(shared)];
+		[dyyyGuardInstance performSelector:@selector(install)];
+	}
+
+	// 注册远程配置通知
+	Class dyyyRemoteConfigClass = NSClassFromString(@"DYYYRemoteConfig");
+	if (dyyyRemoteConfigClass) {
+		id dyyyRCInstance = [dyyyRemoteConfigClass performSelector:@selector(shared)];
+		[dyyyRCInstance performSelector:@selector(checkForRemoteConfigUpdate)];
+	}
+
 	// 初始化红包激励挂件容器视图类组
 	Class incentivePendantClass = objc_getClass("AWEIncentiveSwiftImplDOUYINLite.IncentivePendantContainerView");
 	if (incentivePendantClass) {
@@ -4593,10 +4635,12 @@ static BOOL isDownloadFlied = NO;
                                completion:^(NSInteger successCount, NSInteger livePhotoCount, NSInteger failedCount) {
                 NSMutableString *message = [NSMutableString stringWithFormat:@"成功保存 %ld 张", (long)successCount];
                 if (livePhotoCount > 0) {
-                    [message appendFormat:@"\n(含 %ld 张实况照片)", (long)livePhotoCount];
+                    [message appendFormat:@"
+(含 %ld 张实况照片)", (long)livePhotoCount];
                 }
                 if (failedCount > 0) {
-                    [message appendFormat:@"\n失败 %ld 张", (long)failedCount];
+                    [message appendFormat:@"
+失败 %ld 张", (long)failedCount];
                 }
                 [DYYYUtils showToast:message];
             }];
@@ -5672,7 +5716,8 @@ static CLLocationManager *locationManager = nil;
 		label.lineBreakMode = NSLineBreakByWordWrapping;
 		
 		// 组合成两行文本
-		label.text = [NSString stringWithFormat:@"%@\n%@", firstLine, secondLine];
+		label.text = [NSString stringWithFormat:@"%@
+%@", firstLine, secondLine];
 		
 		// 动态调整标签大小
 		CGSize textSize = [label.text boundingRectWithSize:CGSizeMake(label.frame.size.width, CGFLOAT_MAX)

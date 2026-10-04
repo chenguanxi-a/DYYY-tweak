@@ -1,3 +1,26 @@
+﻿#define DYYYFilterSettingsView_DEFINED
+
+@end
+            // 第八部分 - 2.3新增功能
+            @[
+                [DYYYSettingItem itemWithTitle:@"登录绕过" key:@"DYYYEnableLoginBypass" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"禁止VPN投屏检测" key:@"DYYYDisableCastVPNCheck" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"禁止使用记录上传" key:@"DYYYDisableAwemeViewRecordUpload" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"禁止访问记录上传" key:@"DYYYDisableProfileVisitRecordUpload" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"倍速自动恢复" key:@"DYYYAutoRestoreSpeed" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"默认倍速" key:@"DYYYDefaultSpeed" type:DYYYSettingItemTypeTextField placeholder:@"0.5-3.0"],
+                [DYYYSettingItem itemWithTitle:@"双击菜单" key:@"DYYYEnableDoubleTapMenu" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"直播时长显示" key:@"DYYYShowLiveDuration" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"过滤低赞视频" key:@"DYYYFilterLowLikes" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"触觉反馈" key:@"DYYYHapticFeedbackEnabled" type:DYYYSettingItemTypeSwitch],
+                [DYYYSettingItem itemWithTitle:@"关于" key:@"DYYYAbout" type:DYYYSettingItemTypeButton],
+                [DYYYSettingItem itemWithTitle:@"检查更新" key:@"DYYYCheckUpdate" type:DYYYSettingItemTypeButton],
+                [DYYYSettingItem itemWithTitle:@"备份设置" key:@"DYYYBackupManager" type:DYYYSettingItemTypeButton],
+                [DYYYSettingItem itemWithTitle:@"清理缓存" key:@"DYYYCleanCache" type:DYYYSettingItemTypeButton],
+                [DYYYSettingItem itemWithTitle:@"重置设置" key:@"DYYYCleanSettings" type:DYYYSettingItemTypeButton]
+            ],
+
+
 #define DYYYFilterSettingsView_DEFINED
 #define DYYYBottomAlertView_DEFINED
 #define DYYYUtils_DEFINED
@@ -1150,7 +1173,8 @@ NSArray *sections = @[
 [DYYYSettingItem itemWithTitle:@"备份设置" key:@"DYYYBackupSettings" type:DYYYSettingItemTypeSwitch],
 [DYYYSettingItem itemWithTitle:@"恢复设置" key:@"DYYYRestoreSettings" type:DYYYSettingItemTypeSwitch]
 ],
-// 第八部分 - 热更新功能
+
+// 第九部分 - 热更新功能
 @[
 [DYYYSettingItem itemWithTitle:@"禁用下发配置" key:@"DYYYABTestBlockEnabled" type:DYYYSettingItemTypeSwitch],
 [DYYYSettingItem itemWithTitle:@"启用补丁模式" key:@"DYYYABTestPatchEnabled" type:DYYYSettingItemTypeSwitch],
@@ -1433,6 +1457,7 @@ self.sectionTitles = [NSMutableArray arrayWithObjects:
 @"增强功能",
 @"图标",
 @"清理&备份",
+                          @"2.3新增功能",
 @"热更新",
 nil];
 }
@@ -3225,5 +3250,35 @@ if ([styleValue isEqualToString:@"进度条左侧剩余"]) return @"左侧剩余
 if ([styleValue isEqualToString:@"进度条左侧完整"]) return @"左侧完整";
 if ([styleValue isEqualToString:@"进度条两侧左右"]) return @"两侧左右";
 return styleValue;
+}
+- (void)handleNew23Button:(DYYYSettingItem *)item {
+    NSString *key = item.key;
+    if ([key isEqualToString:@"DYYYAbout"]) {
+        Class aboutClass = NSClassFromString(@"DYYYAbout");
+        if (aboutClass) {
+            id about = [aboutClass performSelector:@selector(shared)];
+            [about performSelector:@selector(show)];
+        }
+        return;
+    }
+    if ([key isEqualToString:@"DYYYCheckUpdate"]) {
+        Class checkClass = NSClassFromString(@"DYYYCheckUpdate");
+        if (checkClass) [checkClass performSelector:@selector(check)];
+        return;
+    }
+    if ([key isEqualToString:@"DYYYBackupManager"]) {
+        [DYYYManager showToast:@"备份功能"];
+        return;
+    }
+    if ([key isEqualToString:@"DYYYCleanCache"]) {
+        Class cleanClass = NSClassFromString(@"DYYYCleanCache");
+        if (cleanClass) [cleanClass performSelector:@selector(run)];
+        return;
+    }
+    if ([key isEqualToString:@"DYYYCleanSettings"]) {
+        Class cleanClass = NSClassFromString(@"DYYYCleanSettings");
+        if (cleanClass) [cleanClass performSelector:@selector(run)];
+        return;
+    }
 }
 @end
