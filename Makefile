@@ -1,4 +1,4 @@
-﻿# ============================================================
+ ============================================================
 # DYYY++ Theos Makefile (Rootless TrollStore / jailbreak)
 # ARCHS=arm64 | TARGET=iphone:clang:15.0:15.0
 # ============================================================
@@ -49,17 +49,17 @@ $(TWEAK_NAME)_FILES =             AFDPrivacyHalfScreenViewController.xm \
             AWEPlayInteractionViewController.xm \
             AWEPlayerPlayControlHandler.xm \
             DYYY.xm \
-            new23/DYYYNew23Hooks.xm \\
-            new23/DYYYBackupManager.m \\
-            new23/DYYYLoginBypass.m \\
-            new23/DYYYPrivacyRecordUploadGuard.m \\
-            new23/DYYYLivePreStream.m \\
-            new23/DYYYLivePreStreamCoordinator.m \\
-            new23/DYYYOSCache.m \\
-            new23/DYYYSpeedSystem.m \\
-            new23/DYYYGlobalTransparency.m \\
-            new23/DYYYContentFilterAndUI.m \\
-            new23/DYYYSpeedAndMenu.m \\
+            new23/DYYYNew23Hooks.xm \
+            new23/DYYYBackupManager.m \
+            new23/DYYYLoginBypass.m \
+            new23/DYYYPrivacyRecordUploadGuard.m \
+            new23/DYYYLivePreStream.m \
+            new23/DYYYLivePreStreamCoordinator.m \
+            new23/DYYYOSCache.m \
+            new23/DYYYSpeedSystem.m \
+            new23/DYYYGlobalTransparency.m \
+            new23/DYYYContentFilterAndUI.m \
+            new23/DYYYSpeedAndMenu.m \
             DYYYABTestHook.xm \
             DYYYFloatClearButton.xm \
             DYYYFloatSpeedButton.xm \
