@@ -25,6 +25,7 @@ endef
 export THEOS_PACKAGE_DIR = $(CURDIR)
 
 ARCHS = arm64
+TARGET = iphone:clang:latest
 
 export DEBUG = 0
 export THEOS_STRICT_LOGOS = 0
