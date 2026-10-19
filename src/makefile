@@ -1,4 +1,4 @@
-include \/tweak.mk
+include $(THEOS_MAKE_PATH)/tweak.mk
 
 TWEAK_NAME = Atria
 
@@ -10,11 +10,10 @@ Atria_CFLAGS += -I.. -I./Settings -I./Hooks -I./UI
 Atria_FRAMEWORKS += UIKit Foundation CoreFoundation
 Atria_EXTRA_FRAMEWORKS += MobileSubstrate
 
-Atria_LDFLAGS += -FTHEOS\/lib -LTHEOS\/lib
-Atria_LDFLAGS += -Wl,-rpath,/var/jb/usr\/lib -Wl,-rpath,/usr\/lib
+Atria_LDFLAGS += -F$(THEOS)/lib -L$(THEOS)/lib
+Atria_LDFLAGS += -Wl,-rpath,/var/jb/usr/lib -Wl,-rpath,/usr/lib
 
-AFTER_INCLUDES += \/makefile:resources.mk
+AFTER_INCLUDES += $(THEOS_PROJECT_DIR)/makefile:resources.mk
 
 Atria_IS_ROOTLESS = 1
 Atria_ROOT = /var/jb
-

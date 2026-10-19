@@ -1,0 +1,64 @@
+name: Build Atria .deb
+
+on:
+  push:
+    branches: [atria-src]
+  pull_request:
+    branches: [atria-src]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Atria Theos .deb
+    runs-on: macos-14
+    timeout-minutes: 30
+
+    env:
+      THEOS: ${{ github.workspace }}/theos
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Theos
+        run: |
+          rm -rf $THEOS
+          git clone --recursive --depth=1 https://github.com/theos/theos.git $THEOS
+
+      - name: Setup iOS SDK
+        run: |
+          SDK="$(xcrun --sdk iphoneos --show-sdk-path)"
+          VER="$(xcrun --sdk iphoneos --show-sdk-version)"
+          echo "iOS SDK version: $VER"
+          mkdir -p $THEOS/sdks
+          ln -sfn "$SDK" "$THEOS/sdks/iPhoneOS${VER}.sdk"
+
+      - name: Build
+        run: |
+          export THEOS=$THEOS
+          export PATH=$THEOS/bin:$PATH
+          make package 2>&1 | tee build.log
+          echo "--- build.log tail ---"
+          tail -50 build.log
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: atria-build-log
+          path: build.log
+          retention-days: 7
+
+      - name: Upload deb
+        uses: actions/upload-artifact@v4
+        with:
+          name: atria-deb
+          path: packages/*.deb
+          if-no-files-found: warn
+
+      - name: Upload dylib
+        uses: actions/upload-artifact@v4
+        with:
+          name: atria-dylib
+          path: .theos/obj/*/*.dylib
+          if-no-files-found: warn
