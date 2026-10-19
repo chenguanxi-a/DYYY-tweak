@@ -14,7 +14,7 @@ jobs:
     timeout-minutes: 30
 
     env:
-      THEOS: ${{ github.workspace }}/theos
+      THEOS_DIR: /Users/runner/work/theos
 
     steps:
       - name: Checkout
@@ -22,24 +22,34 @@ jobs:
 
       - name: Install Theos
         run: |
-          rm -rf $THEOS
-          git clone --recursive --depth=1 https://github.com/theos/theos.git $THEOS
+          THEOS="${{ env.THEOS_DIR }}"
+          rm -rf "$THEOS"
+          git clone --recursive --depth=1 https://github.com/theos/theos.git "$THEOS"
+          git -C "$THEOS" log -1 --oneline
+          echo "THEOS=$THEOS" >> $GITHUB_ENV
 
       - name: Setup iOS SDK
         run: |
           SDK="$(xcrun --sdk iphoneos --show-sdk-path)"
           VER="$(xcrun --sdk iphoneos --show-sdk-version)"
-          echo "iOS SDK version: $VER"
-          mkdir -p $THEOS/sdks
+          echo "iOS SDK: $SDK (version $VER)"
+          mkdir -p "$THEOS/sdks"
           ln -sfn "$SDK" "$THEOS/sdks/iPhoneOS${VER}.sdk"
+          ls -la "$THEOS/sdks/"
 
       - name: Build
         run: |
-          export THEOS=$THEOS
-          export PATH=$THEOS/bin:$PATH
+          set -x
+          export THEOS="$THEOS"
+          export PATH="$THEOS/bin:$PATH"
+          echo "THEOS=$THEOS"
+          echo "which make: $(which make)"
+          echo "which clang: $(which clang)"
+          make clean || true
           make package 2>&1 | tee build.log
-          echo "--- build.log tail ---"
-          tail -50 build.log
+          echo "MAKE_EXIT=${PIPESTATUS[0]}"
+          ls -la packages/ 2>/dev/null || echo NO_packages_dir
+          ls -la .theos/obj/ 2>/dev/null || echo NO_theos_obj_dir
 
       - name: Upload build log
         if: always()
@@ -48,8 +58,10 @@ jobs:
           name: atria-build-log
           path: build.log
           retention-days: 7
+          if-no-files-found: warn
 
       - name: Upload deb
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: atria-deb
@@ -57,8 +69,11 @@ jobs:
           if-no-files-found: warn
 
       - name: Upload dylib
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: atria-dylib
-          path: .theos/obj/*/*.dylib
+          path: |
+            .theos/obj/*/*.dylib
+            .theos/lib/*.dylib
           if-no-files-found: warn
