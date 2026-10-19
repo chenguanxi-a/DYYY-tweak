@@ -1,0 +1,9 @@
+*.o
+*.dylib
+build/
+.theos/
+_/
+theos_log*
+Atria_*
+*.log
+__MACOSX/
