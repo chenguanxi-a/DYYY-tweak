@@ -1,4 +1,4 @@
-﻿# Theos resources include: copy everything under resources/ into the .deb stage
+# Theos resources include: copy everything under resources/ into the .deb stage
 # Rootless layout: /var/jb/Library/...
 
 Atria_resource_files = $(shell find resources -type f 2>/dev/null)
